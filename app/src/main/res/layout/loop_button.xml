@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:background="@null"
+    android:textSize="32dp"
+    app:cb_color_loop="#2196F3"
+    app:cb_pressedRingWidth_loop="8dp"
+    android:layout_gravity="center_horizontal"
+    android:src="@mipmap/microphone"
+    android:padding="40dp"
+    layout_width="wrap_content"
+    layout_height="wrap_content" />

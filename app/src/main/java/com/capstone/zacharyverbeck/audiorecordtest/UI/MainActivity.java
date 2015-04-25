@@ -1,7 +1,6 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -11,8 +10,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
@@ -29,10 +30,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class MainActivity extends Activity {
 
     public Loop[] mLoops;
+
+    public int mLoopsLength = 0;
 
     public Button mPlayButton;
 
@@ -47,6 +52,10 @@ public class MainActivity extends Activity {
     public AudioTrack mAudioTrack;
 
     public AudioRecord mAudioRecord;
+
+    public LinearLayout mLeftLayout;
+
+    public LinearLayout mRightLayout;
 
 
     /** Called when the activity is first created. */
@@ -66,17 +75,33 @@ public class MainActivity extends Activity {
     }
 
     public void init() {
-        mLoops = new Loop[2];
-        mLoops[0] = (new Loop((LoopButton) findViewById(R.id.firstButton)));
-        mLoops[1] = (new Loop((LoopButton) findViewById(R.id.secondButton)));
-        for(int i = 0; i < 2; i++) {
-            LoopButton button = mLoops[i].getLoopButton();
-            button.setOnClickListener(startRecOnClickListener);
-        }
-
+        mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
+        mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
+        mLoops = new Loop[6];
+        addButton();
         mPlayButton = (Button) findViewById(R.id.playButton);
         mPlayButton.setOnClickListener(playBackOnClickListener);
 
+    }
+
+    public LoopButton newLoopButton() {
+        LayoutInflater inflater = getLayoutInflater();
+        LoopButton loopButton = (LoopButton) inflater.inflate(R.layout.loop_button, null);
+        loopButton.setOnClickListener(startRecOnClickListener);
+        loopButton.setId(mLoopsLength);
+        return loopButton;
+    }
+
+    public void addButton() {
+        LoopButton loopButton = newLoopButton();
+        mLoops[mLoopsLength] = new Loop(loopButton);
+        mLoops[mLoopsLength].setId(loopButton.getId());
+        if(mLoopsLength % 2 == 0) {
+            mLeftLayout.addView(loopButton);
+        } else {
+            mRightLayout.addView(loopButton);
+        }
+        mLoopsLength++;
     }
 
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
@@ -99,7 +124,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "STOP REC");
             recording = false;
             Loop loop = findLoopById(v.getId());
-            loop.getLoopButton().setText(loop.getName(), 64.0f, Color.WHITE);
+            addButton();
             v.setOnClickListener(startRecOnClickListener);
         }};
 
@@ -123,27 +148,32 @@ public class MainActivity extends Activity {
         if(!playing) {
             playing = true;
 
-            File files[] = new File[mLoops.length];
+            Queue<File> files= new PriorityQueue<>();
             int shortSizeInBytes = Short.SIZE / Byte.SIZE;
             int bufferSizeInBytes = 0;
 
-            for (int i = 0; i < 2; i++) {
+
+            for(int i = 0; i < mLoopsLength; i++) {
                 Log.d(TAG, mLoops[i].getId() + "");
-                files[i] = new File(Environment.getExternalStorageDirectory(), "test" + mLoops[i].getId() + ".pcm");
-                int length = (int) (files[i].length() / shortSizeInBytes);
-                Log.d(TAG, length + "");
-                if(bufferSizeInBytes < length) {
-                    Log.d(TAG, "Larger.");
-                    bufferSizeInBytes = length;
+                if(mLoops[i].getFilePath() != null) {
+                    File file = new File(mLoops[i].getFilePath());
+                    files.add(file);
+                    int length = (int) (file.length() / shortSizeInBytes);
+                    Log.d(TAG, length + "");
+                    if (bufferSizeInBytes < length) {
+                        Log.d(TAG, "Larger.");
+                        bufferSizeInBytes = length;
+                    }
                 }
             }
 
             short[] audioData = new short[bufferSizeInBytes];
 
-            for(int i = 0; i < 2; i++) {
+            int i = 0;
+            while(files.size() > 0) {
 
                 try {
-                    InputStream inputStream = new FileInputStream(files[i]);
+                    InputStream inputStream = new FileInputStream(files.remove());
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
                     DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
 
@@ -155,12 +185,14 @@ public class MainActivity extends Activity {
 
                     dataInputStream.close();
 
-
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                i++;
+
             }
 
             if (mAudioTrack == null) {
@@ -170,19 +202,18 @@ public class MainActivity extends Activity {
                         AudioFormat.CHANNEL_OUT_MONO,
                         AudioFormat.ENCODING_PCM_16BIT,
                         bufferSizeInBytes,
-                        AudioTrack.MODE_STREAM);
+                        AudioTrack.MODE_STATIC);
             }
 
 
             mAudioTrack.write(audioData, 0, bufferSizeInBytes);
 
-            //mAudioTrack.setLoopPoints(0, audioData.length / 4, -1);
+            mAudioTrack.setLoopPoints(0, audioData.length / 2, -1);
 
             mAudioTrack.play();
         } else {
             playing = false;
-            mAudioTrack.stop();
-            mAudioTrack.flush();
+            mAudioTrack.pause();
         }
     }
 
@@ -193,9 +224,7 @@ public class MainActivity extends Activity {
             int id = params[0];
 
             File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
-
-            if (file.exists())
-                file.delete();
+            mLoops[id].setFilePath(file.getAbsolutePath());
             try {
                 // actually create the file which is path/to/dir/test.pcm
                 file.createNewFile();
@@ -223,10 +252,10 @@ public class MainActivity extends Activity {
                 short[] audioData = new short[minBufferSize];
 
                 mAudioRecord.startRecording();
-                publishProgress(id);
 
                 while(recording) {
                     int numberOfShort = mAudioRecord.read(audioData, 0, minBufferSize);
+                    publishProgress(id);
                     for(int i = 0; i < numberOfShort; i++){
                         dataOutputStream.writeShort(audioData[i]);
                     }
@@ -243,8 +272,8 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            LoopButton loopButton = (LoopButton)findViewById(params[0]);
-            loopButton.setText("Recording", 64.0f, Color.WHITE);
+            LoopButton loopButton = (LoopButton) findViewById(params[0]);
+            loopButton.setImageResource(R.mipmap.microphone_filled);
         }
 
     }

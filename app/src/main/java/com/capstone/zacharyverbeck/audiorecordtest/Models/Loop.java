@@ -16,6 +16,7 @@ public class Loop {
         this.setLoopButton(loopButton);
         this.setId(loopButton.getId());
         this.setName("ZGV");
+        this.setFilePath(null);
     }
 
     public int getId() {
