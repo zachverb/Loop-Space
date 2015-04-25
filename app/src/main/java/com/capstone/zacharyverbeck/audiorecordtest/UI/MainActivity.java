@@ -22,6 +22,8 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.Endpoint;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -111,25 +113,25 @@ public class MainActivity extends Activity {
                 new Callback<Response>() {
                     @Override
                     public void success(Response result, Response response) {
-                        File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
-                        try {
-                            InputStream inputStream = response.getBody().in();
-                            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+                            final Response res = result;
+                            Thread streamThread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
+                                    try {
+                                        InputStream inputStream = res.getBody().in();
+                                        OutputStream out = new FileOutputStream(file);
+                                        IOUtils.copy(inputStream, out);
+                                        inputStream.close();
+                                        out.close();
+                                        mLoops[0].setFilePath(file.getAbsolutePath());
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            streamThread.start();
 
-                            OutputStream outStream = new FileOutputStream(file);
-                            byte[] buffer = new byte[8 * 1024];
-
-                            while (dataInputStream.available() > 0) {
-                                outStream.write(buffer, 0, inputStream.read(buffer));
-                            }
-
-                            outStream.close();
-                            dataInputStream.close();
-                            mLoops[0].setFilePath(file.getAbsolutePath());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                     }
 
 
