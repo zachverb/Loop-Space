@@ -124,7 +124,6 @@ public class MainActivity extends Activity {
     }
 
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
-
         @Override
         public void onClick(View v) {
             final int buttonId = v.getId();
