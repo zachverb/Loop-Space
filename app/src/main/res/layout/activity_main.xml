@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:id="@+id/layoutMain">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <at.markushi.ui.CircleButton
+                android:layout_width="@dimen/circleRadius"
+                android:layout_height="@dimen/circleRadius"
+                app:cb_color="#2196F3"
+                app:cb_pressedRingWidth="8dp"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/firstButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <at.markushi.ui.CircleButton
+                android:layout_width="@dimen/circleRadius"
+                android:layout_height="@dimen/circleRadius"
+                app:cb_color="#009688"
+                app:cb_pressedRingWidth="8dp"
+                android:id="@+id/secondButton"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
