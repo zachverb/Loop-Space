@@ -1,17 +1,21 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
+import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import java.io.BufferedInputStream;
@@ -26,23 +30,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import at.markushi.ui.CircleButton;
-
 public class MainActivity extends Activity {
 
-    public Button startRec, stopRec, playBack;
+    public Loop[] mLoops;
 
-    public CircleButton first;
+    public Button mPlayButton;
 
     public boolean recording;
 
+    public boolean playing = false;
+
     public String TAG = "AudioRecordTest";
 
-    public String channelConfig;
-
-    public int sampleRate;
+    public int sampleRate = 44100;
 
     public AudioTrack mAudioTrack;
+
+    public AudioRecord mAudioRecord;
 
 
     /** Called when the activity is first created. */
@@ -53,55 +57,61 @@ public class MainActivity extends Activity {
         init();
     }
 
-    public void init() {
-
-        first = (CircleButton)findViewById(R.id.firstButton);
-
-        first.setOnClickListener(startRecOnClickListener);
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(playing) {
+            mAudioTrack.pause();
+        }
     }
 
-    public View.OnClickListener startRecOnClickListener
-            = new View.OnClickListener() {
+    public void init() {
+        mLoops = new Loop[2];
+        mLoops[0] = (new Loop((LoopButton) findViewById(R.id.firstButton)));
+        mLoops[1] = (new Loop((LoopButton) findViewById(R.id.secondButton)));
+        for(int i = 0; i < 2; i++) {
+            LoopButton button = mLoops[i].getLoopButton();
+            button.setOnClickListener(startRecOnClickListener);
+        }
+
+        mPlayButton = (Button) findViewById(R.id.playButton);
+        mPlayButton.setOnClickListener(playBackOnClickListener);
+
+    }
+
+    public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
-            final String buttonId = v.getId() + "";
-            Thread recordThread = new Thread(new Runnable(){
-
-                @Override
-                public void run() {
-                    Log.d(TAG, "START REC");
-                    recording = true;
-                    startRecord(buttonId);
-                }
-
-            });
-            recordThread.start();
-            first.setOnClickListener(stopRecOnClickListener);
+            final int buttonId = v.getId();
+            Log.d(TAG, "START REC");
+            recording = true;
+            RecordingTask task = new RecordingTask();
+            task.execute(buttonId);
+            v.setOnClickListener(stopRecOnClickListener);
         }
     };
 
-    public View.OnClickListener stopRecOnClickListener
-            = new View.OnClickListener(){
+    public View.OnClickListener stopRecOnClickListener = new View.OnClickListener(){
 
         @Override
         public void onClick(View v) {
             Log.d(TAG, "STOP REC");
             recording = false;
-            first.setOnClickListener(playBackOnClickListener);
+            Loop loop = findLoopById(v.getId());
+            loop.getLoopButton().setText(loop.getName(), 64.0f, Color.WHITE);
+            v.setOnClickListener(startRecOnClickListener);
         }};
 
-    public View.OnClickListener playBackOnClickListener
-            = new View.OnClickListener(){
+    public View.OnClickListener playBackOnClickListener = new View.OnClickListener(){
 
         @Override
         public void onClick(View v) {
-            final String buttonId = v.getId() + "";
             Thread playThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Log.d(TAG, "START PLAYING");
-                    playRecord(buttonId);
+                    playRecord();
                 }
             });
             playThread.start();
@@ -109,94 +119,142 @@ public class MainActivity extends Activity {
 
     };
 
-    private void startRecord(String id){
+    public void playRecord(){
+        if(!playing) {
+            playing = true;
 
-        File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
+            File files[] = new File[mLoops.length];
+            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
+            int bufferSizeInBytes = 0;
 
-        try {
-            // actually create the file which is path/to/dir/test.pcm
-            file.createNewFile();
-
-            // sets up an outputstream which is a file
-            OutputStream outputStream = new FileOutputStream(file);
-            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-            DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
-            sampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_SYSTEM);
-            int minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                    AudioFormat.CHANNEL_IN_STEREO,
-                    AudioFormat.ENCODING_PCM_16BIT);
-
-            short[] audioData = new short[minBufferSize];
-
-            AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                    sampleRate,
-                    AudioFormat.CHANNEL_IN_STEREO,
-                    AudioFormat.ENCODING_PCM_16BIT,
-                    minBufferSize);
-
-            audioRecord.startRecording();
-
-            while(recording) {
-                int numberOfShort = audioRecord.read(audioData, 0, minBufferSize);
-                for(int i = 0; i < numberOfShort; i++){
-                    dataOutputStream.writeShort(audioData[i]);
+            for (int i = 0; i < 2; i++) {
+                Log.d(TAG, mLoops[i].getId() + "");
+                files[i] = new File(Environment.getExternalStorageDirectory(), "test" + mLoops[i].getId() + ".pcm");
+                int length = (int) (files[i].length() / shortSizeInBytes);
+                Log.d(TAG, length + "");
+                if(bufferSizeInBytes < length) {
+                    Log.d(TAG, "Larger.");
+                    bufferSizeInBytes = length;
                 }
             }
 
-            audioRecord.stop();
-            dataOutputStream.close();
+            short[] audioData = new short[bufferSizeInBytes];
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            for(int i = 0; i < 2; i++) {
 
-    }
+                try {
+                    InputStream inputStream = new FileInputStream(files[i]);
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                    DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
 
-    public void playRecord(String id){
+                    int j = 0;
+                    while (dataInputStream.available() > 0) {
+                        audioData[j] += (dataInputStream.readShort() * .5);
+                        j++;
+                    }
 
-        File file = new File(Environment.getExternalStorageDirectory(), "test" + id +  ".pcm");
+                    dataInputStream.close();
 
-        int shortSizeInBytes = Short.SIZE/Byte.SIZE;
 
-        int bufferSizeInBytes = (int)(file.length()/shortSizeInBytes);
-        short[] audioData = new short[bufferSizeInBytes];
-
-        try {
-            InputStream inputStream = new FileInputStream(file);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-
-            int i = 0;
-            while(dataInputStream.available() > 0){
-                audioData[i] = dataInputStream.readShort();
-                i++;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
-            dataInputStream.close();
-
-            if(mAudioTrack == null) {
+            if (mAudioTrack == null) {
                 mAudioTrack = new AudioTrack(
                         AudioManager.STREAM_MUSIC,
                         sampleRate,
-                        AudioFormat.CHANNEL_OUT_STEREO,
+                        AudioFormat.CHANNEL_OUT_MONO,
                         AudioFormat.ENCODING_PCM_16BIT,
                         bufferSizeInBytes,
-                        AudioTrack.MODE_STATIC);
+                        AudioTrack.MODE_STREAM);
             }
 
 
             mAudioTrack.write(audioData, 0, bufferSizeInBytes);
 
-            mAudioTrack.setLoopPoints(0, audioData.length / 4, -1);
+            //mAudioTrack.setLoopPoints(0, audioData.length / 4, -1);
 
             mAudioTrack.play();
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            playing = false;
+            mAudioTrack.stop();
+            mAudioTrack.flush();
         }
     }
 
+    private class RecordingTask extends AsyncTask<Integer, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Integer... params) {
+            int id = params[0];
+
+            File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
+
+            if (file.exists())
+                file.delete();
+            try {
+                // actually create the file which is path/to/dir/test.pcm
+                file.createNewFile();
+
+                // sets up an outputstream which is a file
+                OutputStream outputStream = new FileOutputStream(file);
+                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+                DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
+
+                //sampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_SYSTEM);
+
+                int minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT);
+
+
+                if(mAudioRecord == null) {
+                    mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                            sampleRate,
+                            AudioFormat.CHANNEL_IN_MONO,
+                            AudioFormat.ENCODING_PCM_16BIT,
+                            minBufferSize);
+                }
+
+                short[] audioData = new short[minBufferSize];
+
+                mAudioRecord.startRecording();
+                publishProgress(id);
+
+                while(recording) {
+                    int numberOfShort = mAudioRecord.read(audioData, 0, minBufferSize);
+                    for(int i = 0; i < numberOfShort; i++){
+                        dataOutputStream.writeShort(audioData[i]);
+                    }
+                }
+
+                mAudioRecord.stop();
+                dataOutputStream.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... params) {
+            LoopButton loopButton = (LoopButton)findViewById(params[0]);
+            loopButton.setText("Recording", 64.0f, Color.WHITE);
+        }
+
+    }
+
+    public Loop findLoopById(int id) {
+        for(int i = 0; i < mLoops.length; i++) {
+            if(mLoops[i].getId() == id) {
+                return mLoops[i];
+            }
+        }
+        return null;
+    }
 }

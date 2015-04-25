@@ -9,7 +9,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="452dp">
 
         <LinearLayout
             android:orientation="vertical"
@@ -17,13 +17,17 @@
             android:layout_height="fill_parent"
             android:layout_weight="1">
 
-            <at.markushi.ui.CircleButton
+            <com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton
                 android:layout_width="@dimen/circleRadius"
                 android:layout_height="@dimen/circleRadius"
-                app:cb_color="#2196F3"
-                app:cb_pressedRingWidth="8dp"
+                android:background="@null"
+                android:text="ZV"
+                android:textSize="32dp"
+                app:cb_color_loop="#2196F3"
+                app:cb_pressedRingWidth_loop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:id="@+id/firstButton" />
+                android:id="@+id/firstButton"
+                />
 
         </LinearLayout>
 
@@ -33,14 +37,25 @@
             android:layout_height="fill_parent"
             android:layout_weight="1">
 
-            <at.markushi.ui.CircleButton
+            <com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton
                 android:layout_width="@dimen/circleRadius"
                 android:layout_height="@dimen/circleRadius"
-                app:cb_color="#009688"
-                app:cb_pressedRingWidth="8dp"
+                android:background="@null"
+                android:text="MV"
+                android:textSize="32dp"
+                app:cb_color_loop="#009688"
+                app:cb_pressedRingWidth_loop="8dp"
                 android:id="@+id/secondButton"
                 android:layout_gravity="center_horizontal"/>
+
         </LinearLayout>
     </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play"
+        android:id="@+id/playButton"
+        android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

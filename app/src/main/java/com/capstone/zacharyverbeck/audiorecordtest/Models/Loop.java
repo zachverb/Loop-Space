@@ -1,14 +1,54 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
-import at.markushi.ui.CircleButton;
+import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
 
 /**
  * Created by zacharyverbeck on 4/23/15.
  */
 public class Loop {
 
-    private CircleButton mCircleButton;
+    private LoopButton mLoopButton;
     private String name;
     private String filePath;
+    private int id;
+
+    public Loop(LoopButton loopButton) {
+        this.setLoopButton(loopButton);
+        this.setId(loopButton.getId());
+        this.setName("ZGV");
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public LoopButton getLoopButton() {
+        return mLoopButton;
+    }
+
+    public void setLoopButton(LoopButton loopButton) {
+        mLoopButton = loopButton;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
 }
