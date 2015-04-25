@@ -15,8 +15,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
+import com.capstone.zacharyverbeck.audiorecordtest.Models.Endpoint;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import java.io.BufferedInputStream;
@@ -32,6 +34,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.PriorityQueue;
 import java.util.Queue;
+
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import retrofit.mime.TypedFile;
 
 public class MainActivity extends Activity {
 
@@ -57,6 +65,7 @@ public class MainActivity extends Activity {
 
     public LinearLayout mRightLayout;
 
+    public ServerAPI service;
 
     /** Called when the activity is first created. */
     @Override
@@ -64,6 +73,16 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+        setupRestAdapter();
+    }
+
+    private void setupRestAdapter() {
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                //.setRequestInterceptor(interceptor)
+                .build();
+
+        service = restAdapter.create(ServerAPI.class);
     }
 
     @Override
@@ -123,8 +142,24 @@ public class MainActivity extends Activity {
         public void onClick(View v) {
             Log.d(TAG, "STOP REC");
             recording = false;
-            Loop loop = findLoopById(v.getId());
             addButton();
+            TypedFile soundFile = new TypedFile("audio/x-wav;codec=pcm;rate=16000", new File(mLoops[v.getId()].getFilePath()));
+            Log.d("Spacers", "uploadin dat sheeit");
+            service.upload(soundFile, new Callback<Endpoint>() {
+                @Override
+                public void success(Endpoint data, Response response) {
+                    if(data.type == true) {
+                        Log.d("Spacers", data.endpoint);
+                    } else {
+                        Log.d("Spacers", "even worse");
+                    }
+                }
+
+                @Override
+                public void failure(RetrofitError retrofitError) {
+                    retrofitError.printStackTrace();
+                }
+            });
             v.setOnClickListener(startRecOnClickListener);
         }};
 
