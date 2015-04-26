@@ -1,6 +1,7 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -9,6 +10,7 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +41,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import retrofit.Callback;
+import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -56,7 +59,7 @@ public class LoopActivity extends Activity {
 
     public boolean playing = false;
 
-    public String TAG = "AudioRecordTest";
+    public String TAG = "LoopActivity";
 
     public int sampleRate = 44100;
 
@@ -114,11 +117,12 @@ public class LoopActivity extends Activity {
                     @Override
                     public void success(Response result, Response response) {
                         final Response res = result;
+                        mLoops[0].getLoopButton().setImageResource(R.mipmap.microphone_filled);
                         Thread streamThread = new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
                                 try {
+                                    File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
                                     InputStream inputStream = res.getBody().in();
                                     OutputStream out = new FileOutputStream(file);
                                     IOUtils.copy(inputStream, out);
@@ -144,9 +148,22 @@ public class LoopActivity extends Activity {
     }
 
     private void setupRestAdapter() {
+        SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+
+        final String token = settings.getString("token", "");
+
+        RequestInterceptor interceptor = new RequestInterceptor() {
+            @Override
+            public void intercept(RequestFacade request) {
+                request.addHeader("Accept", "application/json");
+                request.addHeader("Authorization", token);
+            }
+        };
+
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://secret-spire-6485.herokuapp.com/")
-                        //.setRequestInterceptor(interceptor)
+                .setRequestInterceptor(interceptor)
                 .build();
 
         service = restAdapter.create(ServerAPI.class);
@@ -280,7 +297,7 @@ public class LoopActivity extends Activity {
             mAudioTrack.play();
         } else {
             playing = false;
-            mAudioTrack.pause();
+            //mAudioTrack.pause();
         }
     }
 
@@ -357,6 +374,7 @@ public class LoopActivity extends Activity {
         @Override
         protected void onProgressUpdate(Integer... params) {
             LoopButton loopButton = (LoopButton) findViewById(params[0]);
+            loopButton.setImageResource(R.mipmap.microphone_filled);
         }
 
     }

@@ -12,15 +12,57 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
+        android:layout_marginTop="100dp">
 
         <EditText
             android:layout_width="245dp"
             android:layout_height="60dp"
             android:inputType="textEmailAddress"
             android:ems="10"
-            android:id="@+id/editText"
-            android:layout_gravity="center_horizontal"/>
+            android:id="@+id/usernameField"
+            android:layout_gravity="center_horizontal"
+            android:hint="Email"/>
+
+        <EditText
+            android:layout_width="245dp"
+            android:layout_height="60dp"
+            android:inputType="textEmailAddress"
+            android:ems="10"
+            android:id="@+id/passwordField"
+            android:layout_gravity="center_horizontal"
+            android:password="true"
+            android:hint="Password"/>
+
+        <Button
+            android:layout_width="245dp"
+            android:layout_height="60dp"
+            android:text="Log In"
+            android:id="@+id/logInButton"
+            android:layout_gravity="center_horizontal"
+            style="?android:attr/borderlessButtonStyle"
+            android:background="#ff607d8b"
+            android:textColor="@android:color/white"
+            android:textColorHighlight="@android:color/secondary_text_light"
+            android:layout_margin="20dp"/>
+
+        <Button
+            android:layout_width="245dp"
+            android:layout_height="60dp"
+            android:text="Sign Up"
+            android:id="@+id/signUpButton"
+            android:layout_gravity="center_horizontal"
+            style="?android:attr/borderlessButtonStyle"
+            android:background="#ff607d8b"
+            android:textColor="@android:color/white"
+            android:textColorHighlight="@android:color/secondary_text_light"/>
+
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/loadingBar"
+            android:visibility="invisible"
+            android:indeterminate="true" />
     </LinearLayout>
 </RelativeLayout>
