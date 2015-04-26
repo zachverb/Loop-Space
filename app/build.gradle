@@ -26,5 +26,6 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
     compile 'com.squareup.okhttp:okhttp:2.0.0'
     compile 'com.squareup.okio:okio:1.1.0'
-    compile "commons-io:commons-io:+"
+    compile 'commons-io:commons-io:+'
+    compile 'com.google.android.gms:play-services:6.5.87'
 }

@@ -1,6 +1,7 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
 import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
+import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 /**
  * Created by zacharyverbeck on 4/23/15.
@@ -33,6 +34,7 @@ public class Loop {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+        this.getLoopButton().setImageResource(R.mipmap.microphone_filled);
     }
 
     public LoopButton getLoopButton() {

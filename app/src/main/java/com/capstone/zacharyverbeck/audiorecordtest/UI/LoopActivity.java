@@ -44,7 +44,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
 
-public class MainActivity extends Activity {
+public class LoopActivity extends Activity {
 
     public Loop[] mLoops;
 
@@ -78,16 +78,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-        setupRestAdapter();
-    }
-
-    private void setupRestAdapter() {
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
-                //.setRequestInterceptor(interceptor)
-                .build();
-
-        service = restAdapter.create(ServerAPI.class);
     }
 
     @Override
@@ -104,6 +94,16 @@ public class MainActivity extends Activity {
         mLoops = new Loop[6];
         addButton();
         addButton();
+        setupRestAdapter();
+        downloadLoops();
+
+
+        mPlayButton = (Button) findViewById(R.id.playButton);
+        mPlayButton.setOnClickListener(playBackOnClickListener);
+
+    }
+
+    private void downloadLoops() {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://s3-us-west-2.amazonaws.com/loopspace/")
                 .build();
@@ -113,24 +113,24 @@ public class MainActivity extends Activity {
                 new Callback<Response>() {
                     @Override
                     public void success(Response result, Response response) {
-                            final Response res = result;
-                            Thread streamThread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
-                                    try {
-                                        InputStream inputStream = res.getBody().in();
-                                        OutputStream out = new FileOutputStream(file);
-                                        IOUtils.copy(inputStream, out);
-                                        inputStream.close();
-                                        out.close();
-                                        mLoops[0].setFilePath(file.getAbsolutePath());
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
+                        final Response res = result;
+                        Thread streamThread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
+                                try {
+                                    InputStream inputStream = res.getBody().in();
+                                    OutputStream out = new FileOutputStream(file);
+                                    IOUtils.copy(inputStream, out);
+                                    inputStream.close();
+                                    out.close();
+                                    mLoops[0].setFilePath(file.getAbsolutePath());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-                            });
-                            streamThread.start();
+                            }
+                        });
+                        streamThread.start();
 
                     }
 
@@ -141,10 +141,15 @@ public class MainActivity extends Activity {
                         retrofitError.printStackTrace();
                     }
                 });
+    }
 
-        mPlayButton = (Button) findViewById(R.id.playButton);
-        mPlayButton.setOnClickListener(playBackOnClickListener);
+    private void setupRestAdapter() {
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                        //.setRequestInterceptor(interceptor)
+                .build();
 
+        service = restAdapter.create(ServerAPI.class);
     }
 
     public LoopButton newLoopButton() {
@@ -186,24 +191,8 @@ public class MainActivity extends Activity {
             Log.d(TAG, "STOP REC");
             recording = false;
             addButton();
-            TypedFile soundFile = new TypedFile("audio/x-wav;codec=pcm;rate=44100", new File(mLoops[v.getId()].getFilePath()));
             Log.d("Spacers", "uploadin dat sheeit");
-            service.upload(soundFile, new Callback<Endpoint>() {
-                @Override
-                public void success(Endpoint data, Response response) {
-                    if(data.type == true) {
-                        Log.d("Spacers", data.endpoint);
-                    } else {
-                        Log.d("Spacers", "even worse");
-                    }
-                }
-
-                @Override
-                public void failure(RetrofitError retrofitError) {
-                    retrofitError.printStackTrace();
-                }
-            });
-            v.setOnClickListener(startRecOnClickListener);
+            //v.setOnClickListener(startRecOnClickListener);
         }};
 
     public View.OnClickListener playBackOnClickListener = new View.OnClickListener(){
@@ -342,6 +331,23 @@ public class MainActivity extends Activity {
                 mAudioRecord.stop();
                 dataOutputStream.close();
 
+                TypedFile soundFile = new TypedFile("audio/x-wav;codec=pcm;bitrate=16;rate=44100", file);
+
+                service.upload(soundFile, new Callback<Endpoint>() {
+                    @Override
+                    public void success(Endpoint data, Response response) {
+                        if(data.type == true) {
+                            Log.d("Spacers", data.endpoint);
+                        } else {
+                            Log.d("Spacers", "even worse");
+                        }
+                    }
+
+                    @Override
+                    public void failure(RetrofitError retrofitError) {
+                        retrofitError.printStackTrace();
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -351,17 +357,7 @@ public class MainActivity extends Activity {
         @Override
         protected void onProgressUpdate(Integer... params) {
             LoopButton loopButton = (LoopButton) findViewById(params[0]);
-            loopButton.setImageResource(R.mipmap.microphone_filled);
         }
 
-    }
-
-    public Loop findLoopById(int id) {
-        for(int i = 0; i < mLoops.length; i++) {
-            if(mLoops[i].getId() == id) {
-                return mLoops[i];
-            }
-        }
-        return null;
     }
 }
