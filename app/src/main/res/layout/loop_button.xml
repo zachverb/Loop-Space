@@ -12,4 +12,5 @@
     android:src="@mipmap/microphone"
     android:padding="40dp"
     layout_width="wrap_content"
-    layout_height="wrap_content" />
+    layout_height="wrap_content"
+    />
