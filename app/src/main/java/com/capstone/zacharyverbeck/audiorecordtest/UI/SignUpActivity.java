@@ -1,16 +1,17 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
-import com.capstone.zacharyverbeck.audiorecordtest.Global.PreferencesGlobals;
+import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
@@ -20,12 +21,14 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class SignUpActivity extends ActionBarActivity {
+public class SignUpActivity extends Activity {
 
     public Button mSignUpButton;
     public Button mCancelButton;
 
     public ProgressBar mLoadingBar;
+
+    public TextView mErrorMessage;
 
     public EditText mUsernameField;
     public EditText mPasswordField;
@@ -34,7 +37,7 @@ public class SignUpActivity extends ActionBarActivity {
 
     public ServerAPI service;
 
-    public PreferencesGlobals mGlobal;
+    public GlobalFunctions mGlobal;
 
     private final String TAG = "SignUpActivity";
 
@@ -44,14 +47,16 @@ public class SignUpActivity extends ActionBarActivity {
         setContentView(R.layout.activity_sign_up);
 
         init();
-
-        mSignUpButton.setOnClickListener(signUp);
-        mCancelButton.setOnClickListener(cancel);
     }
 
     public void init() {
         mSignUpButton = (Button)findViewById(R.id.signUpButton);
         mCancelButton = (Button)findViewById(R.id.cancelButton);
+
+        mSignUpButton.setOnClickListener(signUp);
+        mCancelButton.setOnClickListener(cancel);
+
+        mErrorMessage = (TextView)findViewById(R.id.errorMessage);
 
         mUsernameField = (EditText)findViewById(R.id.usernameField);
         mPasswordField = (EditText)findViewById(R.id.passwordField);
@@ -60,9 +65,14 @@ public class SignUpActivity extends ActionBarActivity {
 
         mLoadingBar = (ProgressBar)findViewById(R.id.loadingBar);
 
+        mGlobal = new GlobalFunctions(this);
+        mGlobal.setupUI(findViewById(R.id.parent));
+    }
 
-        mGlobal = new PreferencesGlobals(getApplicationContext());
-
+    public void errorMessage(String error) {
+        mErrorMessage = (TextView)findViewById(R.id.errorMessage);
+        mErrorMessage.setText(error);
+        mErrorMessage.setVisibility(View.VISIBLE);
     }
 
     public View.OnClickListener signUp = new Button.OnClickListener() {
@@ -84,16 +94,16 @@ public class SignUpActivity extends ActionBarActivity {
             service.signup(new User(email, password, username, number), new Callback<Data>() {
                 @Override
                 public void success(Data data, Response response) {
-                    Log.d("HttpTest", data.type + data.token);
+                    Log.d(TAG, data.type + data.token);
                     mLoadingBar.setVisibility(View.GONE);
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
-                        Intent intent = new Intent(SignUpActivity.this, LoopActivity.class);
+                        Intent intent = new Intent(SignUpActivity.this, TrackViewActivity.class);
                         startActivity(intent);
                     } else {
-                        //errorMessage(data.error);
-                        Log.d(TAG, "Error signing in.");
+                        errorMessage(data.error);
+                        Log.d(TAG, data.error);
                     }
                 }
 
@@ -112,4 +122,7 @@ public class SignUpActivity extends ActionBarActivity {
             startActivity(intent);
         }
     };
+
+
+
 }

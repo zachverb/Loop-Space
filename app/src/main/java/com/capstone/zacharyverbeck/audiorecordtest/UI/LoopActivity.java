@@ -19,7 +19,7 @@ import android.widget.LinearLayout;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.S3API;
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
-import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
+import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Endpoint;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.LoopFile;

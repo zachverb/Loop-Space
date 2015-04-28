@@ -1,6 +1,6 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
-import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
+import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
 
 /**
  * Created by zacharyverbeck on 4/23/15.

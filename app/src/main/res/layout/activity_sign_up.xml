@@ -13,7 +13,9 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:id="@+id/parent"
+        android:weightSum="1">
 
         <EditText
             android:layout_width="245dp"
@@ -32,7 +34,6 @@
             android:ems="10"
             android:id="@+id/emailField"
             android:layout_gravity="center_horizontal"
-            android:password="true"
             android:hint="Email"/>
 
         <EditText
@@ -52,7 +53,6 @@
             android:ems="10"
             android:id="@+id/phoneNumberField"
             android:layout_gravity="center_horizontal"
-            android:password="true"
             android:hint="Phone Number"/>
 
         <Button
@@ -78,12 +78,21 @@
             android:textColor="@android:color/white"
             android:textColorHighlight="@android:color/secondary_text_light"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/errorMessage"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:visibility="invisible"/>
+
         <ProgressBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/loadingBar"
             android:visibility="invisible"
             android:indeterminate="true" />
+
     </LinearLayout>
 
 </RelativeLayout>
