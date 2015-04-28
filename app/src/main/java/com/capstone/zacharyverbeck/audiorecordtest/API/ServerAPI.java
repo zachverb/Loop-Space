@@ -9,6 +9,8 @@ import java.util.List;
 
 import retrofit.Callback;
 import retrofit.http.Body;
+import retrofit.http.Field;
+import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
 import retrofit.http.POST;
@@ -27,8 +29,9 @@ public interface ServerAPI {
     @POST("/signup")
     public void signup(@Body User user, Callback<Data> callback);
 
+    @FormUrlEncoded
     @POST("/authenticate")
-    public void authenticate(@Body User user, Callback<Data> callback);
+    public void authenticate(@Field("username") String username, @Field("password") String password, Callback<Data> callback);
 
     @Multipart
     @POST("/upload")

@@ -12,7 +12,6 @@ import android.widget.ProgressBar;
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Global.PreferencesGlobals;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
-import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import retrofit.Callback;
@@ -31,9 +30,6 @@ public class LoginActivity extends ActionBarActivity {
     public ProgressBar mLoadingBar;
 
     public ServerAPI service;
-
-    private String username;
-    private String password;
 
     public String TAG = "LoginActivity";
 
@@ -61,19 +57,19 @@ public class LoginActivity extends ActionBarActivity {
 
         mLoginButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                username = mUsernameField.getText().toString();
-                password = mPasswordField.getText().toString();
+                String username = mUsernameField.getText().toString();
+                String password = mPasswordField.getText().toString();
 
                 mLoadingBar.setVisibility(View.VISIBLE);
 
-                service.authenticate(new User(username, password), new Callback<Data>() {
+                service.authenticate(username, password, new Callback<Data>() {
                     @Override
                     public void success(Data data, Response response) {
                         Log.d("HttpTest", data.type + data.token);
                         mLoadingBar.setVisibility(View.GONE);
                         if(data.error == null && data.type == true) {
                             mGlobal.saveToken(data.token);
-                            mGlobal.saveUserId(data.data.id);
+                            mGlobal.saveUserId(data.id);
                             Intent intent = new Intent(LoginActivity.this, LoopActivity.class);
                             startActivity(intent);
                         }

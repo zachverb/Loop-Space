@@ -5,7 +5,7 @@ package com.capstone.zacharyverbeck.audiorecordtest.Models;
  */
 public class Data {
     public boolean type;
-    public UserData data;
+    public int id;
     public String token;
     public String error;
 }

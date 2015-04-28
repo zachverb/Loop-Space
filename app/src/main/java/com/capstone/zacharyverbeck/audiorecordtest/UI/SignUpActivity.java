@@ -88,7 +88,7 @@ public class SignUpActivity extends ActionBarActivity {
                     mLoadingBar.setVisibility(View.GONE);
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
-                        mGlobal.saveUserId(data.data.id);
+                        mGlobal.saveUserId(data.id);
                         Intent intent = new Intent(SignUpActivity.this, LoopActivity.class);
                         startActivity(intent);
                     } else {
