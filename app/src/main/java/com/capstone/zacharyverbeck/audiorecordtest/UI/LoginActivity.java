@@ -100,9 +100,9 @@ public class LoginActivity extends ActionBarActivity {
                         mLoadingBar.setVisibility(View.GONE);
                         if(data.error == null && data.type == true) {
                             saveToken(data.token);
+                            saveUserId(data.data.id);
                             Intent intent = new Intent(LoginActivity.this, LoopActivity.class);
                             startActivity(intent);
-                        } else {
                         }
                     }
 
@@ -122,5 +122,14 @@ public class LoginActivity extends ActionBarActivity {
         editor.putString("token", token);
         editor.commit();
     }
+
+    public void saveUserId(int id) {
+        SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("userId", id + "");
+        editor.commit();
+    }
+
 
 }

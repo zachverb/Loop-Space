@@ -10,6 +10,7 @@ public class Loop {
     private LoopButton mLoopButton;
     private String name;
     private String filePath;
+    private String endpoint;
     private int id;
 
     public Loop(LoopButton loopButton) {
@@ -49,6 +50,13 @@ public class Loop {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
     }
 
 

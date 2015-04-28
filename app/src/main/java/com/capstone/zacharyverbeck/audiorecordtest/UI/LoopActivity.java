@@ -22,6 +22,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Buttons.LoopButton;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Endpoint;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
+import com.capstone.zacharyverbeck.audiorecordtest.Models.LoopFile;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import org.apache.commons.io.IOUtils;
@@ -37,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -75,6 +77,10 @@ public class LoopActivity extends Activity {
 
     public S3API s3Service;
 
+    public SharedPreferences settings;
+
+    public final int trackId = 1;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,78 +101,45 @@ public class LoopActivity extends Activity {
         mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
         mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
         mLoops = new Loop[6];
-        addButton();
-        addButton();
         setupRestAdapter();
-        downloadLoops();
+        getTrackInfo();
+        addButton();
 
 
         mPlayButton = (Button) findViewById(R.id.playButton);
         mPlayButton.setOnClickListener(playBackOnClickListener);
-
-    }
-
-    private void downloadLoops() {
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://s3-us-west-2.amazonaws.com/loopspace/")
-                .build();
-        s3Service = restAdapter.create(S3API.class);
-
-        s3Service.getLoop("cf0271b3472f1d0cf18e-test0.pcm",
-                new Callback<Response>() {
-                    @Override
-                    public void success(Response result, Response response) {
-                        final Response res = result;
-                        mLoops[0].getLoopButton().setImageResource(R.mipmap.microphone_filled);
-                        Thread streamThread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    File file = new File(Environment.getExternalStorageDirectory(), "cf0271b3472f1d0cf18e-test0.pcm");
-                                    InputStream inputStream = res.getBody().in();
-                                    OutputStream out = new FileOutputStream(file);
-                                    IOUtils.copy(inputStream, out);
-                                    inputStream.close();
-                                    out.close();
-                                    mLoops[0].setFilePath(file.getAbsolutePath());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                        streamThread.start();
-
-                    }
-
-
-                    @Override
-                    public void failure(RetrofitError retrofitError) {
-                        Log.d(TAG, "FAK");
-                        retrofitError.printStackTrace();
-                    }
-                });
     }
 
     private void setupRestAdapter() {
-        SharedPreferences settings = PreferenceManager
-                .getDefaultSharedPreferences(this.getApplicationContext());
+        settings = PreferenceManager
+            .getDefaultSharedPreferences(this.getApplicationContext());
 
         final String token = settings.getString("token", "");
+        final String userId = settings.getString("userId", "");
+        final String trackId = 1 + "";
 
+        // setup heroku connection
         RequestInterceptor interceptor = new RequestInterceptor() {
             @Override
             public void intercept(RequestFacade request) {
                 request.addHeader("Accept", "application/json");
                 request.addHeader("Authorization", token);
+                request.addHeader("user_id", userId);
+                request.addHeader("track_id", trackId);
             }
         };
-
-        RestAdapter restAdapter = new RestAdapter.Builder()
+        RestAdapter serverRestAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://secret-spire-6485.herokuapp.com/")
                 .setRequestInterceptor(interceptor)
                 .build();
+        service = serverRestAdapter.create(ServerAPI.class);
 
-        service = restAdapter.create(ServerAPI.class);
+        // setup s3 connection
+        RestAdapter s3RestAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://s3-us-west-2.amazonaws.com/loopspace/")
+                .build();
+        s3Service = s3RestAdapter.create(S3API.class);
+
     }
 
     public LoopButton newLoopButton() {
@@ -187,6 +160,64 @@ public class LoopActivity extends Activity {
             mRightLayout.addView(loopButton);
         }
         mLoopsLength++;
+    }
+
+    private void getTrackInfo() {
+        service.getLoops(trackId,
+            new Callback<List<LoopFile>>() {
+                @Override
+                public void success(List<LoopFile> data, Response response) {
+                    downloadLoops(data);
+                }
+
+                @Override
+                public void failure(RetrofitError retrofitError) {
+                    Log.d(TAG, "failed grabbing all loop endpoints");
+                    retrofitError.printStackTrace();
+                }
+            });
+    }
+
+    public void downloadLoops(List<LoopFile> loops) {
+        for (final LoopFile loop : loops) {
+            addButton();
+            final int loopId = loop.id;
+            final String endpoint = loop.endpoint;
+            Log.d(TAG, endpoint);
+            s3Service.getLoop(endpoint,
+                    new Callback<Response>() {
+                        @Override
+                        public void success(Response result, Response response) {
+                            final Response res = result;
+                            mLoops[loopId - 1].getLoopButton().setImageResource(R.mipmap.microphone_filled);
+                            Thread streamThread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + loopId + ".pcm");
+                                        InputStream inputStream = res.getBody().in();
+                                        OutputStream out = new FileOutputStream(file);
+                                        IOUtils.copy(inputStream, out);
+                                        inputStream.close();
+                                        out.close();
+                                        mLoops[loopId - 1].setFilePath(file.getAbsolutePath());
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            streamThread.start();
+
+                        }
+
+
+                        @Override
+                        public void failure(RetrofitError retrofitError) {
+                            Log.d(TAG, "FAK");
+                            retrofitError.printStackTrace();
+                        }
+                    });
+        }
     }
 
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
@@ -297,7 +328,7 @@ public class LoopActivity extends Activity {
             mAudioTrack.play();
         } else {
             playing = false;
-            //mAudioTrack.pause();
+            mAudioTrack.pause();
         }
     }
 
@@ -305,7 +336,7 @@ public class LoopActivity extends Activity {
 
         @Override
         protected Void doInBackground(Integer... params) {
-            int id = params[0];
+            final int id = params[0];
 
             File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
             mLoops[id].setFilePath(file.getAbsolutePath());
@@ -350,13 +381,15 @@ public class LoopActivity extends Activity {
 
                 TypedFile soundFile = new TypedFile("audio/x-wav;codec=pcm;bitrate=16;rate=44100", file);
 
+                Log.d(TAG, soundFile.mimeType());
+
                 service.upload(soundFile, new Callback<Endpoint>() {
                     @Override
                     public void success(Endpoint data, Response response) {
                         if(data.type == true) {
-                            Log.d("Spacers", data.endpoint);
+                            mLoops[id].setEndpoint(data.endpoint);
                         } else {
-                            Log.d("Spacers", "even worse");
+                            Log.d("Spacers", "Something went wrong.");
                         }
                     }
 
