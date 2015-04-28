@@ -1,9 +1,7 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +10,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
+import com.capstone.zacharyverbeck.audiorecordtest.Global.PreferencesGlobals;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
@@ -38,6 +37,8 @@ public class LoginActivity extends ActionBarActivity {
 
     public String TAG = "LoginActivity";
 
+    public PreferencesGlobals mGlobal;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,35 +57,7 @@ public class LoginActivity extends ActionBarActivity {
 
         service = restAdapter.create(ServerAPI.class);
 
-        mSignUpButton.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                username = mUsernameField.getText().toString();
-                password = mPasswordField.getText().toString();
-
-                mLoadingBar.setVisibility(View.VISIBLE);
-
-                service.signup(new User(username, password), new Callback<Data>() {
-                    @Override
-                    public void success(Data data, Response response) {
-                        Log.d("HttpTest", data.type + data.token);
-                        mLoadingBar.setVisibility(View.GONE);
-                        if(data.error == null && data.type == true) {
-                            saveToken(data.token);
-                            Intent intent = new Intent(LoginActivity.this, LoopActivity.class);
-                            startActivity(intent);
-                        } else {
-                            //errorMessage(data.error);
-                            Log.d(TAG, "Error signing in.");
-                        }
-                    }
-
-                    @Override
-                    public void failure(RetrofitError retrofitError) {
-                        retrofitError.printStackTrace();
-                    }
-                });
-            }
-        });
+        mGlobal = new PreferencesGlobals(getApplicationContext());
 
         mLoginButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
@@ -99,8 +72,8 @@ public class LoginActivity extends ActionBarActivity {
                         Log.d("HttpTest", data.type + data.token);
                         mLoadingBar.setVisibility(View.GONE);
                         if(data.error == null && data.type == true) {
-                            saveToken(data.token);
-                            saveUserId(data.data.id);
+                            mGlobal.saveToken(data.token);
+                            mGlobal.saveUserId(data.data.id);
                             Intent intent = new Intent(LoginActivity.this, LoopActivity.class);
                             startActivity(intent);
                         }
@@ -113,23 +86,16 @@ public class LoginActivity extends ActionBarActivity {
                 });
             }
         });
+
+        mSignUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
-    public void saveToken(String token) {
-        SharedPreferences settings = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("token", token);
-        editor.commit();
-    }
-
-    public void saveUserId(int id) {
-        SharedPreferences settings = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("userId", id + "");
-        editor.commit();
-    }
 
 
 }
