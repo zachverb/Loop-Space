@@ -36,6 +36,7 @@ public class SignUpActivity extends ActionBarActivity {
 
     public PreferencesGlobals mGlobal;
 
+    private final String TAG = "SignUpActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
