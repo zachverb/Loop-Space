@@ -12,12 +12,14 @@ public class Loop {
     private String filePath;
     private String endpoint;
     private int id;
+    private short[] audioData;
 
     public Loop(LoopButton loopButton) {
         this.setLoopButton(loopButton);
         this.setId(loopButton.getId());
         this.setName("ZGV");
         this.setFilePath(null);
+        this.setAudioData(null);
     }
 
     public int getId() {
@@ -51,12 +53,22 @@ public class Loop {
     public void setName(String name) {
         this.name = name;
     }
+
     public String getEndpoint() {
         return endpoint;
     }
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+
+    public short[] getAudioData() {
+        return audioData;
+    }
+
+    public void setAudioData(short[] audioData) {
+        this.audioData = audioData;
     }
 
 

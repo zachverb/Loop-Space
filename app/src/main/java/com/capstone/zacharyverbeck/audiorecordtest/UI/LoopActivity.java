@@ -27,13 +27,9 @@ import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,7 +101,6 @@ public class LoopActivity extends Activity {
         getTrackInfo();
         addButton();
 
-
         mPlayButton = (Button) findViewById(R.id.playButton);
         mPlayButton.setOnClickListener(playBackOnClickListener);
     }
@@ -124,7 +119,7 @@ public class LoopActivity extends Activity {
             public void intercept(RequestFacade request) {
                 request.addHeader("Accept", "application/json");
                 request.addHeader("Authorization", token);
-                request.addHeader("user_id", userId);
+                //request.addHeader("user_id", userId);
                 request.addHeader("track_id", trackId);
             }
         };
@@ -179,28 +174,28 @@ public class LoopActivity extends Activity {
     }
 
     public void downloadLoops(List<LoopFile> loops) {
-        for (final LoopFile loop : loops) {
+        for (int i = 0; i < loops.size(); i++) {
             addButton();
-            final int loopId = loop.id;
-            final String endpoint = loop.endpoint;
+            final int index = i;
+            final String endpoint = loops.get(i).endpoint;
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
                     new Callback<Response>() {
                         @Override
                         public void success(Response result, Response response) {
                             final Response res = result;
-                            mLoops[loopId - 1].getLoopButton().setImageResource(R.mipmap.microphone_filled);
+                            mLoops[index].getLoopButton().setImageResource(R.mipmap.microphone_filled);
                             Thread streamThread = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
-                                        File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + loopId + ".pcm");
+                                        File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
                                         InputStream inputStream = res.getBody().in();
                                         OutputStream out = new FileOutputStream(file);
                                         IOUtils.copy(inputStream, out);
                                         inputStream.close();
                                         out.close();
-                                        mLoops[loopId - 1].setFilePath(file.getAbsolutePath());
+                                        mLoops[index].setFilePath(file.getAbsolutePath());
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -263,48 +258,64 @@ public class LoopActivity extends Activity {
         if(!playing) {
             playing = true;
 
-            Queue<File> files= new PriorityQueue<>();
-            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
+//            Queue<File> files= new PriorityQueue<>();
+//            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
             int bufferSizeInBytes = 0;
-
-
+            Log.d(TAG, "YO");
+            Queue<short[]> audioDataQueue = new PriorityQueue<>();
             for(int i = 0; i < mLoopsLength; i++) {
-                Log.d(TAG, mLoops[i].getId() + "");
-                if(mLoops[i].getFilePath() != null) {
-                    File file = new File(mLoops[i].getFilePath());
-                    files.add(file);
-                    int length = (int) (file.length() / shortSizeInBytes);
-                    Log.d(TAG, length + "");
-                    if (bufferSizeInBytes < length) {
-                        Log.d(TAG, "Larger.");
-                        bufferSizeInBytes = length;
+                short[] data = mLoops[i].getAudioData();
+                Log.d(TAG, "We out here");
+                if(mLoops[i].getAudioData() != null) {
+                    Log.d(TAG, "We a lil deeper" + data.length);
+                    audioDataQueue.add(data);
+                    if(data.length > bufferSizeInBytes) {
+                        bufferSizeInBytes = data.length;
+                        Log.d(TAG, "We in it to win it");
                     }
+
                 }
+//                Log.d(TAG, mLoops[i].getId() + "");
+//                if(mLoops[i].getFilePath() != null) {
+//                    File file = new File(mLoops[i].getFilePath());
+//                    files.add(file);
+//                    int length = (int) (file.length() / shortSizeInBytes);
+//                    Log.d(TAG, length + "");
+//                    if (bufferSizeInBytes < length) {
+//                        Log.d(TAG, "Larger.");
+//                        bufferSizeInBytes = length;
+//                    }
+//                }
             }
+
+            Log.d(TAG, bufferSizeInBytes + "");
 
             short[] audioData = new short[bufferSizeInBytes];
 
             int i = 0;
-            while(files.size() > 0) {
-
-                try {
-                    InputStream inputStream = new FileInputStream(files.remove());
-                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                    DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-
-                    int j = 0;
-                    while (dataInputStream.available() > 0) {
-                        audioData[j] += (dataInputStream.readShort() * .5);
-                        j++;
-                    }
-
-                    dataInputStream.close();
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            while(audioDataQueue.size() > 0) {
+                short[] tempAudioData = audioDataQueue.remove();
+                for(int j = 0; j < tempAudioData.length; j++) {
+                    audioData[j] += tempAudioData[j];
                 }
+//                try {
+//                    InputStream inputStream = new FileInputStream(files.remove());
+//                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+//                    DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+//
+//                    int j = 0;
+//                    while (dataInputStream.available() > 0) {
+//                        audioData[j] += (dataInputStream.readShort() * .5);
+//                        j++;
+//                    }
+//
+//                    dataInputStream.close();
+//
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 
                 i++;
 
@@ -323,7 +334,7 @@ public class LoopActivity extends Activity {
 
             mAudioTrack.write(audioData, 0, bufferSizeInBytes);
 
-            mAudioTrack.setLoopPoints(0, audioData.length / 2, -1);
+            mAudioTrack.setLoopPoints(0, audioData.length / 4, -1);
 
             mAudioTrack.play();
         } else {
@@ -372,10 +383,12 @@ public class LoopActivity extends Activity {
                     int numberOfShort = mAudioRecord.read(audioData, 0, minBufferSize);
                     publishProgress(id);
                     for(int i = 0; i < numberOfShort; i++){
+                        //Log.d(TAG, audioData[i] + "");
                         dataOutputStream.writeShort(audioData[i]);
                     }
                 }
 
+                mLoops[id].setAudioData(audioData);
                 mAudioRecord.stop();
                 dataOutputStream.close();
 
