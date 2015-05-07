@@ -1,9 +1,10 @@
 <resources>
-    <string name="app_name">AudioRecordTest</string>
+    <string name="app_name">Loop Space</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">Sign In</string>
     <string name="title_activity_track_view">TrackView</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
+    <string name="title_activity_sign_up">Sign Up</string>
+    <string name="title_activity_track_list">Global Tracks</string>
 </resources>

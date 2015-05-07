@@ -80,7 +80,7 @@ public class LoginActivity extends Activity {
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
-                        Intent intent = new Intent(LoginActivity.this, LoopActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
                         startActivity(intent);
                     }
                 }

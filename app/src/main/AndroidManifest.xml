@@ -16,7 +16,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
         </activity>
-
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
@@ -37,13 +36,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".UI.TrackViewActivity"
-            android:label="@string/title_activity_track_view"
-            android:parentActivityName=".UI.LoginActivity" >
-        </activity>
-        <activity
             android:name=".UI.SignUpActivity"
             android:label="@string/title_activity_sign_up" >
+        </activity>
+        <activity
+            android:name=".UI.TrackListActivity"
+            android:label="@string/title_activity_track_list" >
         </activity>
     </application>
 

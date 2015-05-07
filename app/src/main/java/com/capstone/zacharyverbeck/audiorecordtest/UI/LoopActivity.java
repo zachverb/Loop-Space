@@ -65,6 +65,10 @@ public class LoopActivity extends Activity {
 
     public int sampleRate = 44100;
 
+    public int bpm = 60;
+
+    public int bar = sampleRate * 4;
+
     public int minBufferSize;
 
     public AudioTrack mAudioTrack;
@@ -81,7 +85,7 @@ public class LoopActivity extends Activity {
 
     public SharedPreferences settings;
 
-    public final int trackId = 1;
+    public String trackId;
 
     /** Called when the activity is first created. */
     @Override
@@ -104,6 +108,7 @@ public class LoopActivity extends Activity {
         mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
         mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
         mLoops = new Loop[6];
+        trackId = getIntent().getIntExtra("trackId", -1) + "";
         audioInit();
         setupRestAdapter();
         getTrackInfo();
@@ -139,9 +144,6 @@ public class LoopActivity extends Activity {
             .getDefaultSharedPreferences(this.getApplicationContext());
 
         final String token = settings.getString("token", "");
-        final String userId = settings.getString("userId", "");
-        final String trackId = 1 + "";
-
         // setup heroku connection
         RequestInterceptor interceptor = new RequestInterceptor() {
             @Override
@@ -201,9 +203,6 @@ public class LoopActivity extends Activity {
     }
 
     public void downloadLoops(List<LoopFile> loops) {
-        final int minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT);
         for (int i = 0; i < loops.size(); i++) {
             addButton();
             final int index = i;
@@ -227,7 +226,6 @@ public class LoopActivity extends Activity {
                                         //DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
 
                                         //short[] audioData = new short[minBufferSize];
-
 //                                        int j = 0;
 //                                        while (dataInputStream.available() > 0) {
 //                                            audioData[j] += (dataInputStream.readShort() * .5);
@@ -361,6 +359,12 @@ public class LoopActivity extends Activity {
                     e.printStackTrace();
                 }
 
+            }
+            int size;
+            if(bar < bufferSizeInBytes) {
+                size = bufferSizeInBytes;
+            } else {
+                size = bar;
             }
             while(playing) {
                 mAudioTrack.write(audioData, 0, audioData.length);

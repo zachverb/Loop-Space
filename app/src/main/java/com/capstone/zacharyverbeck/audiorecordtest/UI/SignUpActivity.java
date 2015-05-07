@@ -99,7 +99,7 @@ public class SignUpActivity extends Activity {
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
-                        Intent intent = new Intent(SignUpActivity.this, TrackViewActivity.class);
+                        Intent intent = new Intent(SignUpActivity.this, TrackListActivity.class);
                         startActivity(intent);
                     } else {
                         errorMessage(data.error);
