@@ -43,6 +43,18 @@
             android:name=".UI.TrackListActivity"
             android:label="@string/title_activity_track_list" >
         </activity>
+        <activity
+            android:name=".UI.CreateTrackActivity"
+            android:label="@string/title_activity_create_track" >
+        </activity>
+        <activity
+            android:name=".UI.TrackCreateActivity"
+            android:label="@string/title_activity_track_create"
+            android:parentActivityName=".UI.TrackListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.capstone.zacharyverbeck.audiorecordtest.UI.TrackListActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -1,6 +1,5 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -11,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +49,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
 
-public class LoopActivity extends Activity {
+public class LoopActivity extends ActionBarActivity {
 
     public Loop[] mLoops;
 
@@ -87,6 +87,8 @@ public class LoopActivity extends Activity {
 
     public String trackId;
 
+    public short[] audioData;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,8 +118,6 @@ public class LoopActivity extends Activity {
 
         mPlayButton = (Button) findViewById(R.id.playButton);
         mPlayButton.setOnClickListener(playBackOnClickListener);
-
-
     }
 
     private void audioInit() {
@@ -398,7 +398,7 @@ public class LoopActivity extends Activity {
 
                 //sampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_SYSTEM);
 
-                short[] audioData = new short[minBufferSize];
+                short[] tempAudioData = new short[minBufferSize];
 
                 mAudioRecord.startRecording();
 
@@ -406,7 +406,7 @@ public class LoopActivity extends Activity {
                     int numberOfShort = mAudioRecord.read(audioData, 0, minBufferSize);
                     publishProgress(id);
                     for(int i = 0; i < numberOfShort; i++){
-                        dataOutputStream.writeShort(audioData[i]);
+                        dataOutputStream.writeShort(tempAudioData[i]);
                     }
                 }
 
@@ -414,7 +414,7 @@ public class LoopActivity extends Activity {
                 dataOutputStream.close();
 
 
-                mLoops[id].setAudioData(audioData);
+                mLoops[id].setAudioData(tempAudioData);
 
                 TypedFile soundFile = new TypedFile("audio/x-wav;codec=pcm;bitrate=16;rate=44100", file);
 

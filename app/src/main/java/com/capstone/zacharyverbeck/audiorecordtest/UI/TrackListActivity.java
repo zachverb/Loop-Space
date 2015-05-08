@@ -46,6 +46,12 @@ public class TrackListActivity extends ActionBarActivity {
         init();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getTracks();
+    }
+
     private void setUpRestAdapter() {
         SharedPreferences settings = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext());
