@@ -9,6 +9,7 @@ public class Track {
     public String createdAt;
     public String updatedAt;
     public int owner_id;
+    public User User;
 
     public Track(String title) {
         this.title = title;

@@ -6,20 +6,20 @@ package com.capstone.zacharyverbeck.audiorecordtest.Models;
 public class User {
     public String email;
     public String password;
-    public String username;
+    public String name;
     public String number;
 
     public User(String email, String pass) {
         this.email = email;
         this.password = pass;
-        this.username = null;
+        this.name = null;
         this.number = null;
     }
 
-    public User(String email, String pass, String username, String number) {
+    public User(String email, String pass, String name, String number) {
         this.email = email;
         this.password = pass;
-        this.username = username;
+        this.name = name;
         this.number = number;
     }
 }

@@ -65,7 +65,8 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         // - replace the contents of the view with that element
         final int trackId = mDataset.get(index).id;
         holder.title.setText(mDataset.get(index).title);
-        holder.owner.setText("TRACK NUMBER " + trackId);
+        holder.owner.setText(mDataset.get(index).User.name);
+        //Log.d("WHY", mDataset.get(index).user.email);
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
