@@ -62,7 +62,6 @@ public class Loop {
         this.endpoint = endpoint;
     }
 
-
     public short[] getAudioData() {
         return audioData;
     }

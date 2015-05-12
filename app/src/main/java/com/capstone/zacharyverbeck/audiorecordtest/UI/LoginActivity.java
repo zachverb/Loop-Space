@@ -14,6 +14,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
+import com.gc.materialdesign.views.ButtonRectangle;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -22,8 +23,8 @@ import retrofit.client.Response;
 
 public class LoginActivity extends Activity {
 
-    public Button mSignUpButton;
-    public Button mLoginButton;
+    public ButtonRectangle mSignUpButton;
+    public ButtonRectangle mLoginButton;
 
     public EditText mEmailField;
     public EditText mPasswordField;
@@ -48,8 +49,10 @@ public class LoginActivity extends Activity {
     }
 
     public void init() {
-        mSignUpButton = (Button)findViewById(R.id.signUpButton);
-        mLoginButton = (Button)findViewById(R.id.logInButton);
+        mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
+        mLoginButton = (ButtonRectangle)findViewById(R.id.logInButton);
+        mSignUpButton.setRippleSpeed(50f);
+        mLoginButton.setRippleSpeed(50f);
 
         mEmailField = (EditText)findViewById(R.id.usernameField);
         mPasswordField = (EditText)findViewById(R.id.passwordField);
@@ -77,7 +80,7 @@ public class LoginActivity extends Activity {
                 public void success(Data data, Response response) {
                     Log.d(TAG, data.type + data.token);
                     mLoadingBar.setVisibility(View.GONE);
-                    if(data.error == null && data.type == true) {
+                    if(data.error == null && data.type) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
                         Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);

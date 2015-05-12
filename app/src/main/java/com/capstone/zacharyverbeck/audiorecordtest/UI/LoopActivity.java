@@ -87,7 +87,7 @@ public class LoopActivity extends ActionBarActivity {
 
     public String trackId;
 
-    public short[] audioData;
+    public short[] mAudioData;
 
     /** Called when the activity is first created. */
     @Override
@@ -202,6 +202,11 @@ public class LoopActivity extends ActionBarActivity {
             });
     }
 
+    private short[] getAudioData() {
+
+        return mAudioData;
+    }
+
     public void downloadLoops(List<LoopFile> loops) {
         for (int i = 0; i < loops.size(); i++) {
             addButton();
@@ -222,19 +227,10 @@ public class LoopActivity extends ActionBarActivity {
                                         File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
                                         InputStream inputStream = res.getBody().in();
                                         OutputStream out = new FileOutputStream(file);
-                                        //BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                                        //DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-
-                                        //short[] audioData = new short[minBufferSize];
-//                                        int j = 0;
-//                                        while (dataInputStream.available() > 0) {
-//                                            audioData[j] += (dataInputStream.readShort() * .5);
-//                                            j++;
-//                                        }
-                                        //while(dataOutputStream.isAvailable())
                                         IOUtils.copy(inputStream, out);
                                         inputStream.close();
                                         out.close();
+                                        mLoops[index].setAudioData(getAudioDataFromFile(file));
                                         mLoops[index].setFilePath(file.getAbsolutePath());
                                         //mLoops[index].setAudioData(audioData);
                                     } catch (IOException e) {
@@ -254,6 +250,34 @@ public class LoopActivity extends ActionBarActivity {
                         }
                     });
         }
+    }
+
+    private short[] getAudioDataFromFile(File file) {
+        int shortSizeInBytes = Short.SIZE / Byte.SIZE;
+        short[] audioData = new short[(int) (file.length() / shortSizeInBytes)];
+
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+
+            int j = 0;
+            while (dataInputStream.available() > 0) {
+                audioData[j] += (dataInputStream.readShort() * .5);
+                j++;
+            }
+
+            dataInputStream.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        for(int i = 0; i < 500; i++) {
+//            Log.d(TAG, audioData[i] + "");
+//        }
+        return audioData;
     }
 
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
@@ -303,6 +327,10 @@ public class LoopActivity extends ActionBarActivity {
             int shortSizeInBytes = Short.SIZE / Byte.SIZE;
             int bufferSizeInBytes = 0;
             Log.d(TAG, "YO");
+//            short[] tempAudioData = mLoops[0].getAudioData();
+//            for(int i = 0; i < tempAudioData.length; i++) {
+//                Log.d(TAG, tempAudioData[i] + "");
+//            }
            // Queue<short[]> audioDataContainer = new PriorityQueue<>();
             Queue<File> files = new PriorityQueue<>();
             for(int i = 0; i < mLoopsLength; i++) {
@@ -370,7 +398,6 @@ public class LoopActivity extends ActionBarActivity {
                 mAudioTrack.write(audioData, 0, audioData.length);
             }
 
-            //mAudioTrack.setLoopPoints(0, audioData.length / 2, -1);
 
 
         } else {
@@ -396,14 +423,12 @@ public class LoopActivity extends ActionBarActivity {
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
 
-                //sampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_SYSTEM);
-
                 short[] tempAudioData = new short[minBufferSize];
 
                 mAudioRecord.startRecording();
 
                 while(recording) {
-                    int numberOfShort = mAudioRecord.read(audioData, 0, minBufferSize);
+                    int numberOfShort = mAudioRecord.read(tempAudioData, 0, minBufferSize);
                     publishProgress(id);
                     for(int i = 0; i < numberOfShort; i++){
                         dataOutputStream.writeShort(tempAudioData[i]);
@@ -413,10 +438,9 @@ public class LoopActivity extends ActionBarActivity {
                 mAudioRecord.stop();
                 dataOutputStream.close();
 
-
                 mLoops[id].setAudioData(tempAudioData);
 
-                TypedFile soundFile = new TypedFile("audio/x-wav;codec=pcm;bitrate=16;rate=44100", file);
+                TypedFile soundFile = new TypedFile("binary", file);
 
                 Log.d(TAG, soundFile.mimeType());
 

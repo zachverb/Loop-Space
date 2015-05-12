@@ -5,7 +5,8 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="com.capstone.zacharyverbeck.audiorecordtest.UI.TrackListActivity"
-             tools:ignore="MergeRootFrame">
+             tools:ignore="MergeRootFrame"
+             android:background="@android:color/white">
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
@@ -24,7 +25,7 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="16dp"
         android:src="@mipmap/ic_add_white_24dp"
-        fab:fab_colorNormal="@color/primary"
-        fab:fab_colorPressed="@color/primary_dark"
-        fab:fab_colorRipple="@color/ripple" />
+        fab:fab_colorNormal="@color/primary_fab"
+        fab:fab_colorPressed="@color/primary_dark_fab"
+        fab:fab_colorRipple="@color/ripple_fab" />
 </FrameLayout>
