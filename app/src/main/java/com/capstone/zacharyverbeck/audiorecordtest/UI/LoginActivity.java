@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
@@ -14,7 +13,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
-import com.gc.materialdesign.views.ButtonRectangle;
+import com.rey.material.widget.Button;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -23,8 +22,8 @@ import retrofit.client.Response;
 
 public class LoginActivity extends Activity {
 
-    public ButtonRectangle mSignUpButton;
-    public ButtonRectangle mLoginButton;
+    public Button mSignUpButton;
+    public Button mLoginButton;
 
     public EditText mEmailField;
     public EditText mPasswordField;
@@ -49,15 +48,13 @@ public class LoginActivity extends Activity {
     }
 
     public void init() {
-        mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
-        mLoginButton = (ButtonRectangle)findViewById(R.id.logInButton);
-        mSignUpButton.setRippleSpeed(50f);
-        mLoginButton.setRippleSpeed(50f);
+        mSignUpButton = (Button)findViewById(R.id.signUpButton);
+        mLoginButton = (Button)findViewById(R.id.logInButton);
+
 
         mEmailField = (EditText)findViewById(R.id.usernameField);
         mPasswordField = (EditText)findViewById(R.id.passwordField);
 
-        mLoadingBar = (ProgressBar)findViewById(R.id.loadingBar);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://secret-spire-6485.herokuapp.com/")
                 .build();
@@ -73,24 +70,27 @@ public class LoginActivity extends Activity {
             String email = mEmailField.getText().toString();
             String password = mPasswordField.getText().toString();
 
-            mLoadingBar.setVisibility(View.VISIBLE);
 
             service.authenticate(new User(email, password), new Callback<Data>() {
                 @Override
                 public void success(Data data, Response response) {
                     Log.d(TAG, data.type + data.token);
-                    mLoadingBar.setVisibility(View.GONE);
                     if(data.error == null && data.type) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
                         Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
                         startActivity(intent);
+                    } else {
+//                        Dialog dialog = new Dialog(LoginActivity.this, "Error!", data.error);
+//                        dialog.show();
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError retrofitError) {
                     retrofitError.printStackTrace();
+//                    Dialog dialog = new Dialog(getApplicationContext() , "Error!", String message);
+//                    dialog.show();
                 }
             });
         }

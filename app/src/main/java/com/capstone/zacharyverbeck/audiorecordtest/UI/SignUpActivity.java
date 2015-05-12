@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -15,6 +14,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
+import com.rey.material.widget.Button;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;

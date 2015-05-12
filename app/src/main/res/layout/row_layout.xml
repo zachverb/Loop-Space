@@ -3,7 +3,10 @@
                 android:layout_width="fill_parent"
                 android:layout_height="?android:attr/listPreferredItemHeight"
                 android:padding="6dip"
-                android:id="@+id/row">
+                android:id="@+id/row"
+                android:background="@android:color/white">
+
+
 
 
     <TextView
@@ -15,7 +18,8 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         android:text="Owner Username"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"/>
 
     <TextView
         android:id="@+id/title"
@@ -27,6 +31,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:gravity="center_vertical"
         android:text="Song Title"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textColor="@android:color/black"/>
 
 </RelativeLayout>

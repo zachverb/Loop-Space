@@ -218,28 +218,8 @@ public class LoopActivity extends ActionBarActivity {
                     new Callback<Response>() {
                         @Override
                         public void success(Response result, Response response) {
-                            final Response res = result;
-                            mLoops[index].getLoopButton().setImageResource(R.mipmap.microphone_filled);
-                            Thread streamThread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
-                                        InputStream inputStream = res.getBody().in();
-                                        OutputStream out = new FileOutputStream(file);
-                                        IOUtils.copy(inputStream, out);
-                                        inputStream.close();
-                                        out.close();
-                                        mLoops[index].setAudioData(getAudioDataFromFile(file));
-                                        mLoops[index].setFilePath(file.getAbsolutePath());
-                                        //mLoops[index].setAudioData(audioData);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                            streamThread.start();
-
+                            StreamingTask task = new StreamingTask();
+                            task.execute(new Object[]{result, index});
                         }
 
 
@@ -469,6 +449,41 @@ public class LoopActivity extends ActionBarActivity {
         protected void onProgressUpdate(Integer... params) {
             LoopButton loopButton = (LoopButton) findViewById(params[0]);
             loopButton.setImageResource(R.mipmap.microphone_filled);
+        }
+
+    }
+
+    private class StreamingTask extends AsyncTask<Object, Integer, Integer> {
+
+        @Override
+        protected Integer doInBackground(Object... params) {
+            final Response res = (Response) params[0];
+            final int index = (int) params[1];
+            try {
+                File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
+                InputStream inputStream = res.getBody().in();
+                OutputStream out = new FileOutputStream(file);
+                IOUtils.copy(inputStream, out);
+                inputStream.close();
+                out.close();
+                mLoops[index].setAudioData(getAudioDataFromFile(file));
+                mLoops[index].setFilePath(file.getAbsolutePath());
+                //mLoops[index].setAudioData(audioData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return index;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... params) {
+            //LoopButton loopButton = (LoopButton) findViewById(params[0]);
+            //loopButton.setImageResource(R.mipmap.microphone_filled);
+        }
+
+        @Override
+        protected void onPostExecute(Integer index) {
+            mLoops[index].getLoopButton().setImageResource(R.mipmap.microphone_filled);
         }
 
     }
