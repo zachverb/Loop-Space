@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:background="@color/divider"
+              android:textColor="@android:color/white">
+
+    <com.rey.material.widget.EditText
+        style="@style/Material.Widget.EditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/primary_text"
+        app:et_dividerHeight="0dp"
+        app:et_supportMode="none"
+        android:hint="Title"
+        android:text=""
+        android:enabled="false"
+        android:paddingTop="8dp"/>
+        android:shadowColor="#0000"/>
+</LinearLayout>

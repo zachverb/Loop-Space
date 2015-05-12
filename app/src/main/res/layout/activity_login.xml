@@ -50,8 +50,10 @@
             />
 
         <com.rey.material.widget.Button
-            style="@style/Material.Drawable.Ripple.Wave.Light"
+            app:rd_style="@style/Material.Drawable.Ripple.Wave.Light"
             app:rd_rippleColor="@color/primary"
+            android:radius="1dp"
+            app:rd_delayClick="false"
             android:layout_width="245dp"
             android:layout_height="60dp"
             android:text="Log In"
@@ -60,11 +62,13 @@
             android:textColor="@android:color/white"
             android:textColorHighlight="@android:color/secondary_text_light"
             android:layout_margin="20dp"
-            android:background="@color/accent"/>
+            android:background="@color/accent"
+            />
 
         <com.rey.material.widget.Button
             style="@style/Material.Drawable.Ripple.Wave.Light"
             app:rd_rippleColor="@color/primary"
+            app:rd_delayClick="false"
             android:layout_width="245dp"
             android:layout_height="60dp"
             android:text="Sign Up"
