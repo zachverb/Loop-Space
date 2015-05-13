@@ -26,7 +26,6 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.melnykov.fab.FloatingActionButton;
 import com.rey.material.app.Dialog;
-import com.rey.material.widget.EditText;
 
 import java.util.List;
 
@@ -111,11 +110,11 @@ public class TrackListActivity extends ActionBarActivity {
                 Log.d(TAG, "YO");
 
 
-                final Dialog mDialog = new Dialog(TrackListActivity.this, R.style.Material_App_Dialog_Simple);
+                final Dialog mDialog = new Dialog(TrackListActivity.this, R.style.Material_App_Dialog_Light);
                 final boolean[] isText = new boolean[]{false};
 
-                final EditText input = new EditText(TrackListActivity.this);
-                input.setTextColor(Color.WHITE);
+                final android.widget.EditText input = new android.widget.EditText(TrackListActivity.this);
+                input.setTextColor(Color.DKGRAY);
                 input.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -139,16 +138,16 @@ public class TrackListActivity extends ActionBarActivity {
                 });
                 FrameLayout container = new FrameLayout(TrackListActivity.this);
                 FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                params.leftMargin = (int) convertDpToPx(15, TrackListActivity.this);
-                params.rightMargin = (int) convertDpToPx(15, TrackListActivity.this);
+                params.width = (int) convertDpToPx(200, TrackListActivity.this);
+                params.leftMargin = (int) convertDpToPx(30, TrackListActivity.this);
+                params.rightMargin = (int) convertDpToPx(30, TrackListActivity.this);
                 input.setLayoutParams(params);
                 input.setSingleLine();
                 container.addView(input);
                 mDialog.title("Track Name")
-                        .positiveAction("OK")
+                        .positiveAction("CREATE")
                         .negativeAction("CANCEL")
                         .contentView(container)
-                        .contentMargin(50)
                         .show();
 
 
@@ -156,7 +155,7 @@ public class TrackListActivity extends ActionBarActivity {
                     @Override
                     public void onClick(View v) {
                         if (isText[0] == false) {
-                            input.setHelper("Can't be empty!");
+                            //input.setHelper("Can't be empty!");
                         } else {
                             service.newTrack(new Track(input.getText().toString()), new Callback<Data>() {
                                 @Override

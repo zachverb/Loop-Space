@@ -81,8 +81,6 @@ public class LoginActivity extends Activity {
                         Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
                         startActivity(intent);
                     } else {
-//                        Dialog dialog = new Dialog(LoginActivity.this, "Error!", data.error);
-//                        dialog.show();
                     }
                 }
 
