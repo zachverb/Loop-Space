@@ -8,6 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +19,9 @@ import com.capstone.zacharyverbeck.audiorecordtest.Java.TrackListAdapter;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
+import com.gc.materialdesign.views.ProgressBarCircularIndeterminate;
 import com.melnykov.fab.FloatingActionButton;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.List;
 
@@ -33,6 +36,7 @@ public class TrackListActivity extends ActionBarActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private ProgressBarCircularIndeterminate mProgressBar;
     public ServerAPI service;
     public String TAG = "TrackListActivity";
     public FloatingActionButton mNewTrack;
@@ -74,7 +78,15 @@ public class TrackListActivity extends ActionBarActivity {
     }
 
     private void init() {
+        mProgressBar = (ProgressBarCircularIndeterminate) findViewById(R.id.refreshProgress);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.trackList);
+
+
+        mRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(TrackListActivity.this)
+                .color(R.color.divider)
+                .showLastDivider()
+                .build());
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -83,29 +95,29 @@ public class TrackListActivity extends ActionBarActivity {
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
         // specify an adapter (see also next example)
 
         mSwipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                // Refresh items
                 getTracks();
             }
         });
 
         getTracks();
 
-        mNewTrack = (FloatingActionButton)findViewById(R.id.newTrack);
+        mNewTrack = (FloatingActionButton) findViewById(R.id.newTrack);
         mNewTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "YO");
-                service.newTrack(new Track("YO") , new Callback<Data>() {
+                service.newTrack(new Track("YO"), new Callback<Data>() {
                     @Override
                     public void success(Data data, Response response) {
                         Log.d(TAG, "SUCCESS!");
-                        if(data.type == true) {
+                        if (data.type == true) {
                             Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
                             loopIntent.putExtra("trackId", data.id);
                             startActivity(loopIntent);
@@ -122,8 +134,13 @@ public class TrackListActivity extends ActionBarActivity {
                 });
             }
         });
-    }
 
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Global Tracks");
+        setSupportActionBar(toolbar);
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,7 +157,10 @@ public class TrackListActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+            getTracks();
             return true;
         }
 
@@ -154,6 +174,8 @@ public class TrackListActivity extends ActionBarActivity {
                 mAdapter = new TrackListAdapter(getApplicationContext(), tracks);
                 mRecyclerView.setAdapter(mAdapter);
                 mSwipeRefreshLayout.setRefreshing(false);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mProgressBar.setVisibility(View.GONE);
             }
 
             @Override

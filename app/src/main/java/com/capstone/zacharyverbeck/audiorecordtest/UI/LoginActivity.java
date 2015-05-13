@@ -3,7 +3,6 @@ package com.capstone.zacharyverbeck.audiorecordtest.UI;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -68,9 +67,9 @@ public class LoginActivity extends Activity {
         mGlobal = new GlobalFunctions(this);
         mGlobal.setupUI(findViewById(R.id.parent));
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("MY toolbar");
-        toolbar.inflateMenu(R.menu.menu_login);
+
+        //toolbar.inflateMenu(R.menu.menu_login);
+
     }
 
     public View.OnClickListener logIn = new ButtonRectangle.OnClickListener() {

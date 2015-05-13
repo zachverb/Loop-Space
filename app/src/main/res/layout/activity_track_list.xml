@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              xmlns:fab="http://schemas.android.com/apk/res-auto"
              android:id="@+id/container"
@@ -7,14 +7,26 @@
              tools:context="com.capstone.zacharyverbeck.audiorecordtest.UI.TrackListActivity"
              tools:ignore="MergeRootFrame"
              android:background="@android:color/white">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@color/primary_dark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </android.support.v7.widget.Toolbar>
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:layout_marginLeft="@dimen/margin"
+        android:layout_marginRight="@dimen/margin">
         <android.support.v7.widget.RecyclerView
             android:id="@+id/trackList"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:scrollbars="vertical" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -22,10 +34,21 @@
         android:id="@+id/newTrack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="16dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginRight="16dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:src="@mipmap/ic_add_white_24dp"
         fab:fab_colorNormal="@color/primary_fab"
         fab:fab_colorPressed="@color/primary_dark_fab"
         fab:fab_colorRipple="@color/ripple_fab" />
-</FrameLayout>
+
+    <com.gc.materialdesign.views.ProgressBarCircularIndeterminate
+        android:id="@+id/refreshProgress"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:background="#1E88E5" />
+</RelativeLayout>

@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical"
               android:id="@+id/layoutMain"
               android:weightSum="1"
-    >
-
+              android:background="@android:color/white">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@color/primary_dark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </android.support.v7.widget.Toolbar>
     <LinearLayout
+        android:id="@+id/loopContainer"
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="452dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
         android:layout_weight="0.75">
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:id="@+id/leftLayout">
 
@@ -25,8 +33,8 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:id="@+id/rightLayout">
 
@@ -39,6 +47,20 @@
         android:layout_height="wrap_content"
         android:text="Play"
         android:id="@+id/playButton"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 
-</LinearLayout>
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/playbar"-->
+        <!--android:minHeight="?attr/actionBarSize"-->
+        <!--android:background="@color/primary_dark"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true">-->
+
+    <!--</android.support.v7.widget.Toolbar>-->
+
+</RelativeLayout>
