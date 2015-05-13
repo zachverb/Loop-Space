@@ -3,6 +3,7 @@ package com.capstone.zacharyverbeck.audiorecordtest.UI;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -13,7 +14,8 @@ import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
-import com.rey.material.widget.Button;
+import com.gc.materialdesign.views.ButtonRectangle;
+import com.gc.materialdesign.widgets.Dialog;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -22,8 +24,8 @@ import retrofit.client.Response;
 
 public class LoginActivity extends Activity {
 
-    public Button mSignUpButton;
-    public Button mLoginButton;
+    public ButtonRectangle mSignUpButton;
+    public ButtonRectangle mLoginButton;
 
     public EditText mEmailField;
     public EditText mPasswordField;
@@ -48,9 +50,11 @@ public class LoginActivity extends Activity {
     }
 
     public void init() {
-        mSignUpButton = (Button)findViewById(R.id.signUpButton);
-        mLoginButton = (Button)findViewById(R.id.logInButton);
+        mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
+        mLoginButton = (ButtonRectangle)findViewById(R.id.logInButton);
 
+        mSignUpButton.setRippleSpeed(50f);
+        mLoginButton.setRippleSpeed(50f);
 
         mEmailField = (EditText)findViewById(R.id.usernameField);
         mPasswordField = (EditText)findViewById(R.id.passwordField);
@@ -63,9 +67,13 @@ public class LoginActivity extends Activity {
 
         mGlobal = new GlobalFunctions(this);
         mGlobal.setupUI(findViewById(R.id.parent));
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("MY toolbar");
+        toolbar.inflateMenu(R.menu.menu_login);
     }
 
-    public View.OnClickListener logIn = new Button.OnClickListener() {
+    public View.OnClickListener logIn = new ButtonRectangle.OnClickListener() {
         public void onClick(View v) {
             String email = mEmailField.getText().toString();
             String password = mPasswordField.getText().toString();
@@ -81,16 +89,16 @@ public class LoginActivity extends Activity {
                         Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
                         startActivity(intent);
                     } else {
-//                        Dialog dialog = new Dialog(LoginActivity.this, "Error!", data.error);
-//                        dialog.show();
+                        Dialog dialog = new Dialog(LoginActivity.this, "Error!", data.error);
+                        dialog.show();
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError retrofitError) {
                     retrofitError.printStackTrace();
-//                    Dialog dialog = new Dialog(getApplicationContext() , "Error!", String message);
-//                    dialog.show();
+                    Dialog dialog = new Dialog(getApplicationContext() , "Error!", "Network error!");
+                    dialog.show();
                 }
             });
         }

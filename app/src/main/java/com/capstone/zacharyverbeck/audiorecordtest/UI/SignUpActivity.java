@@ -14,7 +14,8 @@ import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
-import com.rey.material.widget.Button;
+import com.gc.materialdesign.views.ButtonFlat;
+import com.gc.materialdesign.views.ButtonRectangle;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -23,8 +24,8 @@ import retrofit.client.Response;
 
 public class SignUpActivity extends Activity {
 
-    public Button mSignUpButton;
-    public Button mCancelButton;
+    public ButtonRectangle mSignUpButton;
+    public ButtonFlat mCancelButton;
 
     public ProgressBar mLoadingBar;
 
@@ -50,8 +51,11 @@ public class SignUpActivity extends Activity {
     }
 
     public void init() {
-        mSignUpButton = (Button)findViewById(R.id.signUpButton);
-        mCancelButton = (Button)findViewById(R.id.cancelButton);
+        mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
+        mCancelButton = (ButtonFlat)findViewById(R.id.cancelButton);
+
+        mSignUpButton.setRippleSpeed(50f);
+        mCancelButton.setRippleSpeed(50f);
 
         mSignUpButton.setOnClickListener(signUp);
         mCancelButton.setOnClickListener(cancel);
@@ -75,7 +79,7 @@ public class SignUpActivity extends Activity {
         mErrorMessage.setVisibility(View.VISIBLE);
     }
 
-    public View.OnClickListener signUp = new Button.OnClickListener() {
+    public View.OnClickListener signUp = new View.OnClickListener() {
         public void onClick(View v) {
             String username = mUsernameField.getText().toString();
             String password = mPasswordField.getText().toString();

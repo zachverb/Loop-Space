@@ -10,6 +10,13 @@
                 android:id="@+id/parent"
                 tools:context="com.capstone.zacharyverbeck.audiorecordtest.UI.LoginActivity"
     >
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="#2196F3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </android.support.v7.widget.Toolbar>
 
     <LinearLayout
         android:orientation="vertical"
@@ -49,12 +56,10 @@
             android:textColor="#000000"
             />
 
-        <com.rey.material.widget.Button
-            style="@style/Material.Drawable.Ripple.Wave.Light"
-            app:rd_rippleColor="@color/primary"
+        <com.gc.materialdesign.views.ButtonRectangle
             android:layout_width="245dp"
             android:layout_height="60dp"
-            android:text="Log In"
+            android:text="LOG IN"
             android:id="@+id/logInButton"
             android:layout_gravity="center_horizontal"
             android:textColor="@android:color/white"
@@ -62,12 +67,10 @@
             android:layout_margin="20dp"
             android:background="@color/accent"/>
 
-        <com.rey.material.widget.Button
-            style="@style/Material.Drawable.Ripple.Wave.Light"
-            app:rd_rippleColor="@color/primary"
+        <com.gc.materialdesign.views.ButtonRectangle
             android:layout_width="245dp"
             android:layout_height="60dp"
-            android:text="Sign Up"
+            android:text="SIGN UP"
             android:id="@+id/signUpButton"
             android:layout_gravity="center_horizontal"
             android:background="@color/accent"
