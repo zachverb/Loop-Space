@@ -21,6 +21,15 @@ public class Loop {
     private String endpoint;
     private int id;
     private short[] audioData;
+    private boolean isPlaying;
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setIsPlaying(boolean isPlaying) {
+        this.isPlaying = isPlaying;
+    }
 
     public Loop(LoopButton loopButton) {
         this.setLoopButton(loopButton);
@@ -28,6 +37,7 @@ public class Loop {
         this.setName("ZGV");
         this.setFilePath(null);
         this.setAudioData(null);
+        this.setIsPlaying(true);
     }
 
     public int getId() {

@@ -87,8 +87,6 @@ public class LoopActivity extends ActionBarActivity {
 
     public short[] mAudioData;
 
-    public boolean hasChanged;
-
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,8 +139,6 @@ public class LoopActivity extends ActionBarActivity {
         mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
         mLoops = new Loop[6];
         trackId = getIntent().getIntExtra("trackId", -1) + "";
-
-        hasChanged = false;
 
         audioInit();
         setupRestAdapter();
@@ -215,6 +211,11 @@ public class LoopActivity extends ActionBarActivity {
         s3Service = s3RestAdapter.create(S3API.class);
     }
 
+
+    /*
+     *  BUTTON CREATION FUNCTIONS
+     */
+
     public LoopButton newLoopButton() {
         LayoutInflater inflater = getLayoutInflater();
         LoopButton loopButton = (LoopButton) inflater.inflate(R.layout.loop_button, null);
@@ -235,6 +236,10 @@ public class LoopActivity extends ActionBarActivity {
         mLoopsLength++;
     }
 
+    /*
+     *  SYNC WITH SERVER
+     */
+
     private void getTrackInfo() {
         service.getLoops(trackId,
             new Callback<List<LoopFile>>() {
@@ -250,6 +255,34 @@ public class LoopActivity extends ActionBarActivity {
                 }
             });
     }
+
+    public void downloadLoops(List<LoopFile> loops) {
+        for (int i = 0; i < loops.size(); i++) {
+            addButton();
+            final int index = i;
+            final String endpoint = loops.get(i).endpoint;
+
+            Log.d(TAG, endpoint);
+            s3Service.getLoop(endpoint,
+                    new Callback<Response>() {
+                        @Override
+                        public void success(Response result, Response response) {
+                            StreamingTask task = new StreamingTask();
+                            task.execute(new Object[]{result, index});
+                        }
+
+                        @Override
+                        public void failure(RetrofitError retrofitError) {
+                            Log.d(TAG, "FAK");
+                            retrofitError.printStackTrace();
+                        }
+                    });
+        }
+    }
+
+    /*
+     *  AUDIO FUNCTIONS
+     */
 
     private short[] getAudioData() {
         return mAudioData;
@@ -272,51 +305,26 @@ public class LoopActivity extends ActionBarActivity {
             index++;
         }
         setAudioData(result);
-        hasChanged = true;
     }
 
     private void subtractAudioData(short[] audioData) {
-        int a = mAudioData.length-1;
-        int b = audioData.length-1;
-
-        short [] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short sum = 0;
-        while(a >= 0 || b >= 0) {
-            if(a>=0) sum-=mAudioData[a];
-            if(b>=0) sum-=audioData[b];
-
-            result[Math.max(a, b)] = sum;
-            sum = 0;
-            a--;
-            b--;
+        int globalLength = mAudioData.length;
+        int localLength = audioData.length;
+        int index = 0;
+        short[] result = new short[Math.max(mAudioData.length, audioData.length)];
+        while (index < globalLength || index < localLength) {
+            short sum = 0;
+            if (index < globalLength) sum += mAudioData[index];
+            if (index < localLength) sum -= audioData[index];
+            result[index] = sum;
+            index++;
         }
         setAudioData(result);
-        hasChanged = true;
     }
 
-    public void downloadLoops(List<LoopFile> loops) {
-        for (int i = 0; i < loops.size(); i++) {
-            addButton();
-            final int index = i;
-            final String endpoint = loops.get(i).endpoint;
-
-            Log.d(TAG, endpoint);
-            s3Service.getLoop(endpoint,
-                new Callback<Response>() {
-                    @Override
-                    public void success(Response result, Response response) {
-                        StreamingTask task = new StreamingTask();
-                        task.execute(new Object[]{result, index});
-                    }
-
-                    @Override
-                    public void failure(RetrofitError retrofitError) {
-                        Log.d(TAG, "FAK");
-                        retrofitError.printStackTrace();
-                    }
-                });
-        }
-    }
+    /*
+     *  ONCLICK LISTENERS
+     */
 
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
         @Override
@@ -338,7 +346,7 @@ public class LoopActivity extends ActionBarActivity {
             recording = false;
             addButton();
             Log.d("Spacers", "uploadin dat sheeit");
-            v.setOnClickListener(addAudioDataOnClickListener);
+            v.setOnClickListener(togglePlayOnClickListener);
         }};
 
     public View.OnClickListener playBackOnClickListener = new View.OnClickListener(){
@@ -357,63 +365,30 @@ public class LoopActivity extends ActionBarActivity {
 
     };
 
-    public View.OnClickListener addAudioDataOnClickListener = new View.OnClickListener(){
+    public View.OnClickListener togglePlayOnClickListener = new View.OnClickListener(){
 
         @Override
         public void onClick(View v) {
-            // todo
-            // write code to add individual AudioData to the play stream.
+            Loop loop = mLoops[v.getId()];
+            if(loop.isPlaying()) {
+                subtractAudioData(loop.getAudioData());
+                loop.getLoopButton().setImageResource(R.drawable.ic_play_arrow_white_48dp);
+            } else {
+                addAudioData(loop.getAudioData());
+                loop.getLoopButton().setImageResource(R.drawable.ic_pause_white_48dp);
+            }
+            mLoops[v.getId()].setIsPlaying(!loop.isPlaying());
         }
 
     };
 
+
+    // THREAD
     public void playRecord(){
         if(!playing) {
             mAudioTrack.play();
             Log.d(TAG, "PLAY");
             playing = true;
-//
-//            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
-//            int bufferSizeInBytes = 0;
-//
-//            Queue<File> files = new PriorityQueue<>();
-//            for(int i = 0; i < mLoopsLength; i++) {
-//                Log.d(TAG, mLoops[i].getId() + "");
-//                if(mLoops[i].getFilePath() != null) {;
-//                    File file = new File(mLoops[i].getFilePath());
-//                    files.add(file);
-//                    int length = (int) (file.length() / shortSizeInBytes);
-//                    Log.d(TAG, length + "");
-//                    if (bufferSizeInBytes < length) {
-//                        bufferSizeInBytes = length;
-//                    }
-//                }
-//            }
-//
-//
-//            setAudioData(new short[bufferSizeInBytes]);
-//
-//            while(files.size() > 0) {
-//                try {
-//                    InputStream inputStream = new FileInputStream(files.remove());
-//                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-//                    DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-//
-//                    int j = 0;
-//                    while (dataInputStream.available() > 0) {
-//                        mAudioData[j] += (dataInputStream.readShort() * .5);
-//                        j++;
-//                    }
-//
-//                    dataInputStream.close();
-//
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
-//          }
             while(playing) {
                 short[] audioData = getAudioData();
                 Log.d(TAG, "Play " + audioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
@@ -425,6 +400,10 @@ public class LoopActivity extends ActionBarActivity {
             mAudioTrack.pause();
         }
     }
+
+    /*
+     * ASYNC TASKS
+     */
 
     private class RecordingTask extends AsyncTask<Integer, Integer, Integer> {
 
@@ -445,10 +424,10 @@ public class LoopActivity extends ActionBarActivity {
                 short[] tempAudioData = new short[minBufferSize];
 
                 mAudioRecord.startRecording();
-
+                publishProgress(id);
                 while(recording) {
                     int numberOfShort = mAudioRecord.read(tempAudioData, 0, minBufferSize);
-                    publishProgress(id);
+
                     for(int i = 0; i < numberOfShort; i++){
                         dataOutputStream.writeShort(tempAudioData[i]);
                     }
@@ -487,16 +466,12 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            LoopButton loopButton = (LoopButton) findViewById(params[0]);
-            loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
+            setRecordingImage(params[0]);
         }
 
         @Override
         protected void onPostExecute(Integer index) {
-            LoopButton loopButton = mLoops[index].getLoopButton();
-            loopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
-            loopButton.setOnClickListener(addAudioDataOnClickListener);
-            addAudioData(mLoops[index].getAudioData());
+            taskPostExecute(index);
         }
 
     }
@@ -523,17 +498,24 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            LoopButton loopButton = mLoops[params[0]].getLoopButton();
-            loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
+            setRecordingImage(params[0]);
         }
 
         @Override
         protected void onPostExecute(Integer index) {
-            LoopButton loopButton = mLoops[index].getLoopButton();
-            loopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
-            loopButton.setOnClickListener(addAudioDataOnClickListener);
-            addAudioData(mLoops[index].getAudioData());
+            taskPostExecute(index);
         }
+    }
 
+    public void setRecordingImage(Integer index) {
+        LoopButton loopButton = mLoops[index].getLoopButton();
+        loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
+    }
+
+    public void taskPostExecute(Integer index) {
+        LoopButton loopButton = mLoops[index].getLoopButton();
+        loopButton.setImageResource(R.drawable.ic_pause_white_48dp);
+        addAudioData(mLoops[index].getAudioData());
+        loopButton.setOnClickListener(togglePlayOnClickListener);
     }
 }
