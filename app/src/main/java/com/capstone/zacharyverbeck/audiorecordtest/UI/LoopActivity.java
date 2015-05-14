@@ -264,18 +264,16 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void addAudioData(short[] audioData) {
-        int a = mAudioData.length;
-        int b = audioData.length;
-        int c = 0;
+        int globalLength = mAudioData.length;
+        int localLength = audioData.length;
+        int index = 0;
         short [] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short sum = 0;
-        while(c < a || c < b) {
-            if(c < a) sum+=mAudioData[c];
-            if(c < b) sum+=audioData[c];
-
-            result[c] = sum;
-            sum = 0;
-            c++;
+        while(index < globalLength || index < localLength) {
+            short sum = 0;
+            if(index < globalLength) sum+=mAudioData[index];
+            if(index < localLength) sum+=audioData[index];
+            result[index] = sum;
+            index++;
         }
         setAudioData(result);
         hasChanged = true;
@@ -401,7 +399,7 @@ public class LoopActivity extends ActionBarActivity {
         if(!playing) {
             mAudioTrack.play();
             Log.d(TAG, "PLAY");
-//            playing = true;
+            playing = true;
 //
 //            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
 //            int bufferSizeInBytes = 0;
@@ -444,17 +442,11 @@ public class LoopActivity extends ActionBarActivity {
 //                }
 
 //          }
-            short[] audioData = getAudioData();
-            for(int i = 0; i < audioData.length; i++) {
-                Log.d(TAG, audioData[i] + "");
-            }
-            while(playing) {
-                audioData = getAudioData();
+            //while(playing) {
+                short[] audioData = getAudioData();
+                Log.d(TAG, "Play " + audioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
                 mAudioTrack.write(audioData, 0, audioData.length);
-            }
-
-
-
+            //}
         } else {
             Log.d(TAG, "PAUSE");
             playing = false;
@@ -530,9 +522,6 @@ public class LoopActivity extends ActionBarActivity {
                 short[] data = (short[]) params[0][1];
                 addAudioData(data);
                 Log.d(TAG, "Added audio");
-                for(int i = 0; i < data.length; i++) {
-                    Log.d(TAG, data[i] + "");
-                }
             } else if(((int)params[0][1]) == -1) {
                 LoopButton loopButton = (LoopButton) findViewById((int) params[0][0]);
                 loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
