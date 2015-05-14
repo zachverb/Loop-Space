@@ -43,8 +43,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -93,6 +91,8 @@ public class LoopActivity extends ActionBarActivity {
 
     public short[] mAudioData;
 
+    public boolean hasChanged;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -125,15 +125,40 @@ public class LoopActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_refresh) {
-//            return true;
-//        }
+        switch(id) {
+            case R.id.action_refresh:
+                getTrackInfo();
+                break;
+            case R.id.action_add:
+                addButton();
+                break;
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
     public void init() {
 
+        setupToolbar();
+
+        mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
+        mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
+        mLoops = new Loop[6];
+        trackId = getIntent().getIntExtra("trackId", -1) + "";
+
+        hasChanged = false;
+
+        audioInit();
+        setupRestAdapter();
+        getTrackInfo();
+
+        mPlayButton = (Button) findViewById(R.id.playButton);
+        mPlayButton.setOnClickListener(playBackOnClickListener);
+
+        mAudioData = new short[minBufferSize];
+    }
+
+    private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Current Track");
         setSupportActionBar(toolbar);
@@ -141,22 +166,11 @@ public class LoopActivity extends ActionBarActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("cek", "home selected");
+                Log.d(TAG, "home selected");
                 Intent intent = new Intent(LoopActivity.this, TrackListActivity.class);
                 startActivity(intent);
             }
         });
-        mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
-        mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
-        mLoops = new Loop[6];
-        trackId = getIntent().getIntExtra("trackId", -1) + "";
-        audioInit();
-        setupRestAdapter();
-        getTrackInfo();
-        addButton();
-
-        mPlayButton = (Button) findViewById(R.id.playButton);
-        mPlayButton.setOnClickListener(playBackOnClickListener);
     }
 
     private void audioInit() {
@@ -242,8 +256,48 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private short[] getAudioData() {
-
         return mAudioData;
+    }
+
+    private void setAudioData(short[] audioData) {
+        mAudioData = audioData;
+    }
+
+    private void addAudioData(short[] audioData) {
+        int a = mAudioData.length;
+        int b = audioData.length;
+        int c = 0;
+        short [] result = new short[Math.max(mAudioData.length, audioData.length)];
+        short sum = 0;
+        while(c < a || c < b) {
+            if(c < a) sum+=mAudioData[c];
+            if(c < b) sum+=audioData[c];
+
+            result[c] = sum;
+            sum = 0;
+            c++;
+        }
+        setAudioData(result);
+        hasChanged = true;
+    }
+
+    private void subtractAudioData(short[] audioData) {
+        int a = mAudioData.length-1;
+        int b = audioData.length-1;
+
+        short [] result = new short[Math.max(mAudioData.length, audioData.length)];
+        short sum = 0;
+        while(a >= 0 || b >= 0) {
+            if(a>=0) sum-=mAudioData[a];
+            if(b>=0) sum-=audioData[b];
+
+            result[Math.max(a, b)] = sum;
+            sum = 0;
+            a--;
+            b--;
+        }
+        setAudioData(result);
+        hasChanged = true;
     }
 
     public void downloadLoops(List<LoopFile> loops) {
@@ -254,27 +308,25 @@ public class LoopActivity extends ActionBarActivity {
 
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
-                    new Callback<Response>() {
-                        @Override
-                        public void success(Response result, Response response) {
-                            StreamingTask task = new StreamingTask();
-                            task.execute(new Object[]{result, index});
-                        }
+                new Callback<Response>() {
+                    @Override
+                    public void success(Response result, Response response) {
+                        StreamingTask task = new StreamingTask();
+                        task.execute(new Object[]{result, index});
+                    }
 
-
-                        @Override
-                        public void failure(RetrofitError retrofitError) {
-                            Log.d(TAG, "FAK");
-                            retrofitError.printStackTrace();
-                        }
-                    });
+                    @Override
+                    public void failure(RetrofitError retrofitError) {
+                        Log.d(TAG, "FAK");
+                        retrofitError.printStackTrace();
+                    }
+                });
         }
     }
 
     private short[] getAudioDataFromFile(File file) {
         int shortSizeInBytes = Short.SIZE / Byte.SIZE;
         short[] audioData = new short[(int) (file.length() / shortSizeInBytes)];
-
         try {
             InputStream inputStream = new FileInputStream(file);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
@@ -293,9 +345,6 @@ public class LoopActivity extends ActionBarActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        for(int i = 0; i < 500; i++) {
-//            Log.d(TAG, audioData[i] + "");
-//        }
         return audioData;
     }
 
@@ -319,7 +368,7 @@ public class LoopActivity extends ActionBarActivity {
             recording = false;
             addButton();
             Log.d("Spacers", "uploadin dat sheeit");
-            //v.setOnClickListener(startRecOnClickListener);
+            v.setOnClickListener(addAudioDataOnClickListener);
         }};
 
     public View.OnClickListener playBackOnClickListener = new View.OnClickListener(){
@@ -329,7 +378,7 @@ public class LoopActivity extends ActionBarActivity {
             Thread playThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG, "START PLAYING");
+                    Log.d(TAG, "START PLAY THREAD");
                     playRecord();
                 }
             });
@@ -338,97 +387,85 @@ public class LoopActivity extends ActionBarActivity {
 
     };
 
+    public View.OnClickListener addAudioDataOnClickListener = new View.OnClickListener(){
+
+        @Override
+        public void onClick(View v) {
+            // todo
+            // write code to add individual AudioData to the play stream.
+        }
+
+    };
+
     public void playRecord(){
         if(!playing) {
             mAudioTrack.play();
-            playing = true;
-
-            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
-            int bufferSizeInBytes = 0;
-            Log.d(TAG, "YO");
-//            short[] tempAudioData = mLoops[0].getAudioData();
-//            for(int i = 0; i < tempAudioData.length; i++) {
-//                Log.d(TAG, tempAudioData[i] + "");
+            Log.d(TAG, "PLAY");
+//            playing = true;
+//
+//            int shortSizeInBytes = Short.SIZE / Byte.SIZE;
+//            int bufferSizeInBytes = 0;
+//
+//            Queue<File> files = new PriorityQueue<>();
+//            for(int i = 0; i < mLoopsLength; i++) {
+//                Log.d(TAG, mLoops[i].getId() + "");
+//                if(mLoops[i].getFilePath() != null) {;
+//                    File file = new File(mLoops[i].getFilePath());
+//                    files.add(file);
+//                    int length = (int) (file.length() / shortSizeInBytes);
+//                    Log.d(TAG, length + "");
+//                    if (bufferSizeInBytes < length) {
+//                        bufferSizeInBytes = length;
+//                    }
+//                }
 //            }
-           // Queue<short[]> audioDataContainer = new PriorityQueue<>();
-            Queue<File> files = new PriorityQueue<>();
-            for(int i = 0; i < mLoopsLength; i++) {
-//                short[] data = mLoops[i].getAudioData();
-//                Log.d(TAG, "We out here");
-//                if(mLoops[i].getAudioData() != null) {
-//                    Log.d(TAG, "We a lil deeper" + data.length);
-//                    audioDataContainer.add(data);
-//                    if(data.length > bufferSizeInBytes) {
-//                        bufferSizeInBytes = data.length;
-//                        Log.d(TAG, "We in it to win it");
+//
+//
+//            setAudioData(new short[bufferSizeInBytes]);
+//
+//            while(files.size() > 0) {
+//                try {
+//                    InputStream inputStream = new FileInputStream(files.remove());
+//                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+//                    DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+//
+//                    int j = 0;
+//                    while (dataInputStream.available() > 0) {
+//                        mAudioData[j] += (dataInputStream.readShort() * .5);
+//                        j++;
 //                    }
 //
+//                    dataInputStream.close();
+//
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
 //                }
-                Log.d(TAG, mLoops[i].getId() + "");
-                if(mLoops[i].getFilePath() != null) {
-                    Log.d(TAG, mLoops[i].getFilePath() + " DO U BELIEVE ME");
-                    File file = new File(mLoops[i].getFilePath());
-                    files.add(file);
-                    int length = (int) (file.length() / shortSizeInBytes);
-                    Log.d(TAG, length + "");
-                    if (bufferSizeInBytes < length) {
-                        Log.d(TAG, "Larger.");
-                        bufferSizeInBytes = length;
-                    }
-                }
-            }
 
-
-            short[] audioData = new short[bufferSizeInBytes];
-
-            while(files.size() > 0) {
-//                short[] tempAudioData = audioDataContainer.remove();
-//                Log.d(TAG, "i = " + (i + 1));
-//                for(int j = 0; j < tempAudioData.length; j++) {
-//                    audioData[j] += tempAudioData[j];
-//                }
-                try {
-                    InputStream inputStream = new FileInputStream(files.remove());
-                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                    DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-
-                    int j = 0;
-                    while (dataInputStream.available() > 0) {
-                        audioData[j] += (dataInputStream.readShort() * .5);
-                        j++;
-                    }
-
-                    dataInputStream.close();
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            int size;
-            if(bar < bufferSizeInBytes) {
-                size = bufferSizeInBytes;
-            } else {
-                size = bar;
+//          }
+            short[] audioData = getAudioData();
+            for(int i = 0; i < audioData.length; i++) {
+                Log.d(TAG, audioData[i] + "");
             }
             while(playing) {
+                audioData = getAudioData();
                 mAudioTrack.write(audioData, 0, audioData.length);
             }
 
 
 
         } else {
+            Log.d(TAG, "PAUSE");
             playing = false;
             mAudioTrack.pause();
         }
     }
 
-    private class RecordingTask extends AsyncTask<Integer, Integer, Void> {
+    private class RecordingTask extends AsyncTask<Integer, Object[], Integer> {
 
         @Override
-        protected Void doInBackground(Integer... params) {
+        protected Integer doInBackground(Integer... params) {
             final int id = params[0];
 
             File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
@@ -448,7 +485,7 @@ public class LoopActivity extends ActionBarActivity {
 
                 while(recording) {
                     int numberOfShort = mAudioRecord.read(tempAudioData, 0, minBufferSize);
-                    publishProgress(id);
+                    publishProgress(new Object[]{id, -1});
                     for(int i = 0; i < numberOfShort; i++){
                         dataOutputStream.writeShort(tempAudioData[i]);
                     }
@@ -458,6 +495,9 @@ public class LoopActivity extends ActionBarActivity {
                 dataOutputStream.close();
 
                 mLoops[id].setAudioData(tempAudioData);
+
+
+                publishProgress(new Object[]{-1, tempAudioData});
 
                 TypedFile soundFile = new TypedFile("binary", file);
 
@@ -481,13 +521,27 @@ public class LoopActivity extends ActionBarActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return id;
         }
 
         @Override
-        protected void onProgressUpdate(Integer... params) {
-            LoopButton loopButton = (LoopButton) findViewById(params[0]);
-            loopButton.setImageResource(R.mipmap.microphone_filled);
+        protected void onProgressUpdate(Object[]... params) {
+            if(((int) params[0][0]) == -1) {
+                short[] data = (short[]) params[0][1];
+                addAudioData(data);
+                Log.d(TAG, "Added audio");
+                for(int i = 0; i < data.length; i++) {
+                    Log.d(TAG, data[i] + "");
+                }
+            } else if(((int)params[0][1]) == -1) {
+                LoopButton loopButton = (LoopButton) findViewById((int) params[0][0]);
+                loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer index) {
+            mLoops[index].getLoopButton().setImageResource(R.drawable.ic_play_arrow_white_48dp);
         }
 
     }
@@ -516,13 +570,15 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            //LoopButton loopButton = (LoopButton) findViewById(params[0]);
-            //loopButton.setImageResource(R.mipmap.microphone_filled);
+            LoopButton loopButton = mLoops[params[0]].getLoopButton();
+            loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
         }
 
         @Override
         protected void onPostExecute(Integer index) {
-            mLoops[index].getLoopButton().setImageResource(R.mipmap.microphone_filled);
+            LoopButton loopButton = mLoops[index].getLoopButton();
+            loopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+            loopButton.setOnClickListener(addAudioDataOnClickListener);
         }
 
     }

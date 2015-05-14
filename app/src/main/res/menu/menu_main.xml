@@ -6,4 +6,8 @@
             android:icon="@drawable/ic_refresh_white_24dp"
             android:title="Refresh"
             app:showAsAction="ifRoom" />
+      <item android:id="@+id/action_add"
+            android:icon="@drawable/ic_add_white_24dp"
+            android:title="Add"
+            app:showAsAction="ifRoom" />
 </menu>
