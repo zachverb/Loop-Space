@@ -454,14 +454,13 @@ public class LoopActivity extends ActionBarActivity {
         }
     }
 
-    private class RecordingTask extends AsyncTask<Integer, Object[], Integer> {
+    private class RecordingTask extends AsyncTask<Integer, Integer, Integer> {
 
         @Override
         protected Integer doInBackground(Integer... params) {
             final int id = params[0];
 
             File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
-            mLoops[id].setFilePath(file.getAbsolutePath());
             try {
                 // actually create the file which is path/to/dir/test.pcm
                 file.createNewFile();
@@ -477,7 +476,7 @@ public class LoopActivity extends ActionBarActivity {
 
                 while(recording) {
                     int numberOfShort = mAudioRecord.read(tempAudioData, 0, minBufferSize);
-                    publishProgress(new Object[]{id, -1});
+                    publishProgress(id);
                     for(int i = 0; i < numberOfShort; i++){
                         dataOutputStream.writeShort(tempAudioData[i]);
                     }
@@ -486,10 +485,8 @@ public class LoopActivity extends ActionBarActivity {
                 mAudioRecord.stop();
                 dataOutputStream.close();
 
-                mLoops[id].setAudioData(tempAudioData);
+                mLoops[id].setFilePath(file.getAbsolutePath());
 
-
-                publishProgress(new Object[]{-1, tempAudioData});
 
                 TypedFile soundFile = new TypedFile("binary", file);
 
@@ -517,20 +514,17 @@ public class LoopActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onProgressUpdate(Object[]... params) {
-            if(((int) params[0][0]) == -1) {
-                short[] data = (short[]) params[0][1];
-                addAudioData(data);
-                Log.d(TAG, "Added audio");
-            } else if(((int)params[0][1]) == -1) {
-                LoopButton loopButton = (LoopButton) findViewById((int) params[0][0]);
-                loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
-            }
+        protected void onProgressUpdate(Integer... params) {
+            LoopButton loopButton = (LoopButton) findViewById(params[0]);
+            loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
         }
 
         @Override
         protected void onPostExecute(Integer index) {
-            mLoops[index].getLoopButton().setImageResource(R.drawable.ic_play_arrow_white_48dp);
+            LoopButton loopButton = mLoops[index].getLoopButton();
+            loopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+            loopButton.setOnClickListener(addAudioDataOnClickListener);g
+            addAudioData(mLoops[index].getAudioData());
         }
 
     }
@@ -550,7 +544,6 @@ public class LoopActivity extends ActionBarActivity {
                 out.close();
                 mLoops[index].setAudioData(getAudioDataFromFile(file));
                 mLoops[index].setFilePath(file.getAbsolutePath());
-                //mLoops[index].setAudioData(audioData);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -568,6 +561,7 @@ public class LoopActivity extends ActionBarActivity {
             LoopButton loopButton = mLoops[index].getLoopButton();
             loopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
             loopButton.setOnClickListener(addAudioDataOnClickListener);
+            addAudioData(mLoops[index].getAudioData());
         }
 
     }

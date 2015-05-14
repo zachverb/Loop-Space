@@ -1,6 +1,16 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
+import android.os.Environment;
+
 import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by zacharyverbeck on 4/23/15.
@@ -35,6 +45,7 @@ public class Loop {
     }
 
     public void setFilePath(String filePath) {
+        setAudioData(getAudioDataFromFile(new File(Environment.getExternalStorageDirectory(), filePath)));
         this.filePath = filePath;
     }
 
@@ -68,6 +79,30 @@ public class Loop {
 
     public void setAudioData(short[] audioData) {
         this.audioData = audioData;
+    }
+
+    private short[] getAudioDataFromFile(File file) {
+        int shortSizeInBytes = Short.SIZE / Byte.SIZE;
+        short[] audioData = new short[(int) (file.length() / shortSizeInBytes)];
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+
+            int j = 0;
+            while (dataInputStream.available() > 0) {
+                audioData[j] += (dataInputStream.readShort() * .5);
+                j++;
+            }
+
+            dataInputStream.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return audioData;
     }
 
 
