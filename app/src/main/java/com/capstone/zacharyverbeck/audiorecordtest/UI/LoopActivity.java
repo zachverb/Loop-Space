@@ -163,6 +163,28 @@ public class LoopActivity extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+
+        Toolbar playbar = (Toolbar) findViewById(R.id.playbar);
+        playbar.inflateMenu(R.menu.menu_play);
+        playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(final MenuItem menuItem) {
+                if(playing) {
+                    menuItem.setIcon(R.drawable.ic_play_arrow_white_24dp);
+                } else {
+                    menuItem.setIcon(R.drawable.ic_pause_white_24dp);
+                }
+                Thread playThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "START PLAY THREAD");
+                        playRecord();
+                    }
+                });
+                playThread.start();
+                return true;
+            }
+        });
     }
 
     private void audioInit() {
