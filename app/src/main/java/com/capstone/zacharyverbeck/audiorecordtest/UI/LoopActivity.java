@@ -31,13 +31,9 @@ import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -322,30 +318,6 @@ public class LoopActivity extends ActionBarActivity {
         }
     }
 
-    private short[] getAudioDataFromFile(File file) {
-        int shortSizeInBytes = Short.SIZE / Byte.SIZE;
-        short[] audioData = new short[(int) (file.length() / shortSizeInBytes)];
-        try {
-            InputStream inputStream = new FileInputStream(file);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-
-            int j = 0;
-            while (dataInputStream.available() > 0) {
-                audioData[j] += (dataInputStream.readShort() * .5);
-                j++;
-            }
-
-            dataInputStream.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return audioData;
-    }
-
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -442,11 +414,11 @@ public class LoopActivity extends ActionBarActivity {
 //                }
 
 //          }
-            //while(playing) {
+            while(playing) {
                 short[] audioData = getAudioData();
                 Log.d(TAG, "Play " + audioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
                 mAudioTrack.write(audioData, 0, audioData.length);
-            //}
+            }
         } else {
             Log.d(TAG, "PAUSE");
             playing = false;
@@ -523,7 +495,7 @@ public class LoopActivity extends ActionBarActivity {
         protected void onPostExecute(Integer index) {
             LoopButton loopButton = mLoops[index].getLoopButton();
             loopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
-            loopButton.setOnClickListener(addAudioDataOnClickListener);g
+            loopButton.setOnClickListener(addAudioDataOnClickListener);
             addAudioData(mLoops[index].getAudioData());
         }
 
@@ -542,7 +514,6 @@ public class LoopActivity extends ActionBarActivity {
                 IOUtils.copy(inputStream, out);
                 inputStream.close();
                 out.close();
-                mLoops[index].setAudioData(getAudioDataFromFile(file));
                 mLoops[index].setFilePath(file.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();

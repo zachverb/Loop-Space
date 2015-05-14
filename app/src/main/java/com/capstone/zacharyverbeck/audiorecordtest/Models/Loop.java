@@ -1,7 +1,5 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
-import android.os.Environment;
-
 import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
 
 import java.io.BufferedInputStream;
@@ -45,7 +43,9 @@ public class Loop {
     }
 
     public void setFilePath(String filePath) {
-        setAudioData(getAudioDataFromFile(new File(Environment.getExternalStorageDirectory(), filePath)));
+        if(filePath != null) {
+            setAudioData(getAudioDataFromFile(new File(filePath)));
+        }
         this.filePath = filePath;
     }
 
