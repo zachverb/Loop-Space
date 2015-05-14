@@ -42,15 +42,6 @@
 
     </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Play"
-        android:id="@+id/playButton"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
-
     <android.support.v7.widget.Toolbar
         android:id="@+id/playbar"
         android:minHeight="?attr/actionBarSize"

@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.S3API;
@@ -28,6 +27,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.Endpoint;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.LoopFile;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
+import com.gc.materialdesign.widgets.Dialog;
 
 import org.apache.commons.io.IOUtils;
 
@@ -53,8 +53,6 @@ public class LoopActivity extends ActionBarActivity {
 
     public int mLoopsLength = 0;
 
-    public Button mPlayButton;
-
     public boolean recording;
 
     public boolean playing = false;
@@ -65,7 +63,7 @@ public class LoopActivity extends ActionBarActivity {
 
     public int bpm = 60;
 
-    public int bar = sampleRate * 4;
+    public int beat = (60/bpm) * sampleRate;
 
     public int minBufferSize;
 
@@ -144,13 +142,11 @@ public class LoopActivity extends ActionBarActivity {
         setupRestAdapter();
         getTrackInfo();
 
-        mPlayButton = (Button) findViewById(R.id.playButton);
-        mPlayButton.setOnClickListener(playBackOnClickListener);
-
         mAudioData = new short[minBufferSize];
     }
 
     private void setupToolbar() {
+        // top toolbar, holds navigation controls, refresh, and add track
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Current Track");
         setSupportActionBar(toolbar);
@@ -164,6 +160,7 @@ public class LoopActivity extends ActionBarActivity {
             }
         });
 
+        // bottom playbar, play/pause toggle down here
         Toolbar playbar = (Toolbar) findViewById(R.id.playbar);
         playbar.inflateMenu(R.menu.menu_play);
         playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -187,6 +184,7 @@ public class LoopActivity extends ActionBarActivity {
         });
     }
 
+    // initializes audiotrack and audiorecord.
     private void audioInit() {
         minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
                 AudioFormat.CHANNEL_IN_MONO,
@@ -206,12 +204,21 @@ public class LoopActivity extends ActionBarActivity {
                 AudioTrack.MODE_STREAM);
     }
 
+    // sets up the REST Client for the AWS s3 server and the node.js server.
     private void setupRestAdapter() {
+
+        // Find token.
         settings = PreferenceManager
             .getDefaultSharedPreferences(this.getApplicationContext());
-
         final String token = settings.getString("token", "");
-        // setup heroku connection
+        if(token == "") {
+            Dialog dialog = new Dialog(getApplicationContext() , "Error!", "You must be signed in!");
+            dialog.show();
+            Intent intent = new Intent(LoopActivity.this, LoginActivity.class);
+            startActivity(intent);
+        }
+
+        // set up heroku connection header with the token and trackId.
         RequestInterceptor interceptor = new RequestInterceptor() {
             @Override
             public void intercept(RequestFacade request) {
@@ -220,6 +227,8 @@ public class LoopActivity extends ActionBarActivity {
                 request.addHeader("track_id", trackId);
             }
         };
+
+        // sets up connection to heroku server
         RestAdapter serverRestAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://secret-spire-6485.herokuapp.com/")
                 .setRequestInterceptor(interceptor)
@@ -238,6 +247,7 @@ public class LoopActivity extends ActionBarActivity {
      *  BUTTON CREATION FUNCTIONS
      */
 
+    // returns a new LoopButton object ready to put in the view.
     public LoopButton newLoopButton() {
         LayoutInflater inflater = getLayoutInflater();
         LoopButton loopButton = (LoopButton) inflater.inflate(R.layout.loop_button, null);
@@ -246,6 +256,7 @@ public class LoopActivity extends ActionBarActivity {
         return loopButton;
     }
 
+    // places a button in the view.
     public void addButton() {
         LoopButton loopButton = newLoopButton();
         mLoops[mLoopsLength] = new Loop(loopButton);
@@ -262,6 +273,7 @@ public class LoopActivity extends ActionBarActivity {
      *  SYNC WITH SERVER
      */
 
+    // gets the endpoints for each track
     private void getTrackInfo() {
         service.getLoops(trackId,
             new Callback<List<LoopFile>>() {
@@ -278,6 +290,7 @@ public class LoopActivity extends ActionBarActivity {
             });
     }
 
+    // downloads each track from their given endpoint.
     public void downloadLoops(List<LoopFile> loops) {
         for (int i = 0; i < loops.size(); i++) {
             addButton();
@@ -303,7 +316,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     /*
-     *  AUDIO FUNCTIONS
+     *  GLOBAL AUDIO FUNCTIONS
      */
 
     private short[] getAudioData() {
@@ -314,6 +327,8 @@ public class LoopActivity extends ActionBarActivity {
         mAudioData = audioData;
     }
 
+    // Adds new audioData to the global mAudioData
+    // TODO: Handle Clipping effectively.
     private void addAudioData(short[] audioData) {
         int globalLength = mAudioData.length;
         int localLength = audioData.length;
@@ -329,6 +344,8 @@ public class LoopActivity extends ActionBarActivity {
         setAudioData(result);
     }
 
+    // Removes audioData from the global mAudioData
+    // TODO: Handle Clipping effectively.
     private void subtractAudioData(short[] audioData) {
         int globalLength = mAudioData.length;
         int localLength = audioData.length;
@@ -348,6 +365,7 @@ public class LoopActivity extends ActionBarActivity {
      *  ONCLICK LISTENERS
      */
 
+    // Initial recording OnClickListener
     public View.OnClickListener startRecOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -360,31 +378,14 @@ public class LoopActivity extends ActionBarActivity {
         }
     };
 
+    // Stop the recording of the button.
     public View.OnClickListener stopRecOnClickListener = new View.OnClickListener(){
-
         @Override
         public void onClick(View v) {
             Log.d(TAG, "STOP REC");
             recording = false;
-            addButton();
-            Log.d("Spacers", "uploadin dat sheeit");
             v.setOnClickListener(togglePlayOnClickListener);
-        }};
-
-    public View.OnClickListener playBackOnClickListener = new View.OnClickListener(){
-
-        @Override
-        public void onClick(View v) {
-            Thread playThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "START PLAY THREAD");
-                    playRecord();
-                }
-            });
-            playThread.start();
         }
-
     };
 
     public View.OnClickListener togglePlayOnClickListener = new View.OnClickListener(){
