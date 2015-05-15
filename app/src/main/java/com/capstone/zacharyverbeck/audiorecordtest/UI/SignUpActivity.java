@@ -1,12 +1,12 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
@@ -16,6 +16,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.gc.materialdesign.views.ButtonFlat;
 import com.gc.materialdesign.views.ButtonRectangle;
+import com.gc.materialdesign.widgets.Dialog;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -26,8 +27,6 @@ public class SignUpActivity extends Activity {
 
     public ButtonRectangle mSignUpButton;
     public ButtonFlat mCancelButton;
-
-    public ProgressBar mLoadingBar;
 
     public TextView mErrorMessage;
 
@@ -67,8 +66,6 @@ public class SignUpActivity extends Activity {
         mEmailField = (EditText)findViewById(R.id.emailField);
         mNumberField = (EditText)findViewById(R.id.phoneNumberField);
 
-        mLoadingBar = (ProgressBar)findViewById(R.id.loadingBar);
-
         mGlobal = new GlobalFunctions(this);
         mGlobal.setupUI(findViewById(R.id.parent));
     }
@@ -86,33 +83,40 @@ public class SignUpActivity extends Activity {
             String email = mEmailField.getText().toString();
             String number = mNumberField.getText().toString();
 
-
-            mLoadingBar.setVisibility(View.VISIBLE);
-
             RestAdapter restAdapter = new RestAdapter.Builder()
                     .setEndpoint("https://secret-spire-6485.herokuapp.com/")
                     .build();
 
             service = restAdapter.create(ServerAPI.class);
+            final ProgressDialog signupDialog = new ProgressDialog(SignUpActivity.this);
+            signupDialog.setIndeterminate(true);
+            signupDialog.setTitle("Please Wait");
+            signupDialog.setMessage("Signing up");
+            signupDialog.show();
 
             service.signup(new User(email, password, username, number), new Callback<Data>() {
                 @Override
                 public void success(Data data, Response response) {
+                    signupDialog.dismiss();
                     Log.d(TAG, data.type + data.token);
-                    mLoadingBar.setVisibility(View.GONE);
+                    //mLoadingBar.setVisibility(View.GONE);
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
                         Intent intent = new Intent(SignUpActivity.this, TrackListActivity.class);
                         startActivity(intent);
                     } else {
-                        errorMessage(data.error);
+                        Dialog dialog = new Dialog(SignUpActivity.this, "Error!", "Signup Error!");
+                        dialog.show();
                         Log.d(TAG, data.error);
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError retrofitError) {
+                    signupDialog.dismiss();
+                    Dialog dialog = new Dialog(getApplicationContext() , "Error!", "Network error!");
+                    dialog.show();
                     retrofitError.printStackTrace();
                 }
             });

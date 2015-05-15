@@ -1,6 +1,7 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -76,11 +77,17 @@ public class LoginActivity extends Activity {
         public void onClick(View v) {
             String email = mEmailField.getText().toString();
             String password = mPasswordField.getText().toString();
+            final ProgressDialog loginDialog = new ProgressDialog(LoginActivity.this);
+            loginDialog.setIndeterminate(true);
+            loginDialog.setTitle("Please Wait");
+            loginDialog.setMessage("Logging in");
+            loginDialog.show();
 
 
             service.authenticate(new User(email, password), new Callback<Data>() {
                 @Override
                 public void success(Data data, Response response) {
+                    loginDialog.dismiss();
                     Log.d(TAG, data.type + data.token);
                     if(data.error == null && data.type) {
                         mGlobal.saveToken(data.token);
@@ -95,6 +102,7 @@ public class LoginActivity extends Activity {
 
                 @Override
                 public void failure(RetrofitError retrofitError) {
+                    loginDialog.dismiss();
                     retrofitError.printStackTrace();
                     Dialog dialog = new Dialog(getApplicationContext() , "Error!", "Network error!");
                     dialog.show();

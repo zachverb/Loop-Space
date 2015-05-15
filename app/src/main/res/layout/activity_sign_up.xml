@@ -25,6 +25,11 @@
             android:ems="10"
             android:id="@+id/usernameField"
             android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/black"
+            android:background="@android:color/white"
+            android:textColorHint="@android:color/darker_gray"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="10dp"
             android:hint="User Name"
             />
 
@@ -35,6 +40,11 @@
             android:ems="10"
             android:id="@+id/emailField"
             android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/black"
+            android:background="@android:color/white"
+            android:textColorHint="@android:color/darker_gray"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="10dp"
             android:hint="Email"/>
 
         <EditText
@@ -44,6 +54,11 @@
             android:ems="10"
             android:id="@+id/passwordField"
             android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/black"
+            android:background="@android:color/white"
+            android:textColorHint="@android:color/darker_gray"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="10dp"
             android:password="true"
             android:hint="Password"/>
 
@@ -53,6 +68,11 @@
             android:inputType="text|phone"
             android:ems="10"
             android:id="@+id/phoneNumberField"
+            android:textColor="@android:color/black"
+            android:background="@android:color/white"
+            android:textColorHint="@android:color/darker_gray"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="10dp"
             android:layout_gravity="center_horizontal"
             android:hint="Phone Number"/>
 
@@ -82,13 +102,6 @@
             android:layout_gravity="center"
             android:layout_marginTop="40dp"
             android:visibility="invisible"/>
-
-        <ProgressBar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/loadingBar"
-            android:visibility="invisible"
-            android:indeterminate="true" />
 
     </LinearLayout>
 

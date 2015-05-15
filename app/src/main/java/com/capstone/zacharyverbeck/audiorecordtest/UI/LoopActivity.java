@@ -28,6 +28,7 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.LoopFile;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.gc.materialdesign.widgets.Dialog;
+import com.gc.materialdesign.widgets.SnackBar;
 
 import org.apache.commons.io.IOUtils;
 
@@ -131,18 +132,20 @@ public class LoopActivity extends ActionBarActivity {
 
     public void init() {
 
+        setupLayouts();
         setupToolbar();
-
-        mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
-        mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
-        mLoops = new Loop[6];
-        trackId = getIntent().getIntExtra("trackId", -1) + "";
-
         audioInit();
         setupRestAdapter();
         getTrackInfo();
 
-        mAudioData = new short[minBufferSize];
+
+    }
+
+    private void setupLayouts() {
+        mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
+        mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
+        mLoops = new Loop[6];
+        trackId = getIntent().getIntExtra("trackId", -1) + "";
     }
 
     private void setupToolbar() {
@@ -166,7 +169,7 @@ public class LoopActivity extends ActionBarActivity {
         playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(final MenuItem menuItem) {
-                if(playing) {
+                if (playing) {
                     menuItem.setIcon(R.drawable.ic_play_arrow_white_24dp);
                 } else {
                     menuItem.setIcon(R.drawable.ic_pause_white_24dp);
@@ -202,6 +205,8 @@ public class LoopActivity extends ActionBarActivity {
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
+
+        mAudioData = new short[minBufferSize];
     }
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
@@ -242,6 +247,12 @@ public class LoopActivity extends ActionBarActivity {
         s3Service = s3RestAdapter.create(S3API.class);
     }
 
+    private void setupHowTo() {
+        final SnackBar snackbar;
+        snackbar = new SnackBar(LoopActivity.this, "Press the + button to add a new loop!");
+        snackbar.show();
+    }
+
 
     /*
      *  BUTTON CREATION FUNCTIONS
@@ -258,15 +269,17 @@ public class LoopActivity extends ActionBarActivity {
 
     // places a button in the view.
     public void addButton() {
-        LoopButton loopButton = newLoopButton();
-        mLoops[mLoopsLength] = new Loop(loopButton);
-        mLoops[mLoopsLength].setId(loopButton.getId());
-        if(mLoopsLength % 2 == 0) {
-            mLeftLayout.addView(loopButton);
-        } else {
-            mRightLayout.addView(loopButton);
+        if(mLoopsLength < 6) {
+            LoopButton loopButton = newLoopButton();
+            mLoops[mLoopsLength] = new Loop(loopButton);
+            mLoops[mLoopsLength].setId(loopButton.getId());
+            if (mLoopsLength % 2 == 0) {
+                mLeftLayout.addView(loopButton);
+            } else {
+                mRightLayout.addView(loopButton);
+            }
+            mLoopsLength++;
         }
-        mLoopsLength++;
     }
 
     /*
@@ -388,6 +401,7 @@ public class LoopActivity extends ActionBarActivity {
         }
     };
 
+    // toggles individual audio tracks to play/not play
     public View.OnClickListener togglePlayOnClickListener = new View.OnClickListener(){
 
         @Override
@@ -406,7 +420,7 @@ public class LoopActivity extends ActionBarActivity {
     };
 
 
-    // THREAD
+    // Function that plays/pauses the audioTrack
     public void playRecord(){
         if(!playing) {
             mAudioTrack.play();
@@ -461,7 +475,6 @@ public class LoopActivity extends ActionBarActivity {
 
                 mLoops[id].setFilePath(file.getAbsolutePath());
 
-
                 TypedFile soundFile = new TypedFile("binary", file);
 
                 Log.d(TAG, soundFile.mimeType());
@@ -505,6 +518,7 @@ public class LoopActivity extends ActionBarActivity {
         protected Integer doInBackground(Object... params) {
             final Response res = (Response) params[0];
             final int index = (int) params[1];
+            publishProgress(index);
             try {
                 File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
                 InputStream inputStream = res.getBody().in();
@@ -533,6 +547,7 @@ public class LoopActivity extends ActionBarActivity {
     public void setRecordingImage(Integer index) {
         LoopButton loopButton = mLoops[index].getLoopButton();
         loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
+        //loopButton.setAnimation(AnimationUtils.loadAnimation(this, R.anim.progress_indeterminate_animation));
     }
 
     public void taskPostExecute(Integer index) {

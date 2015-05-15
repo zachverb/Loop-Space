@@ -204,5 +204,6 @@ public class LoopButton extends ImageButton {
 
         this.invalidate();
     }
+
 }
 
