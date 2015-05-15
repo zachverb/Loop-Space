@@ -16,7 +16,6 @@ import android.view.View;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Java.TrackListAdapter;
-import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.gc.materialdesign.views.ProgressBarCircularIndeterminate;
@@ -113,28 +112,10 @@ public class TrackListActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "YO");
-                service.newTrack(new Track("YO"), new Callback<Data>() {
-                    @Override
-                    public void success(Data data, Response response) {
-                        Log.d(TAG, "SUCCESS!");
-                        if (data.type == true) {
-                            Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
-                            loopIntent.putExtra("trackId", data.id);
-                            startActivity(loopIntent);
-                        } else {
-                            Log.d(TAG, "JK, failure");
-                        }
-                    }
-
-                    @Override
-                    public void failure(RetrofitError error) {
-                        Log.d(TAG, "failed to create track");
-                        error.printStackTrace();
-                    }
-                });
+                Intent trackIntent = new Intent(getApplicationContext(), TrackCreateActivity.class);
+                startActivity(trackIntent);
             }
         });
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Global Tracks");

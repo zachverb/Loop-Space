@@ -99,7 +99,6 @@ public class SignUpActivity extends Activity {
                 public void success(Data data, Response response) {
                     signupDialog.dismiss();
                     Log.d(TAG, data.type + data.token);
-                    //mLoadingBar.setVisibility(View.GONE);
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);

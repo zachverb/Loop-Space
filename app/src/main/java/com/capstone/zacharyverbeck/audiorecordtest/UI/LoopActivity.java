@@ -66,6 +66,8 @@ public class LoopActivity extends ActionBarActivity {
 
     public int beat = (60/bpm) * sampleRate;
 
+    public int bar = beat * 4;
+
     public int minBufferSize;
 
     public AudioTrack mAudioTrack;
@@ -206,7 +208,7 @@ public class LoopActivity extends ActionBarActivity {
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
 
-        mAudioData = new short[minBufferSize];
+        mAudioData = new short[beat];
     }
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
@@ -346,8 +348,10 @@ public class LoopActivity extends ActionBarActivity {
         int globalLength = mAudioData.length;
         int localLength = audioData.length;
         int index = 0;
-        short [] result = new short[Math.max(mAudioData.length, audioData.length)];
-        while(index < globalLength || index < localLength) {
+        // short [] result = new short[Math.max(mAudioData.length, audioData.length)];
+        short [] result = new short[bar];
+        // while(index < globalLength || index < localLength) {
+        while(index<bar) {
             short sum = 0;
             if(index < globalLength) sum+=mAudioData[index];
             if(index < localLength) sum+=audioData[index];
@@ -363,8 +367,10 @@ public class LoopActivity extends ActionBarActivity {
         int globalLength = mAudioData.length;
         int localLength = audioData.length;
         int index = 0;
-        short[] result = new short[Math.max(mAudioData.length, audioData.length)];
-        while (index < globalLength || index < localLength) {
+        //short[] result = new short[Math.max(mAudioData.length, audioData.length)];
+        short [] result = new short[bar];
+        // while (index < globalLength || index < localLength) {
+        while(index<bar) {
             short sum = 0;
             if (index < globalLength) sum += mAudioData[index];
             if (index < localLength) sum -= audioData[index];
