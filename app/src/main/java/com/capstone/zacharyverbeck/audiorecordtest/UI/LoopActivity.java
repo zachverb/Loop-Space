@@ -210,6 +210,12 @@ public class LoopActivity extends ActionBarActivity {
                 AudioTrack.MODE_STREAM);
 
         mAudioData = new short[beat];
+//        double[] tick = getSineWave((sampleRate / 16), sampleRate, 880);
+//        short[] lol = get16BitPcm(tick);
+//        for(int i = 0; i < lol.length; i++) {
+//            Log.d(TAG, lol[i] + "");
+//        }
+//        addAudioData(lol);
     }
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
@@ -434,14 +440,13 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "PLAY");
             playing = true;
             int currentBeat = 1;
-            int length = mAudioData.length;
             while(playing) {
-                if(beat * currentBeat > length) {
+                if(beat * currentBeat > mAudioData.length) {
                     currentBeat = 1;
                 }
-                short[] audioData = getAudioData();
-                Log.d(TAG, "Play " + audioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
-                mAudioTrack.write(audioData, (beat * (currentBeat - 1)), (beat * (currentBeat++)));
+                //short[] audioData = getAudioData();
+                Log.d(TAG, "Play " + mAudioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
+                mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), (beat * (currentBeat++)));
             }
         } else {
             Log.d(TAG, "PAUSE");
@@ -567,5 +572,29 @@ public class LoopActivity extends ActionBarActivity {
         loopButton.setImageResource(R.drawable.ic_pause_white_48dp);
         addAudioData(mLoops[index].getAudioData());
         loopButton.setOnClickListener(togglePlayOnClickListener);
+    }
+
+    // Metronome methods
+
+    public double[] getSineWave(int samples,int sampleRate,double frequencyOfTone){
+        double[] sample = new double[samples];
+        for (int i = 0; i < samples; i++) {
+            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/frequencyOfTone));
+        }
+        return sample;
+    }
+
+    public short[] get16BitPcm(double[] samples) {
+        short[] generatedSound = new short[samples.length];
+        int index = 0;
+        for (double sample : samples) {
+            // scale to maximum amplitude
+            short maxSample = (short) (sample * Short.MAX_VALUE);
+            // in 16 bit wav PCM, first byte is the low order byte
+            generatedSound[index++] = maxSample;
+            //generatedSound[index++] = maxSample;
+
+        }
+        return generatedSound;
     }
 }
