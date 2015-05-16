@@ -99,9 +99,16 @@ public class LoopActivity extends ActionBarActivity {
     @Override
     public void onPause() {
         super.onPause();
-        if(playing) {
-            playing = false;
-            mAudioTrack.pause();
+        playing = false;
+        mAudioTrack.pause();
+        Log.d(TAG, "Pausing");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!playing) {
+            startAudio();
         }
     }
 
@@ -122,7 +129,7 @@ public class LoopActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         switch(id) {
             case R.id.action_refresh:
-                getTrackInfo();
+                //init();
                 break;
             case R.id.action_add:
                 addButton();
@@ -139,7 +146,6 @@ public class LoopActivity extends ActionBarActivity {
         audioInit();
         setupRestAdapter();
         getTrackInfo();
-
 
     }
 
@@ -168,26 +174,26 @@ public class LoopActivity extends ActionBarActivity {
 
         // bottom playbar, play/pause toggle down here
         Toolbar playbar = (Toolbar) findViewById(R.id.playbar);
-        playbar.inflateMenu(R.menu.menu_play);
-        playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(final MenuItem menuItem) {
-                if (playing) {
-                    menuItem.setIcon(R.drawable.ic_play_arrow_white_24dp);
-                } else {
-                    menuItem.setIcon(R.drawable.ic_pause_white_24dp);
-                }
-                Thread playThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "START PLAY THREAD");
-                        playRecord();
-                    }
-                });
-                playThread.start();
-                return true;
-            }
-        });
+//        playbar.inflateMenu(R.menu.menu_play);
+//        playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(final MenuItem menuItem) {
+//                if (playing) {
+//                    menuItem.setIcon(R.drawable.ic_play_arrow_white_24dp);
+//                } else {
+//                    menuItem.setIcon(R.drawable.ic_pause_white_24dp);
+//                }
+//                Thread playThread = new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Log.d(TAG, "START PLAY THREAD");
+//                        playRecord();
+//                    }
+//                });
+//                playThread.start();
+//                return true;
+//            }
+//        });
     }
 
     // initializes audiotrack and audiorecord.
@@ -210,12 +216,25 @@ public class LoopActivity extends ActionBarActivity {
                 AudioTrack.MODE_STREAM);
 
         mAudioData = new short[beat];
+
+        startAudio();
 //        double[] tick = getSineWave((sampleRate / 16), sampleRate, 880);
 //        short[] lol = get16BitPcm(tick);
 //        for(int i = 0; i < lol.length; i++) {
 //            Log.d(TAG, lol[i] + "");
 //        }
 //        addAudioData(lol);
+    }
+
+    private void startAudio() {
+        Thread playThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "START PLAY THREAD");
+                playRecord();
+            }
+        });
+        playThread.start();
     }
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
@@ -435,23 +454,18 @@ public class LoopActivity extends ActionBarActivity {
 
     // Function that plays/pauses the audioTrack
     public void playRecord(){
-        if(!playing) {
-            mAudioTrack.play();
-            Log.d(TAG, "PLAY");
-            playing = true;
-            int currentBeat = 1;
-            while(playing) {
-                if(beat * currentBeat > mAudioData.length) {
-                    currentBeat = 1;
-                }
-                //short[] audioData = getAudioData();
-                Log.d(TAG, "Play " + mAudioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
-                mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), (beat * (currentBeat++)));
+        mAudioTrack.play();
+        Log.d(TAG, "PLAY");
+        playing = true;
+        int currentBeat = 1;
+        while(playing) {
+            if(beat * currentBeat > mAudioData.length) {
+                currentBeat = 1;
             }
-        } else {
-            Log.d(TAG, "PAUSE");
-            playing = false;
-            mAudioTrack.pause();
+            //short[] audioData = getAudioData();
+            Log.d(TAG, "Play " + mAudioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
+            mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), beat);
+            currentBeat++;
         }
     }
 
@@ -493,8 +507,6 @@ public class LoopActivity extends ActionBarActivity {
                 mLoops[id].setFilePath(file.getAbsolutePath());
 
                 TypedFile soundFile = new TypedFile("binary", file);
-
-                Log.d(TAG, soundFile.mimeType());
 
                 service.upload(soundFile, new Callback<Endpoint>() {
                     @Override

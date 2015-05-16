@@ -53,8 +53,8 @@ public class SignUpActivity extends Activity {
         mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
         mCancelButton = (ButtonFlat)findViewById(R.id.cancelButton);
 
-        mSignUpButton.setRippleSpeed(50f);
-        mCancelButton.setRippleSpeed(50f);
+        mSignUpButton.setRippleSpeed(100f);
+        mCancelButton.setRippleSpeed(100f);
 
         mSignUpButton.setOnClickListener(signUp);
         mCancelButton.setOnClickListener(cancel);

@@ -53,8 +53,8 @@ public class LoginActivity extends Activity {
         mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
         mLoginButton = (ButtonRectangle)findViewById(R.id.logInButton);
 
-        mSignUpButton.setRippleSpeed(50f);
-        mLoginButton.setRippleSpeed(50f);
+        mSignUpButton.setRippleSpeed(100f);
+        mLoginButton.setRippleSpeed(100f);
 
         mEmailField = (EditText)findViewById(R.id.usernameField);
         mPasswordField = (EditText)findViewById(R.id.passwordField);

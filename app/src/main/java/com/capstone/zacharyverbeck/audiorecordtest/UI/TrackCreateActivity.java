@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
+import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
@@ -32,6 +33,8 @@ public class TrackCreateActivity extends ActionBarActivity {
     public ButtonRectangle mTrackCreateButton;
     public EditText mTrackName;
     public NumberPicker mBpmPicker;
+    public GlobalFunctions mGlobal;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +78,7 @@ public class TrackCreateActivity extends ActionBarActivity {
         mBpmPicker.setValue(80);
 
         mTrackCreateButton = (ButtonRectangle) findViewById(R.id.createTrackButton);
+        mTrackCreateButton.setRippleSpeed(100f);
         mTrackCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,6 +109,9 @@ public class TrackCreateActivity extends ActionBarActivity {
                 }
             }
         });
+
+        mGlobal = new GlobalFunctions(this);
+        mGlobal.setupUI(findViewById(R.id.parent));
     }
 
     @Override
