@@ -148,6 +148,7 @@ public class LoopActivity extends ActionBarActivity {
         mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
         mLoops = new Loop[6];
         trackId = getIntent().getIntExtra("trackId", -1) + "";
+        // bpm = getIntent().getIntExtra("BPM", 80);
     }
 
     private void setupToolbar() {
@@ -432,10 +433,15 @@ public class LoopActivity extends ActionBarActivity {
             mAudioTrack.play();
             Log.d(TAG, "PLAY");
             playing = true;
+            int currentBeat = 1;
+            int length = mAudioData.length;
             while(playing) {
+                if(beat * currentBeat > length) {
+                    currentBeat = 1;
+                }
                 short[] audioData = getAudioData();
                 Log.d(TAG, "Play " + audioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
-                mAudioTrack.write(audioData, 0, audioData.length);
+                mAudioTrack.write(audioData, (beat * (currentBeat - 1)), (beat * (currentBeat++)));
             }
         } else {
             Log.d(TAG, "PAUSE");

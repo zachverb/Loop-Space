@@ -64,6 +64,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final int trackId = mDataset.get(index).id;
+        final int bpm = mDataset.get(index).bpm;
         holder.title.setText(mDataset.get(index).title);
         holder.owner.setText(mDataset.get(index).User.name);
         //Log.d("WHY", mDataset.get(index).user.email);
@@ -72,6 +73,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             public void onClick(View v) {
                 Intent loopIntent = new Intent(mContext, LoopActivity.class);
                 loopIntent.putExtra("trackId", trackId);
+                loopIntent.putExtra("BPM", bpm);
                 loopIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivity(loopIntent);
             }

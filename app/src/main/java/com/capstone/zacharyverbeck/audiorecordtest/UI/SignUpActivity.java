@@ -98,13 +98,13 @@ public class SignUpActivity extends Activity {
                 @Override
                 public void success(Data data, Response response) {
                     signupDialog.dismiss();
-                    Log.d(TAG, data.type + data.token);
                     if(data.error == null && data.type == true) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
                         Intent intent = new Intent(SignUpActivity.this, TrackListActivity.class);
                         startActivity(intent);
                     } else {
+                        Log.d(TAG, data.error);
                         Dialog dialog = new Dialog(SignUpActivity.this, "Error!", "Signup Error!");
                         dialog.show();
                         Log.d(TAG, data.error);
@@ -114,7 +114,7 @@ public class SignUpActivity extends Activity {
                 @Override
                 public void failure(RetrofitError retrofitError) {
                     signupDialog.dismiss();
-                    Dialog dialog = new Dialog(getApplicationContext() , "Error!", "Network error!");
+                    Dialog dialog = new Dialog(SignUpActivity.this , "Error!", "Network error!");
                     dialog.show();
                     retrofitError.printStackTrace();
                 }

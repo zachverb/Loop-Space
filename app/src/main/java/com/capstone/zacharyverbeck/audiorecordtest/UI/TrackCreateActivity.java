@@ -79,13 +79,14 @@ public class TrackCreateActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 if(mTrackName.getText().length() != 0) {
-                    service.newTrack(new Track(mTrackName.getText().toString()), new Callback<Data>() {
+                    service.newTrack(new Track(mTrackName.getText().toString(), mBpmPicker.getValue()), new Callback<Data>() {
                         @Override
                         public void success(Data data, Response response) {
                             Log.d(TAG, "SUCCESS!");
                             if (data.type == true) {
                                 Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
                                 loopIntent.putExtra("trackId", data.id);
+                                loopIntent.putExtra("BPM", mBpmPicker.getValue());
                                 startActivity(loopIntent);
                             } else {
                                 Log.d(TAG, "JK, failure");
