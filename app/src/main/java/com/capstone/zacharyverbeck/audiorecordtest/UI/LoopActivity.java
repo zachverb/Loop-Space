@@ -1,7 +1,9 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -10,6 +12,7 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.capstone.zacharyverbeck.audiorecordtest.API.S3API;
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
@@ -92,6 +96,10 @@ public class LoopActivity extends ActionBarActivity {
 
     public short[] mAudioData;
 
+    public boolean toDelete = false;
+
+    private MaterialMenuDrawable materialMenu;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,6 +149,14 @@ public class LoopActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem trash = menu.findItem(R.id.action_delete);
+        Log.d(TAG, "heh");
+        trash.setVisible(toDelete);
+        return true;
+    }
+
     public void init() {
         setupLayouts();
         setupToolbar();
@@ -163,15 +179,19 @@ public class LoopActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Current Track");
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+
+        materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
+        materialMenu.setIconState(MaterialMenuDrawable.IconState.ARROW);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Handle your drawable state here
                 Log.d(TAG, "home selected");
                 Intent intent = new Intent(LoopActivity.this, TrackListActivity.class);
                 startActivity(intent);
             }
         });
+        toolbar.setNavigationIcon(materialMenu);
 
         // bottom playbar, play/pause toggle down here
         Toolbar playbar = (Toolbar) findViewById(R.id.playbar);
@@ -473,6 +493,18 @@ public class LoopActivity extends ActionBarActivity {
 
     };
 
+    private View.OnLongClickListener setLoopButtonDelete = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(100);
+            toDelete = true;
+            invalidateOptionsMenu();
+            materialMenu.animateIconState(MaterialMenuDrawable.IconState.X);
+            return true;
+        }
+    };
+
     /*
      * ASYNC TASKS
      */
@@ -617,6 +649,7 @@ public class LoopActivity extends ActionBarActivity {
         loop.setCurrentState("loading");
         addAudioData(loop.getAudioData());
         loopButton.setOnClickListener(togglePlayOnClickListener);
+        loopButton.setOnLongClickListener(setLoopButtonDelete);
         loop.setCurrentState("playing");
     }
 
