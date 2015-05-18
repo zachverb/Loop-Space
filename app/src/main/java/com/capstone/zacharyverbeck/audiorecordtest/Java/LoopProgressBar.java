@@ -28,7 +28,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 
@@ -205,12 +205,11 @@ public class LoopProgressBar extends View {
     public void setProgressWithAnimation(float progress) {
 
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(this, "progress", progress);
-        objectAnimator.setDuration(1500);
-        objectAnimator.setInterpolator(new DecelerateInterpolator());
+        objectAnimator.setDuration(1000);
+        objectAnimator.setInterpolator(new LinearInterpolator());
         objectAnimator.start();
     }
 }
-
 
 
 

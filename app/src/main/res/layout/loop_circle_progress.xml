@@ -6,4 +6,6 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_centerInParent="true"
+        app:progress_max="4"
+        app:current_progress="2"
         app:progressBarThickness="8dp"/>

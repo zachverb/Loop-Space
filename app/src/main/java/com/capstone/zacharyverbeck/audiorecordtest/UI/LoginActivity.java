@@ -87,7 +87,9 @@ public class LoginActivity extends Activity {
             service.authenticate(new User(email, password), new Callback<Data>() {
                 @Override
                 public void success(Data data, Response response) {
-                    loginDialog.dismiss();
+                    if(loginDialog.isShowing()) {
+                        loginDialog.dismiss();
+                    }
                     Log.d(TAG, data.type + data.token);
                     if(data.error == null && data.type) {
                         mGlobal.saveToken(data.token);

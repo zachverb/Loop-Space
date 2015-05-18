@@ -50,6 +50,8 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
 
+import static com.capstone.zacharyverbeck.audiorecordtest.R.color.primary_light;
+
 public class LoopActivity extends ActionBarActivity {
 
     public Loop[] mLoops;
@@ -109,9 +111,7 @@ public class LoopActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if(!playing) {
-            startAudio();
-        }
+        startAudio();
     }
 
     @Override
@@ -142,13 +142,12 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void init() {
-
         setupLayouts();
         setupToolbar();
         audioInit();
         setupRestAdapter();
         getTrackInfo();
-
+        startAudio();
     }
 
     private void setupLayouts() {
@@ -200,10 +199,9 @@ public class LoopActivity extends ActionBarActivity {
 
     // initializes audiotrack and audiorecord.
     private void audioInit() {
-        minBufferSize = beat;
-//                = AudioRecord.getMinBufferSize(sampleRate,
-//                AudioFormat.CHANNEL_IN_MONO,
-//                AudioFormat.ENCODING_PCM_16BIT);
+        minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT);
 
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 sampleRate,
@@ -220,12 +218,14 @@ public class LoopActivity extends ActionBarActivity {
 
         mAudioData = new short[beat];
 
-        startAudio();
     }
 
     private void startAudio() {
-        PlayingTask playTask = new PlayingTask();
-        playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if(!playing) {
+            playing = true;
+            PlayingTask playTask = new PlayingTask();
+            playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
@@ -323,15 +323,12 @@ public class LoopActivity extends ActionBarActivity {
         relativeLayout.addView(progressBar, params);
 
         LoopProgressBar loopProgress = (LoopProgressBar) getLayoutInflater().inflate(R.layout.loop_circle_progress, null);
-        //loopProgress.setVisibility(View.VISIBLE);
-        loopProgress.setMax(bar);
-        loopProgress.setProgress(0);
-        RelativeLayout.LayoutParams loopProgressParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT
-        );
+        loopProgress.setMax(4);
+        loopProgress.setVisibility(View.INVISIBLE);
+        loopProgress.setColor(primary_light);
+        params = new RelativeLayout.LayoutParams(300,300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        relativeLayout.addView(loopProgress, loopProgressParams);
+        relativeLayout.addView(loopProgress, params);
         return relativeLayout;
     }
 
@@ -483,16 +480,16 @@ public class LoopActivity extends ActionBarActivity {
     private class PlayingTask extends AsyncTask<Void, Integer, Boolean> {
         @Override
         protected Boolean doInBackground(Void... params) {
+            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+            Log.d(TAG, "THREAD PLAYIN NOW");
             mAudioTrack.play();
             Log.d(TAG, "PLAY");
-            playing = true;
             int currentBeat = 1;
             while(playing) {
                 if(beat * currentBeat > mAudioData.length) {
                     currentBeat = 1;
                 }
-                //short[] audioData = getAudioData();
-                Log.d(TAG, "Play " + mAudioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
+                publishProgress(currentBeat);
                 mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), beat);
                 currentBeat++;
             }
@@ -501,7 +498,7 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... param) {
-
+            setLoopsProgress(param[0]);
         }
 
     }
@@ -621,5 +618,11 @@ public class LoopActivity extends ActionBarActivity {
         addAudioData(loop.getAudioData());
         loopButton.setOnClickListener(togglePlayOnClickListener);
         loop.setCurrentState("playing");
+    }
+
+    public void setLoopsProgress(Integer value) {
+        for(int i = 0; i < mLoopsLength; i++) {
+            mLoops[i].setLoopProgress(value);
+        }
     }
 }

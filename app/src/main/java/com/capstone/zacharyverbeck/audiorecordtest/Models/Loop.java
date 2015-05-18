@@ -24,8 +24,7 @@ public class Loop {
     private RelativeLayout mContainer;
     private LoopButton mLoopButton;
     private ProgressBar mProgressBar;
-    private LoopProgressBar mLoopProgress;
-    private String name;
+    private LoopProgressBar mLoopProgressBar;
     private String filePath;
     private String endpoint;
     private int id;
@@ -45,9 +44,8 @@ public class Loop {
         this.setContainer(layout);
         this.setLoopButton((LoopButton) layout.getChildAt(0));
         this.setProgressBar((ProgressBar) layout.getChildAt(1));
-        this.setLoopProgress((LoopProgressBar) layout.getChildAt(2));
+        this.setLoopProgressBar((LoopProgressBar) layout.getChildAt(2));
         this.setId(layout.getChildAt(0).getId());
-        this.setName("ZGV");
         this.setFilePath(null);
         this.setAudioData(null);
         this.setIsPlaying(true);
@@ -78,6 +76,13 @@ public class Loop {
         getProgressBar().setVisibility(View.INVISIBLE);
     }
 
+    public void setLoopProgressBarInvisible() {
+        getLoopProgressBar().setVisibility(View.INVISIBLE);
+    }
+
+    public void setLoopProgressBarVisible() {
+        getLoopProgressBar().setVisibility(View.VISIBLE);
+    }
     public String getCurrentState() {
         return currentState;
     }
@@ -92,6 +97,7 @@ public class Loop {
                 break;
             case "recording":
                 this.getLoopButton().setImageResource(R.drawable.ic_mic_white_48dp);
+                break;
             case "paused":
                 this.getLoopButton().setImageResource(R.drawable.ic_volume_off_white_48dp);
                 break;
@@ -99,8 +105,10 @@ public class Loop {
                 this.getLoopButton().setImageResource(R.drawable.ic_file_download_48dp);
                 this.setProgressBarVisible();
                 break;
-            default:
-                this.getLoopButton().setImageResource(android.R.color.transparent);
+            case "playing":
+                this.getLoopButton().setImageResource(R.drawable.ic_file_download_48dp);
+                setLoopProgressBarVisible();
+                break;
         }
         this.currentState = state;
     }
@@ -130,14 +138,6 @@ public class Loop {
 
     public void setContainer(RelativeLayout container) {
         mContainer = container;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getEndpoint() {
@@ -181,11 +181,18 @@ public class Loop {
     }
 
 
-    public LoopProgressBar getLoopProgress() {
-        return mLoopProgress;
+    public LoopProgressBar getLoopProgressBar() {
+        return mLoopProgressBar;
     }
 
-    public void setLoopProgress(LoopProgressBar loopProgress) {
-        mLoopProgress = loopProgress;
+    public void setLoopProgressBar(LoopProgressBar loopProgressBar) {
+        mLoopProgressBar = loopProgressBar;
+    }
+
+    public void setLoopProgress(int beat) {
+        if (beat == 1) {
+            this.getLoopProgressBar().setProgress(Float.valueOf(0));
+        }
+        this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
     }
 }
