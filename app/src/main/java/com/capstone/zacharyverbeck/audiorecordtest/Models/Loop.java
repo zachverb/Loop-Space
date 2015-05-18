@@ -1,6 +1,12 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+
 import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
+import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopProgressBar;
+import com.capstone.zacharyverbeck.audiorecordtest.R;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -15,13 +21,17 @@ import java.io.InputStream;
  */
 public class Loop {
 
+    private RelativeLayout mContainer;
     private LoopButton mLoopButton;
+    private ProgressBar mProgressBar;
+    private LoopProgressBar mLoopProgress;
     private String name;
     private String filePath;
     private String endpoint;
     private int id;
     private short[] audioData;
     private boolean isPlaying;
+    private String currentState;
 
     public boolean isPlaying() {
         return isPlaying;
@@ -31,13 +41,68 @@ public class Loop {
         this.isPlaying = isPlaying;
     }
 
-    public Loop(LoopButton loopButton) {
-        this.setLoopButton(loopButton);
-        this.setId(loopButton.getId());
+    public Loop(RelativeLayout layout) {
+        this.setContainer(layout);
+        this.setLoopButton((LoopButton) layout.getChildAt(0));
+        this.setProgressBar((ProgressBar) layout.getChildAt(1));
+        this.setLoopProgress((LoopProgressBar) layout.getChildAt(2));
+        this.setId(layout.getChildAt(0).getId());
         this.setName("ZGV");
         this.setFilePath(null);
         this.setAudioData(null);
         this.setIsPlaying(true);
+        this.setCurrentState("ready");
+    }
+
+    public LoopButton getLoopButton() {
+        return mLoopButton;
+    }
+
+    public void setLoopButton(LoopButton loopButton) {
+        mLoopButton = loopButton;
+    }
+
+    public ProgressBar getProgressBar() {
+        return mProgressBar;
+    }
+
+    public void setProgressBar(ProgressBar progressBar) {
+        mProgressBar = progressBar;
+    }
+
+    public void setProgressBarVisible() {
+        getProgressBar().setVisibility(View.VISIBLE);
+    }
+
+    public void setProgressBarInvisible() {
+        getProgressBar().setVisibility(View.INVISIBLE);
+    }
+
+    public String getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(String state) {
+        if(getCurrentState() == "loading" && state != "loading") {
+            setProgressBarInvisible();
+        }
+        switch(state) {
+            case "ready":
+                this.getLoopButton().setImageResource(R.drawable.ic_mic_none_white_48dp);
+                break;
+            case "recording":
+                this.getLoopButton().setImageResource(R.drawable.ic_mic_white_48dp);
+            case "paused":
+                this.getLoopButton().setImageResource(R.drawable.ic_volume_off_white_48dp);
+                break;
+            case "loading":
+                this.getLoopButton().setImageResource(R.drawable.ic_file_download_48dp);
+                this.setProgressBarVisible();
+                break;
+            default:
+                this.getLoopButton().setImageResource(android.R.color.transparent);
+        }
+        this.currentState = state;
     }
 
     public int getId() {
@@ -59,12 +124,12 @@ public class Loop {
         this.filePath = filePath;
     }
 
-    public LoopButton getLoopButton() {
-        return mLoopButton;
+    public RelativeLayout getContainer() {
+        return mContainer;
     }
 
-    public void setLoopButton(LoopButton loopButton) {
-        mLoopButton = loopButton;
+    public void setContainer(RelativeLayout container) {
+        mContainer = container;
     }
 
     public String getName() {
@@ -116,4 +181,11 @@ public class Loop {
     }
 
 
+    public LoopProgressBar getLoopProgress() {
+        return mLoopProgress;
+    }
+
+    public void setLoopProgress(LoopProgressBar loopProgress) {
+        mLoopProgress = loopProgress;
+    }
 }

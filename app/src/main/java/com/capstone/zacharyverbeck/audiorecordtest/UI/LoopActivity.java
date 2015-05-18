@@ -14,15 +14,17 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.S3API;
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopButton;
+import com.capstone.zacharyverbeck.audiorecordtest.Java.LoopProgressBar;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Endpoint;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Loop;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.LoopFile;
@@ -198,9 +200,10 @@ public class LoopActivity extends ActionBarActivity {
 
     // initializes audiotrack and audiorecord.
     private void audioInit() {
-        minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT);
+        minBufferSize = beat;
+//                = AudioRecord.getMinBufferSize(sampleRate,
+//                AudioFormat.CHANNEL_IN_MONO,
+//                AudioFormat.ENCODING_PCM_16BIT);
 
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 sampleRate,
@@ -218,23 +221,11 @@ public class LoopActivity extends ActionBarActivity {
         mAudioData = new short[beat];
 
         startAudio();
-//        double[] tick = getSineWave((sampleRate / 16), sampleRate, 880);
-//        short[] lol = get16BitPcm(tick);
-//        for(int i = 0; i < lol.length; i++) {
-//            Log.d(TAG, lol[i] + "");
-//        }
-//        addAudioData(lol);
     }
 
     private void startAudio() {
-        Thread playThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "START PLAY THREAD");
-                playRecord();
-            }
-        });
-        playThread.start();
+        PlayingTask playTask = new PlayingTask();
+        playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
@@ -288,8 +279,7 @@ public class LoopActivity extends ActionBarActivity {
 
     // returns a new LoopButton object ready to put in the view.
     public LoopButton newLoopButton() {
-        LayoutInflater inflater = getLayoutInflater();
-        LoopButton loopButton = (LoopButton) inflater.inflate(R.layout.loop_button, null);
+        LoopButton loopButton = (LoopButton) getLayoutInflater().inflate(R.layout.loop_button, null);
         loopButton.setOnClickListener(startRecOnClickListener);
         loopButton.setId(mLoopsLength);
         return loopButton;
@@ -299,15 +289,50 @@ public class LoopActivity extends ActionBarActivity {
     public void addButton() {
         if(mLoopsLength < 6) {
             LoopButton loopButton = newLoopButton();
-            mLoops[mLoopsLength] = new Loop(loopButton);
+            RelativeLayout relativeLayout = addButtonToLayout(loopButton);
+            mLoops[mLoopsLength] = new Loop(relativeLayout);
             mLoops[mLoopsLength].setId(loopButton.getId());
             if (mLoopsLength % 2 == 0) {
-                mLeftLayout.addView(loopButton);
+                mLeftLayout.addView(relativeLayout);
             } else {
-                mRightLayout.addView(loopButton);
+                mRightLayout.addView(relativeLayout);
             }
             mLoopsLength++;
         }
+    }
+
+    private RelativeLayout addButtonToLayout(LoopButton loopButton) {
+        RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                400);
+        rlp.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setLayoutParams(rlp);
+
+        RelativeLayout.LayoutParams loopParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        loopParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        relativeLayout.addView(loopButton, loopParams);
+
+        ProgressBar progressBar = new ProgressBar(LoopActivity.this, null, android.R.attr.progressBarStyleLarge);
+        progressBar.setIndeterminate(true);
+        progressBar.setVisibility(View.INVISIBLE);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100,100);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        relativeLayout.addView(progressBar, params);
+
+        LoopProgressBar loopProgress = (LoopProgressBar) getLayoutInflater().inflate(R.layout.loop_circle_progress, null);
+        //loopProgress.setVisibility(View.VISIBLE);
+        loopProgress.setMax(bar);
+        loopProgress.setProgress(0);
+        RelativeLayout.LayoutParams loopProgressParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+        );
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        relativeLayout.addView(loopProgress, loopProgressParams);
+        return relativeLayout;
     }
 
     /*
@@ -334,25 +359,26 @@ public class LoopActivity extends ActionBarActivity {
     // downloads each track from their given endpoint.
     public void downloadLoops(List<LoopFile> loops) {
         for (int i = 0; i < loops.size(); i++) {
-            addButton();
             final int index = i;
-            final String endpoint = loops.get(i).endpoint;
-
+            final String endpoint = loops.get(index).endpoint;
+            addButton();
+            mLoops[i].setCurrentState("loading");
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
-                    new Callback<Response>() {
-                        @Override
-                        public void success(Response result, Response response) {
-                            StreamingTask task = new StreamingTask();
-                            task.execute(new Object[]{result, index});
-                        }
+                new Callback<Response>() {
+                    @Override
+                    public void success(Response result, Response response) {
+                        StreamingTask task = new StreamingTask();
+                        task.execute(new Object[]{result, index});
+                    }
 
-                        @Override
-                        public void failure(RetrofitError retrofitError) {
-                            Log.d(TAG, "FAK");
-                            retrofitError.printStackTrace();
-                        }
-                    });
+                    @Override
+                    public void failure(RetrofitError retrofitError) {
+                        Log.d(TAG, "FAK");
+                        retrofitError.printStackTrace();
+                    }
+                });
+
         }
     }
 
@@ -429,7 +455,6 @@ public class LoopActivity extends ActionBarActivity {
         public void onClick(View v) {
             Log.d(TAG, "STOP REC");
             recording = false;
-            v.setOnClickListener(togglePlayOnClickListener);
         }
     };
 
@@ -441,37 +466,45 @@ public class LoopActivity extends ActionBarActivity {
             Loop loop = mLoops[v.getId()];
             if(loop.isPlaying()) {
                 subtractAudioData(loop.getAudioData());
-                loop.getLoopButton().setImageResource(R.drawable.ic_play_arrow_white_48dp);
+                loop.setCurrentState("paused");
             } else {
                 addAudioData(loop.getAudioData());
-                loop.getLoopButton().setImageResource(R.drawable.ic_pause_white_48dp);
+                loop.setCurrentState("playing");
             }
             mLoops[v.getId()].setIsPlaying(!loop.isPlaying());
         }
 
     };
 
-
-    // Function that plays/pauses the audioTrack
-    public void playRecord(){
-        mAudioTrack.play();
-        Log.d(TAG, "PLAY");
-        playing = true;
-        int currentBeat = 1;
-        while(playing) {
-            if(beat * currentBeat > mAudioData.length) {
-                currentBeat = 1;
-            }
-            //short[] audioData = getAudioData();
-            Log.d(TAG, "Play " + mAudioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
-            mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), beat);
-            currentBeat++;
-        }
-    }
-
     /*
      * ASYNC TASKS
      */
+
+    private class PlayingTask extends AsyncTask<Void, Integer, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            mAudioTrack.play();
+            Log.d(TAG, "PLAY");
+            playing = true;
+            int currentBeat = 1;
+            while(playing) {
+                if(beat * currentBeat > mAudioData.length) {
+                    currentBeat = 1;
+                }
+                //short[] audioData = getAudioData();
+                Log.d(TAG, "Play " + mAudioData.length + " Position: " + mAudioTrack.getPlaybackHeadPosition());
+                mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), beat);
+                currentBeat++;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... param) {
+
+        }
+
+    }
 
     private class RecordingTask extends AsyncTask<Integer, Integer, Integer> {
 
@@ -564,7 +597,7 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            setRecordingImage(params[0]);
+            setLoopLoading(params[0]);
         }
 
         @Override
@@ -574,39 +607,19 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void setRecordingImage(Integer index) {
-        LoopButton loopButton = mLoops[index].getLoopButton();
-        loopButton.setImageResource(R.drawable.ic_mic_white_48dp);
-        //loopButton.setAnimation(AnimationUtils.loadAnimation(this, R.anim.progress_indeterminate_animation));
+        mLoops[index].setCurrentState("recording");
+    }
+
+    public void setLoopLoading(Integer index) {
+        mLoops[index].setCurrentState("loading");
     }
 
     public void taskPostExecute(Integer index) {
-        LoopButton loopButton = mLoops[index].getLoopButton();
-        loopButton.setImageResource(R.drawable.ic_pause_white_48dp);
-        addAudioData(mLoops[index].getAudioData());
+        Loop loop = mLoops[index];
+        LoopButton loopButton = loop.getLoopButton();
+        loop.setCurrentState("loading");
+        addAudioData(loop.getAudioData());
         loopButton.setOnClickListener(togglePlayOnClickListener);
-    }
-
-    // Metronome methods
-
-    public double[] getSineWave(int samples,int sampleRate,double frequencyOfTone){
-        double[] sample = new double[samples];
-        for (int i = 0; i < samples; i++) {
-            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/frequencyOfTone));
-        }
-        return sample;
-    }
-
-    public short[] get16BitPcm(double[] samples) {
-        short[] generatedSound = new short[samples.length];
-        int index = 0;
-        for (double sample : samples) {
-            // scale to maximum amplitude
-            short maxSample = (short) (sample * Short.MAX_VALUE);
-            // in 16 bit wav PCM, first byte is the low order byte
-            generatedSound[index++] = maxSample;
-            //generatedSound[index++] = maxSample;
-
-        }
-        return generatedSound;
+        loop.setCurrentState("playing");
     }
 }

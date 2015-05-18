@@ -4,6 +4,13 @@
         <attr name="cb_color_loop" format="color" />
         <attr name="cb_pressedRingWidth_loop" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="LoopProgressBar">
+        <attr name="progress_min" format="integer" />
+        <attr name="progress_max" format="integer" />
+        <attr name="current_progress" format="integer" />
+        <attr name="progressbarColor" format="color" />
+        <attr name="progressBarThickness" format="dimension" />
+    </declare-styleable>
     <color name="primary">#2196F3</color>
     <color name="primary_dark">#1976D2</color>
     <color name="primary_light">#BBDEFB</color>

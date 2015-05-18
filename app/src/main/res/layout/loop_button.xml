@@ -9,10 +9,7 @@
     android:textSize="32dp"
     app:cb_color_loop="#2196F3"
     app:cb_pressedRingWidth_loop="8dp"
-    android:layout_gravity="center_horizontal"
     android:src="@drawable/ic_mic_none_white_48dp"
     android:padding="40dp"
-    layout_width="wrap_content"
-    layout_height="wrap_content"
     android:layout_marginBottom="10dp"
     />
