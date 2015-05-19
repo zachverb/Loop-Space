@@ -10,4 +10,11 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_track_create">Create Track</string>
+
+    <string-array name="filters_array">
+        <item>Nearby Tracks</item>
+        <item>Tracks in City</item>
+        <item>Global Tracks</item>
+    </string-array>
+
 </resources>

@@ -343,7 +343,7 @@ public class LoopActivity extends ActionBarActivity {
         relativeLayout.addView(progressBar, params);
 
         LoopProgressBar loopProgress = (LoopProgressBar) getLayoutInflater().inflate(R.layout.loop_circle_progress, null);
-        loopProgress.setMax(4);
+        loopProgress.setMax(1);
         loopProgress.setVisibility(View.INVISIBLE);
         loopProgress.setColor(primary_light);
         params = new RelativeLayout.LayoutParams(300,300);
@@ -518,11 +518,11 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "PLAY");
             int currentBeat = 1;
             while(playing) {
-                if(beat * currentBeat > mAudioData.length) {
+                if(minBufferSize * currentBeat > mAudioData.length) {
                     currentBeat = 1;
+                    publishProgress(currentBeat);
                 }
-                publishProgress(currentBeat);
-                mAudioTrack.write(mAudioData, (beat * (currentBeat - 1)), beat);
+                mAudioTrack.write(mAudioData, (minBufferSize * (currentBeat - 1)), minBufferSize);
                 currentBeat++;
             }
             return true;

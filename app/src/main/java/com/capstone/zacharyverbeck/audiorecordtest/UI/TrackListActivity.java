@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Java.TrackListAdapter;
@@ -40,6 +42,8 @@ public class TrackListActivity extends ActionBarActivity {
     public String TAG = "TrackListActivity";
     public FloatingActionButton mNewTrack;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private Spinner mFiltersSpinner;
+    private boolean filtersShowing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,9 +121,22 @@ public class TrackListActivity extends ActionBarActivity {
             }
         });
 
+        mFiltersSpinner = (Spinner)findViewById(R.id.filter_spinner);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Global Tracks");
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(filtersShowing);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.filters_array, android.R.layout.simple_spinner_item);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        mFiltersSpinner.setAdapter(adapter);
+
+
+
 
     }
 
@@ -137,12 +154,17 @@ public class TrackListActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_refresh) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-            getTracks();
-            return true;
+
+        switch (id) {
+            case R.id.action_refresh:
+                mProgressBar.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
+                getTracks();
+                break;
+            case R.id.action_filter:
+                //filtersShowing = !filtersShowing;
+                //getSupportActionBar().setDisplayShowTitleEnabled(filtersShowing);
+                break;
         }
 
         return super.onOptionsItemSelected(item);
