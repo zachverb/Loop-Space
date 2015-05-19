@@ -36,7 +36,7 @@ public interface ServerAPI {
     public void upload(@Part("fileContent") TypedFile file, Callback<Endpoint> callback);
 
     @POST("/tracks")
-    public void newTrack(@Body Track track, Callback<Data> callback);
+    public void newTrack(@Body Track track, Callback<Track> callback);
 
     @GET("/tracks")
     public void getTracks(Callback<List<Track>> callback);
