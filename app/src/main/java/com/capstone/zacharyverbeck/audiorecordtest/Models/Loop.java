@@ -27,6 +27,7 @@ public class Loop {
     private LoopProgressBar mLoopProgressBar;
     private String filePath;
     private String endpoint;
+    private int index;
     private int id;
     private short[] audioData;
     private boolean isPlaying;
@@ -45,7 +46,7 @@ public class Loop {
         this.setLoopButton((LoopButton) layout.getChildAt(0));
         this.setProgressBar((ProgressBar) layout.getChildAt(1));
         this.setLoopProgressBar((LoopProgressBar) layout.getChildAt(2));
-        this.setId(layout.getChildAt(0).getId());
+        this.setIndex(this.getLoopButton().getId());
         this.setFilePath(null);
         this.setAudioData(null);
         this.setIsPlaying(true);
@@ -119,6 +120,14 @@ public class Loop {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     public String getFilePath() {

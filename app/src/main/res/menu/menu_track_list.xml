@@ -7,10 +7,4 @@
         android:icon="@drawable/ic_refresh_white_24dp"
         android:title="Refresh"
         app:showAsAction="ifRoom"/>
-
-    <item
-        android:id="@+id/action_filter"
-        android:icon="@drawable/ic_arrow_drop_down_white_24dp"
-        android:title="Filter"
-        app:showAsAction="ifRoom"/>
 </menu>

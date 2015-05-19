@@ -104,10 +104,13 @@ public class LoginActivity extends Activity {
 
                 @Override
                 public void failure(RetrofitError retrofitError) {
-                    loginDialog.dismiss();
-                    retrofitError.printStackTrace();
-                    Dialog dialog = new Dialog(getApplicationContext() , "Error!", "Network error!");
+                    if(loginDialog.isShowing()) {
+                        loginDialog.dismiss();
+                    }
+                    Dialog dialog = new Dialog(LoginActivity.this , "Error!", "Network error!");
                     dialog.show();
+
+                    retrofitError.printStackTrace();
                 }
             });
         }

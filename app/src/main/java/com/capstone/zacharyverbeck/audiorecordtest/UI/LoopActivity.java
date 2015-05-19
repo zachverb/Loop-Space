@@ -1,5 +1,9 @@
 package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -45,6 +50,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit.Callback;
@@ -58,7 +64,7 @@ import static com.capstone.zacharyverbeck.audiorecordtest.R.color.primary_light;
 
 public class LoopActivity extends ActionBarActivity {
 
-    public Loop[] mLoops;
+    public ArrayList<Loop> mLoops;
 
     public int mLoopsLength = 0;
 
@@ -99,6 +105,12 @@ public class LoopActivity extends ActionBarActivity {
     public boolean toDelete = false;
 
     private MaterialMenuDrawable materialMenu;
+
+    public Toolbar playbar;
+
+    private int selected = -1;
+
+    private boolean bottomToolbarShowing = true;
 
     /** Called when the activity is first created. */
     @Override
@@ -142,7 +154,7 @@ public class LoopActivity extends ActionBarActivity {
                 //init();
                 break;
             case R.id.action_add:
-                addButton();
+                addToLayout();
                 break;
         }
 
@@ -151,9 +163,18 @@ public class LoopActivity extends ActionBarActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem trash = menu.findItem(R.id.action_delete);
-        Log.d(TAG, "heh");
-        trash.setVisible(toDelete);
+//        MenuItem trash = menu.findItem(R.id.action_delete);
+//        Log.d(TAG, "heh");
+//        trash.setVisible(toDelete);
+//        trash.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                deleteLoop(selected);
+//                toDelete = false;
+//                materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+//                return true;
+//            }
+//        });
         return true;
     }
 
@@ -169,9 +190,8 @@ public class LoopActivity extends ActionBarActivity {
     private void setupLayouts() {
         mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
         mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
-        mLoops = new Loop[6];
+        mLoops = new ArrayList<Loop>(6);
         trackId = getIntent().getIntExtra("trackId", -1) + "";
-        // bpm = getIntent().getIntExtra("BPM", 80);
     }
 
     private void setupToolbar() {
@@ -185,36 +205,79 @@ public class LoopActivity extends ActionBarActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Handle your drawable state here
-                Log.d(TAG, "home selected");
-                Intent intent = new Intent(LoopActivity.this, TrackListActivity.class);
-                startActivity(intent);
+                if (toDelete) {
+                    toDelete = false;
+                    selected = -1;
+                    materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+                    animateBottomToolbar();
+                } else {
+                    Log.d(TAG, "home selected");
+                    Intent intent = new Intent(LoopActivity.this, TrackListActivity.class);
+                    startActivity(intent);
+                }
             }
         });
         toolbar.setNavigationIcon(materialMenu);
 
         // bottom playbar, play/pause toggle down here
-        Toolbar playbar = (Toolbar) findViewById(R.id.playbar);
-//        playbar.inflateMenu(R.menu.menu_play);
-//        playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(final MenuItem menuItem) {
-//                if (playing) {
-//                    menuItem.setIcon(R.drawable.ic_play_arrow_white_24dp);
-//                } else {
-//                    menuItem.setIcon(R.drawable.ic_pause_white_24dp);
-//                }
-//                Thread playThread = new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Log.d(TAG, "START PLAY THREAD");
-//                        playRecord();
-//                    }
-//                });
-//                playThread.start();
-//                return true;
-//            }
-//        });
+        playbar = (Toolbar) findViewById(R.id.playbar);
+        playbar.inflateMenu(R.menu.menu_play);
+        playbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(final MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_delete:
+                        deleteLoop(selected);
+                        toDelete = false;
+                        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+                        animateBottomToolbar();
+                        break;
+                }
+                return true;
+            }
+        });
+        animateBottomToolbar();
+    }
+
+    private void animateBottomToolbar() {
+        AnimatorSet set = new AnimatorSet().setDuration(100L);
+        if(bottomToolbarShowing) {
+            //hide toolbar
+            set.playTogether(
+                    ObjectAnimator.ofFloat(playbar, "translationY", 0f, 200f)
+            );
+
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationStart(animation);
+                    playbar.setVisibility(View.GONE);
+                    animation.removeAllListeners();
+                }
+            });
+
+            set.setInterpolator(new LinearInterpolator());
+            set.start();
+            bottomToolbarShowing = false;
+        } else {
+            //show toolbar
+            set.playTogether(
+                    ObjectAnimator.ofFloat(playbar, "translationY", 200f, 0f)
+            );
+
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    playbar.setVisibility(View.VISIBLE);
+                    animation.removeAllListeners();
+                }
+            });
+            set.setInterpolator(new LinearInterpolator());
+            set.start();
+            bottomToolbarShowing = true;
+        }
+
     }
 
     // initializes audiotrack and audiorecord.
@@ -297,31 +360,53 @@ public class LoopActivity extends ActionBarActivity {
      *  BUTTON CREATION FUNCTIONS
      */
 
-    // returns a new LoopButton object ready to put in the view.
-    public LoopButton newLoopButton() {
-        LoopButton loopButton = (LoopButton) getLayoutInflater().inflate(R.layout.loop_button, null);
-        loopButton.setOnClickListener(startRecOnClickListener);
-        loopButton.setId(mLoopsLength);
-        return loopButton;
-    }
-
     // places a button in the view.
-    public void addButton() {
+    public void addToLayout() {
         if(mLoopsLength < 6) {
-            LoopButton loopButton = newLoopButton();
-            RelativeLayout relativeLayout = addButtonToLayout(loopButton);
-            mLoops[mLoopsLength] = new Loop(relativeLayout);
-            mLoops[mLoopsLength].setId(loopButton.getId());
             if (mLoopsLength % 2 == 0) {
-                mLeftLayout.addView(relativeLayout);
+                mLeftLayout.addView(addLoopObject());
             } else {
-                mRightLayout.addView(relativeLayout);
+                mRightLayout.addView(addLoopObject());
             }
             mLoopsLength++;
+        } else {
+            Dialog dialog = new Dialog(LoopActivity.this , "Error!", "Max amount of loops reached!");
+            dialog.show();
         }
     }
 
-    private RelativeLayout addButtonToLayout(LoopButton loopButton) {
+    public void deleteLoop(int id) {
+        if(selected != -1) {
+            Loop loop = mLoops.get(id);
+            subtractAudioData(loop.getAudioData());
+            mLoopsLength--;
+            ((LinearLayout) mLoops.get(id).getContainer().getParent()).removeView(mLoops.get(id).getContainer());
+            mLoops.remove(id);
+            refreshLayout();
+            selected = -1;
+        }
+    }
+
+    public void refreshLayout() {
+        int index = 0;
+        for(Loop loop : mLoops) {
+            ((LinearLayout)loop.getContainer().getParent()).removeView(loop.getContainer());
+            if (index % 2 == 0) {
+                mLeftLayout.addView(loop.getContainer());
+            } else {
+                mRightLayout.addView(loop.getContainer());
+            }
+            index++;
+        }
+    }
+
+    private RelativeLayout addLoopObject() {
+        // Creating a new loop button
+        LoopButton loopButton = (LoopButton) getLayoutInflater().inflate(R.layout.loop_button, null);
+        loopButton.setOnClickListener(startRecOnClickListener);
+        loopButton.setId(mLoopsLength);
+
+        // Creating the container.
         RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
                 400);
@@ -329,12 +414,15 @@ public class LoopActivity extends ActionBarActivity {
         RelativeLayout relativeLayout = new RelativeLayout(this);
         relativeLayout.setLayoutParams(rlp);
 
+        // setting up the parameters to add the loop button
         RelativeLayout.LayoutParams loopParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         loopParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        // adding the actual button
         relativeLayout.addView(loopButton, loopParams);
 
+        // Adding the indeterminate progressbar
         ProgressBar progressBar = new ProgressBar(LoopActivity.this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.INVISIBLE);
@@ -342,6 +430,7 @@ public class LoopActivity extends ActionBarActivity {
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(progressBar, params);
 
+        // Adding the loop progressbar
         LoopProgressBar loopProgress = (LoopProgressBar) getLayoutInflater().inflate(R.layout.loop_circle_progress, null);
         loopProgress.setMax(1);
         loopProgress.setVisibility(View.INVISIBLE);
@@ -349,6 +438,10 @@ public class LoopActivity extends ActionBarActivity {
         params = new RelativeLayout.LayoutParams(300,300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(loopProgress, params);
+
+        // Adding the loop to the global container
+        mLoops.add(mLoopsLength, new Loop(relativeLayout));
+        mLoops.get(mLoopsLength).setIndex(mLoopsLength);
         return relativeLayout;
     }
 
@@ -378,8 +471,10 @@ public class LoopActivity extends ActionBarActivity {
         for (int i = 0; i < loops.size(); i++) {
             final int index = i;
             final String endpoint = loops.get(index).endpoint;
-            addButton();
-            mLoops[i].setCurrentState("loading");
+            addToLayout();
+            mLoops.get(i).setCurrentState("loading");
+            mLoops.get(i).setIndex(index);
+            mLoops.get(i).setId(loops.get(index).id);
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
                 new Callback<Response>() {
@@ -395,7 +490,6 @@ public class LoopActivity extends ActionBarActivity {
                         retrofitError.printStackTrace();
                     }
                 });
-
         }
     }
 
@@ -480,7 +574,7 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         public void onClick(View v) {
-            Loop loop = mLoops[v.getId()];
+            Loop loop = mLoops.get(v.getId());
             if(loop.isPlaying()) {
                 subtractAudioData(loop.getAudioData());
                 loop.setCurrentState("paused");
@@ -488,7 +582,7 @@ public class LoopActivity extends ActionBarActivity {
                 addAudioData(loop.getAudioData());
                 loop.setCurrentState("playing");
             }
-            mLoops[v.getId()].setIsPlaying(!loop.isPlaying());
+            mLoops.get(v.getId()).setIsPlaying(!loop.isPlaying());
         }
 
     };
@@ -499,8 +593,9 @@ public class LoopActivity extends ActionBarActivity {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(100);
             toDelete = true;
-            invalidateOptionsMenu();
+            selected = v.getId();
             materialMenu.animateIconState(MaterialMenuDrawable.IconState.X);
+            animateBottomToolbar();
             return true;
         }
     };
@@ -566,7 +661,7 @@ public class LoopActivity extends ActionBarActivity {
                 mAudioRecord.stop();
                 dataOutputStream.close();
 
-                mLoops[id].setFilePath(file.getAbsolutePath());
+                mLoops.get(id).setFilePath(file.getAbsolutePath());
 
                 TypedFile soundFile = new TypedFile("binary", file);
 
@@ -574,7 +669,7 @@ public class LoopActivity extends ActionBarActivity {
                     @Override
                     public void success(Endpoint data, Response response) {
                         if(data.type == true) {
-                            mLoops[id].setEndpoint(data.endpoint);
+                            mLoops.get(id).setEndpoint(data.endpoint);
                         } else {
                             Log.d("Spacers", "Something went wrong.");
                         }
@@ -617,7 +712,7 @@ public class LoopActivity extends ActionBarActivity {
                 IOUtils.copy(inputStream, out);
                 inputStream.close();
                 out.close();
-                mLoops[index].setFilePath(file.getAbsolutePath());
+                mLoops.get(index).setFilePath(file.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -636,15 +731,15 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void setRecordingImage(Integer index) {
-        mLoops[index].setCurrentState("recording");
+        mLoops.get(index).setCurrentState("recording");
     }
 
     public void setLoopLoading(Integer index) {
-        mLoops[index].setCurrentState("loading");
+        mLoops.get(index).setCurrentState("loading");
     }
 
     public void taskPostExecute(Integer index) {
-        Loop loop = mLoops[index];
+        Loop loop = mLoops.get(index);
         LoopButton loopButton = loop.getLoopButton();
         loop.setCurrentState("loading");
         addAudioData(loop.getAudioData());
@@ -655,7 +750,7 @@ public class LoopActivity extends ActionBarActivity {
 
     public void setLoopsProgress(Integer value) {
         for(int i = 0; i < mLoopsLength; i++) {
-            mLoops[i].setLoopProgress(value);
+            mLoops.get(i).setLoopProgress(value);
         }
     }
 }

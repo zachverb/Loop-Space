@@ -124,7 +124,6 @@ public class TrackListActivity extends ActionBarActivity {
         mFiltersSpinner = (Spinner)findViewById(R.id.filter_spinner);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Global Tracks");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(filtersShowing);
 
@@ -134,10 +133,6 @@ public class TrackListActivity extends ActionBarActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mFiltersSpinner.setAdapter(adapter);
-
-
-
-
     }
 
     @Override
@@ -160,10 +155,6 @@ public class TrackListActivity extends ActionBarActivity {
                 mProgressBar.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
                 getTracks();
-                break;
-            case R.id.action_filter:
-                //filtersShowing = !filtersShowing;
-                //getSupportActionBar().setDisplayShowTitleEnabled(filtersShowing);
                 break;
         }
 
