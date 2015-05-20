@@ -2,6 +2,8 @@ package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,7 +17,6 @@ import android.widget.NumberPicker;
 
 import com.capstone.zacharyverbeck.audiorecordtest.API.ServerAPI;
 import com.capstone.zacharyverbeck.audiorecordtest.Java.GlobalFunctions;
-import com.capstone.zacharyverbeck.audiorecordtest.Models.Data;
 import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.gc.materialdesign.views.ButtonRectangle;
@@ -24,9 +25,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -46,6 +49,7 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
     protected Location mLastLocation;
     private double latitude;
     private double longitude;
+    private String city;
 
 
     @Override
@@ -103,9 +107,6 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
     }
 
     private void setUpViews() {
-
-
-
         mTrackName = (EditText)findViewById(R.id.trackName);
 
         mBpmPicker = (NumberPicker)findViewById(R.id.bpmPicker);
@@ -119,7 +120,7 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
             @Override
             public void onClick(View v) {
                 if(mTrackName.getText().length() != 0) {
-                    service.newTrack(new Track(mTrackName.getText().toString(), mBpmPicker.getValue(), longitude, latitude), new Callback<Track>() {
+                    service.newTrack(new Track(mTrackName.getText().toString(), mBpmPicker.getValue(), longitude, latitude, city), new Callback<Track>() {
                         @Override
                         public void success(Track track, Response response) {
                             Log.d(TAG, "SUCCESS!");
@@ -128,6 +129,7 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
                                 loopIntent.putExtra("trackId", track.id);
                                 loopIntent.putExtra("BPM", mBpmPicker.getValue());
                                 Log.d(TAG, String.valueOf(track.latitude));
+                                Log.d(TAG, track.city + "");
 
                                 startActivity(loopIntent);
                             } else {
@@ -182,6 +184,18 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
         if (mLastLocation != null) {
             longitude = mLastLocation.getLongitude();
             latitude = mLastLocation.getLatitude();
+
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            try {
+                List<Address> addressList = geocoder.getFromLocation(
+                        latitude, longitude, 1);
+                if (addressList != null && addressList.size() > 0) {
+                    Address address = addressList.get(0);
+                    city = address.getLocality();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable connect to Geocoder", e);
+            }
             Log.d(TAG, String.valueOf(mLastLocation.getLatitude()));
         }
 
