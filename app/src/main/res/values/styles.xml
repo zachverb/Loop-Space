@@ -17,4 +17,5 @@
     <color name="ripple_fab">#F06292</color>
     <color name="accent_fab">#E91E63</color>
     <color name="accent_pressed_fab">#C2185B</color>
+    <color name="loop_button_color">#2196F3</color>
 </resources>

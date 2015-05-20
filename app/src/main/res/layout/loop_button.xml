@@ -7,7 +7,7 @@
     android:layout_height="150dp"
     android:background="@null"
     android:textSize="32dp"
-    app:cb_color_loop="#2196F3"
+    app:cb_color_loop="@color/loop_button_color"
     app:cb_pressedRingWidth_loop="8dp"
     android:src="@drawable/ic_mic_none_white_48dp"
     android:padding="40dp"

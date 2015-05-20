@@ -1,5 +1,7 @@
 package com.capstone.zacharyverbeck.audiorecordtest.Models;
 
+import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -15,6 +17,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+
+import static com.capstone.zacharyverbeck.audiorecordtest.R.color.loop_button_color;
 
 /**
  * Created by zacharyverbeck on 4/23/15.
@@ -92,22 +96,32 @@ public class Loop {
         if(getCurrentState() == "loading" && state != "loading") {
             setProgressBarInvisible();
         }
+        LoopButton button = this.getLoopButton();
+        Log.d("TrackListActivity", loop_button_color + "");
         switch(state) {
             case "ready":
-                this.getLoopButton().setImageResource(R.drawable.ic_mic_none_white_48dp);
+                button.setImageResource(R.drawable.ic_mic_none_white_48dp);
+                button.setColor(Color.parseColor("#2196F3"));
                 break;
             case "recording":
-                this.getLoopButton().setImageResource(R.drawable.ic_mic_white_48dp);
+                button.setImageResource(R.drawable.ic_mic_white_48dp);
+                button.setColor(Color.RED);
                 break;
             case "paused":
-                this.getLoopButton().setImageResource(R.drawable.ic_volume_off_white_48dp);
+                button.setImageResource(R.drawable.ic_volume_off_white_48dp);
+                button.setColor(Color.parseColor("#2196F3"));
+                button.setAlpha(.5f);
                 break;
             case "loading":
-                this.getLoopButton().setImageResource(R.drawable.ic_file_download_48dp);
+                button.setImageResource(R.drawable.ic_file_download_48dp);
+                button.setColor(Color.parseColor("#2196F3"));
+                button.setAlpha(.5f);
                 this.setProgressBarVisible();
                 break;
             case "playing":
-                this.getLoopButton().setImageResource(R.drawable.ic_file_download_48dp);
+                button.setImageResource(R.drawable.ic_play_arrow_blue_48dp);
+                button.setColor(Color.parseColor("#2196F3"));
+                button.setAlpha(1f);
                 setLoopProgressBarVisible();
                 break;
         }
@@ -127,6 +141,7 @@ public class Loop {
     }
 
     public void setIndex(int index) {
+        this.getLoopButton().setId(index);
         this.index = index;
     }
 

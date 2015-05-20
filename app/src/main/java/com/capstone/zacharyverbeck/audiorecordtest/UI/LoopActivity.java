@@ -241,7 +241,7 @@ public class LoopActivity extends ActionBarActivity {
 
     private void animateBottomToolbar() {
         AnimatorSet set = new AnimatorSet().setDuration(100L);
-        if(bottomToolbarShowing) {
+        if(bottomToolbarShowing && selected == -1) {
             //hide toolbar
             set.playTogether(
                     ObjectAnimator.ofFloat(playbar, "translationY", 0f, 200f)
@@ -355,7 +355,6 @@ public class LoopActivity extends ActionBarActivity {
         snackbar.show();
     }
 
-
     /*
      *  BUTTON CREATION FUNCTIONS
      */
@@ -378,7 +377,9 @@ public class LoopActivity extends ActionBarActivity {
     public void deleteLoop(int id) {
         if(selected != -1) {
             Loop loop = mLoops.get(id);
-            subtractAudioData(loop.getAudioData());
+            if(loop.isPlaying()) {
+                subtractAudioData(loop.getAudioData());
+            }
             mLoopsLength--;
             ((LinearLayout) mLoops.get(id).getContainer().getParent()).removeView(mLoops.get(id).getContainer());
             mLoops.remove(id);
@@ -390,6 +391,7 @@ public class LoopActivity extends ActionBarActivity {
     public void refreshLayout() {
         int index = 0;
         for(Loop loop : mLoops) {
+            loop.setIndex(index);
             ((LinearLayout)loop.getContainer().getParent()).removeView(loop.getContainer());
             if (index % 2 == 0) {
                 mLeftLayout.addView(loop.getContainer());
