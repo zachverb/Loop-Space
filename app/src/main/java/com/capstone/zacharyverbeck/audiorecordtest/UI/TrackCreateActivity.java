@@ -2,6 +2,7 @@ package com.capstone.zacharyverbeck.audiorecordtest.UI;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +20,13 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.widgets.Dialog;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -26,7 +34,7 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class TrackCreateActivity extends ActionBarActivity {
+public class TrackCreateActivity extends ActionBarActivity implements ConnectionCallbacks, OnConnectionFailedListener {
 
     public String TAG = "TrackListActivity";
     public ServerAPI service;
@@ -34,6 +42,10 @@ public class TrackCreateActivity extends ActionBarActivity {
     public EditText mTrackName;
     public NumberPicker mBpmPicker;
     public GlobalFunctions mGlobal;
+    protected GoogleApiClient mGoogleApiClient;
+    protected Location mLastLocation;
+    private double latitude;
+    private double longitude;
 
 
     @Override
@@ -41,11 +53,32 @@ public class TrackCreateActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_create);
         init();
+
+
+
+
+
     }
+
+
+    protected synchronized void buildGoogleApiClient() {
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+
+
 
     private void init() {
         setUpRestAdapter();
         setUpViews();
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
+
     }
 
     private void setUpRestAdapter() {
@@ -70,6 +103,9 @@ public class TrackCreateActivity extends ActionBarActivity {
     }
 
     private void setUpViews() {
+
+
+
         mTrackName = (EditText)findViewById(R.id.trackName);
 
         mBpmPicker = (NumberPicker)findViewById(R.id.bpmPicker);
@@ -83,14 +119,16 @@ public class TrackCreateActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 if(mTrackName.getText().length() != 0) {
-                    service.newTrack(new Track(mTrackName.getText().toString(), mBpmPicker.getValue()), new Callback<Data>() {
+                    service.newTrack(new Track(mTrackName.getText().toString(), mBpmPicker.getValue(), longitude, latitude), new Callback<Track>() {
                         @Override
-                        public void success(Data data, Response response) {
+                        public void success(Track track, Response response) {
                             Log.d(TAG, "SUCCESS!");
-                            if (data.type == true) {
+                            if (track.type == true) {
                                 Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
-                                loopIntent.putExtra("trackId", data.id);
+                                loopIntent.putExtra("trackId", track.id);
                                 loopIntent.putExtra("BPM", mBpmPicker.getValue());
+                                Log.d(TAG, String.valueOf(track.latitude));
+
                                 startActivity(loopIntent);
                             } else {
                                 Log.d(TAG, "JK, failure");
@@ -134,5 +172,34 @@ public class TrackCreateActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+
+        if (mLastLocation != null) {
+            longitude = mLastLocation.getLongitude();
+            latitude = mLastLocation.getLatitude();
+            Log.d(TAG, String.valueOf(mLastLocation.getLatitude()));
+        }
+
+
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
+
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
+
     }
 }
