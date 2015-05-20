@@ -32,6 +32,8 @@ import com.melnykov.fab.FloatingActionButton;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -59,8 +61,10 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
     private double longitude;
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
-    private String city;
+    private String city = "";
     private int filterIndex = 0;
+    private Toolbar toolbar;
+    private List<String> filterStrings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,13 +167,16 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
 
         mFiltersSpinner = (Spinner) findViewById(R.id.filter_spinner);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.filters_array, android.R.layout.simple_spinner_item);
+        filterStrings = new ArrayList<String>(Arrays.asList(new String[]{"Filter Nearby", "Filter by City: ", "Global Filter"}));
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                 android.R.layout.simple_spinner_item, filterStrings);
+
+        adapter.setNotifyOnChange(true);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mFiltersSpinner.setAdapter(adapter);
@@ -216,55 +223,26 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
     public void getTracks() {
         switch(filterIndex) {
             case 0:
-                getTracksByCity();
+                getNearby();
                 break;
             case 1:
+                getTracksByCity();
+                break;
+            case 2:
                 getTracksGlobal();
                 break;
         }
     }
 
     public void getTracksGlobal() {
-        service.getTracks(new Callback<List<Track>>() {
-            @Override
-            public void success(List<Track> tracks, Response response) {
-                mAdapter = new TrackListAdapter(getApplicationContext(), tracks);
-
-                mRecyclerView.setAdapter(mAdapter);
-                mSwipeRefreshLayout.setRefreshing(false);
-                mRecyclerView.setVisibility(View.VISIBLE);
-                mProgressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d(TAG, "Failed to retrieve tracklist");
-                error.printStackTrace();
-            }
-        });
+        service.getTracks(getTracksCallback);
     }
 
     public void getTracksByCity() {
-        service.getTracksByCity(city, new Callback<List<Track>>() {
-            @Override
-            public void success(List<Track> tracks, Response response) {
-                mAdapter = new TrackListAdapter(getApplicationContext(), tracks);
-
-                mRecyclerView.setAdapter(mAdapter);
-                mSwipeRefreshLayout.setRefreshing(false);
-                mRecyclerView.setVisibility(View.VISIBLE);
-                mProgressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d(TAG, "Failed to retrieve tracklist");
-                error.printStackTrace();
-            }
-        });
+        service.getTracksByCity(city, getTracksCallback);
     }
 
-    public void sortNearby() {
+    public void getNearby() {
         service.getTracks(new Callback<List<Track>>() {
             @Override
             public void success(List<Track> tracks, Response response) {
@@ -309,6 +287,23 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
 
     }
 
+    public Callback<List<Track>> getTracksCallback = new Callback<List<Track>>() {
+        @Override
+        public void success(List<Track> tracks, Response response) {
+            mAdapter = new TrackListAdapter(getApplicationContext(), tracks);
+            mRecyclerView.setAdapter(mAdapter);
+            mSwipeRefreshLayout.setRefreshing(false);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mProgressBar.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void failure(RetrofitError error) {
+            Log.d(TAG, "Failed to retrieve tracklist");
+            error.printStackTrace();
+        }
+    };
+
     @Override
     public void onConnected(Bundle bundle) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
@@ -325,6 +320,7 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
                 if (addressList != null && addressList.size() > 0) {
                     Address address = addressList.get(0);
                     city = address.getLocality();
+                    filterStrings.set(1, filterStrings.get(1) + city);
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Unable connect to Geocoder", e);
