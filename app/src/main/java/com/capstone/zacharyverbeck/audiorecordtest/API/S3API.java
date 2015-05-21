@@ -10,7 +10,9 @@ import retrofit.http.Streaming;
  * Created by zacharyverbeck on 4/25/15.
  */
 public interface S3API {
+
     @GET("/loops/{filename}")
     @Streaming
     void getLoop(@Path("filename") String filename, Callback<Response> callback);
+
 }

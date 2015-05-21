@@ -48,6 +48,8 @@ public class LoopProgressBar extends View {
     private float progress = 0;
     private int min = 0;
     private int max = 100;
+
+    private int duration = 4000;
     /**
      * Start the progress at 12 o'clock
      */
@@ -94,6 +96,14 @@ public class LoopProgressBar extends View {
     public void setMax(int max) {
         this.max = max;
         invalidate();
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
     public int getColor() {
@@ -205,7 +215,7 @@ public class LoopProgressBar extends View {
     public void setProgressWithAnimation(float progress) {
 
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(this, "progress", progress);
-        objectAnimator.setDuration(4000);
+        objectAnimator.setDuration(duration);
         objectAnimator.setInterpolator(new LinearInterpolator());
         objectAnimator.start();
     }

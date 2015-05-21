@@ -72,13 +72,17 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
         setContentView(R.layout.activity_track_list);
         setUpRestAdapter();
         init();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         getTracks();
+    }
+
+    @Override
+    protected void onPause() {
+        mGoogleApiClient.disconnect();
     }
 
     public double countDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -321,6 +325,7 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
                     Address address = addressList.get(0);
                     city = address.getLocality();
                     filterStrings.set(1, filterStrings.get(1) + city);
+                    mGoogleApiClient.disconnect();
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Unable connect to Geocoder", e);
