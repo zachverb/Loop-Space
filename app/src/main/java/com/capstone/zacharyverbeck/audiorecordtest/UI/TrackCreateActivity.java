@@ -60,12 +60,6 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
 
     }
 
-    @Override
-    protected void onPause() {
-        mGoogleApiClient.disconnect();
-    }
-
-
     protected synchronized void buildGoogleApiClient() {
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)

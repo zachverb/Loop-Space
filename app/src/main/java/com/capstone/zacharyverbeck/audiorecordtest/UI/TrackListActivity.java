@@ -80,11 +80,6 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
         getTracks();
     }
 
-    @Override
-    protected void onPause() {
-        mGoogleApiClient.disconnect();
-    }
-
     public double countDistance(double lat1, double lng1, double lat2, double lng2) {
         Location locationUser = new Location("point A");
         Location locationPlace = new Location("point B");

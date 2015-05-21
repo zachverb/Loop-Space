@@ -76,15 +76,15 @@ public class LoopActivity extends ActionBarActivity {
 
     public int sampleRate = 44100;
 
-    public int bpm;
+    public double bpm;
 
-    public int beat;
+    public double beat;
 
-    public int duration;
+    public double duration;
 
-    public int bar;
+    public double bar;
 
-    public int maxBars;
+    public double maxBars;
 
     public int minBufferSize;
 
@@ -194,10 +194,14 @@ public class LoopActivity extends ActionBarActivity {
 
     private void initVariables() {
         trackId = getIntent().getIntExtra("trackId", -1) + "";
-        bpm = getIntent().getIntExtra("BPM", 60);
+        bpm = (double) getIntent().getIntExtra("BPM", 60);
+        Log.d(TAG, bpm + "");
         beat = (60/bpm) * sampleRate;
+        Log.d(TAG, beat + "");
         duration = (60/bpm) * 4000;
+        Log.d(TAG, duration + "");
         bar = beat * 4;
+        Log.d(TAG, bar + "");
         maxBars = bar * 8;
     }
 
@@ -310,7 +314,7 @@ public class LoopActivity extends ActionBarActivity {
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
 
-        mAudioData = new short[beat];
+        mAudioData = new short[(int)beat];
     }
 
     private void startAudio() {
@@ -447,7 +451,7 @@ public class LoopActivity extends ActionBarActivity {
         loopProgress.setMax(1);
         loopProgress.setVisibility(View.INVISIBLE);
         loopProgress.setColor(primary_light);
-        loopProgress.setDuration(duration);
+        loopProgress.setDuration((int) duration);
         params = new RelativeLayout.LayoutParams(300,300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(loopProgress, params);
@@ -523,7 +527,7 @@ public class LoopActivity extends ActionBarActivity {
         int localLength = audioData.length;
         int index = 0;
         // short [] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short [] result = new short[bar];
+        short [] result = new short[(int)bar];
         // while(index < globalLength || index < localLength) {
         while(index<bar) {
             short sum = 0;
@@ -542,7 +546,7 @@ public class LoopActivity extends ActionBarActivity {
         int localLength = audioData.length;
         int index = 0;
         //short[] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short [] result = new short[bar];
+        short [] result = new short[(int) bar];
         // while (index < globalLength || index < localLength) {
         while(index<bar) {
             short sum = 0;
