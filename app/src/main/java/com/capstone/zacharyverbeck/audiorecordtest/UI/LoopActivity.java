@@ -76,11 +76,11 @@ public class LoopActivity extends ActionBarActivity {
 
     public int sampleRate = 44100;
 
-    public int bpm = 60;
+    public int bpm;
 
-    public int beat = (60/bpm) * sampleRate;
+    public int beat;
 
-    public int bar = beat * 4;
+    public int bar;
 
     public int minBufferSize;
 
@@ -179,6 +179,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void init() {
+        setupVariables();
         setupLayouts();
         setupToolbar();
         audioInit();
@@ -187,11 +188,17 @@ public class LoopActivity extends ActionBarActivity {
         startAudio();
     }
 
+    private void setupVariables() {
+        trackId = getIntent().getIntExtra("trackId", -1) + "";
+        bpm = getIntent().getIntExtra("BPM", -1);
+        beat = (60/bpm) * sampleRate;
+        bar = beat * 4;
+    }
+
     private void setupLayouts() {
         mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
         mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
         mLoops = new ArrayList<Loop>(6);
-        trackId = getIntent().getIntExtra("trackId", -1) + "";
     }
 
     private void setupToolbar() {
