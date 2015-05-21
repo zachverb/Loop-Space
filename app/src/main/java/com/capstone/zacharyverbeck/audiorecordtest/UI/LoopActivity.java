@@ -76,11 +76,15 @@ public class LoopActivity extends ActionBarActivity {
 
     public int sampleRate = 44100;
 
-    public int bpm;
+    public double bpm;
 
-    public int beat;
+    public double beat;
 
-    public int bar;
+    public double duration;
+
+    public double bar;
+
+    public double maxBars;
 
     public int minBufferSize;
 
@@ -102,8 +106,6 @@ public class LoopActivity extends ActionBarActivity {
 
     public short[] mAudioData;
 
-    public boolean toDelete = false;
-
     private MaterialMenuDrawable materialMenu;
 
     public Toolbar playbar;
@@ -111,6 +113,8 @@ public class LoopActivity extends ActionBarActivity {
     private int selected = -1;
 
     private boolean bottomToolbarShowing = true;
+
+    private int currentBeat;
 
     /** Called when the activity is first created. */
     @Override
@@ -155,6 +159,7 @@ public class LoopActivity extends ActionBarActivity {
                 break;
             case R.id.action_add:
                 addToLayout();
+                mLoops.get(mLoopsLength - 1).getLoopButton().setOnClickListener(startRecOnClickListener);
                 break;
         }
 
@@ -179,20 +184,25 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void init() {
-        setupVariables();
+        initVariables();
         setupLayouts();
         setupToolbar();
-        audioInit();
+        initAudio();
         setupRestAdapter();
         getTrackInfo();
-        startAudio();
     }
 
-    private void setupVariables() {
+    private void initVariables() {
         trackId = getIntent().getIntExtra("trackId", -1) + "";
-        bpm = getIntent().getIntExtra("BPM", -1);
+        bpm = (double) getIntent().getIntExtra("BPM", 60);
+        Log.d(TAG, bpm + "");
         beat = (60/bpm) * sampleRate;
+        Log.d(TAG, beat + "");
+        duration = (60/bpm) * 4000;
+        Log.d(TAG, duration + "");
         bar = beat * 4;
+        Log.d(TAG, bar + "");
+        maxBars = bar * 8;
     }
 
     private void setupLayouts() {
@@ -212,8 +222,7 @@ public class LoopActivity extends ActionBarActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (toDelete) {
-                    toDelete = false;
+                if (selected != -1) {
                     selected = -1;
                     materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
                     animateBottomToolbar();
@@ -235,7 +244,6 @@ public class LoopActivity extends ActionBarActivity {
                 switch (menuItem.getItemId()) {
                     case R.id.action_delete:
                         deleteLoop(selected);
-                        toDelete = false;
                         materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
                         animateBottomToolbar();
                         break;
@@ -288,7 +296,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     // initializes audiotrack and audiorecord.
-    private void audioInit() {
+    private void initAudio() {
         minBufferSize = AudioRecord.getMinBufferSize(sampleRate,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
@@ -306,8 +314,7 @@ public class LoopActivity extends ActionBarActivity {
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
 
-        mAudioData = new short[beat];
-
+        mAudioData = new short[(int)beat];
     }
 
     private void startAudio() {
@@ -412,7 +419,7 @@ public class LoopActivity extends ActionBarActivity {
     private RelativeLayout addLoopObject() {
         // Creating a new loop button
         LoopButton loopButton = (LoopButton) getLayoutInflater().inflate(R.layout.loop_button, null);
-        loopButton.setOnClickListener(startRecOnClickListener);
+        //loopButton.setOnClickListener(startRecOnClickListener);
         loopButton.setId(mLoopsLength);
 
         // Creating the container.
@@ -444,6 +451,7 @@ public class LoopActivity extends ActionBarActivity {
         loopProgress.setMax(1);
         loopProgress.setVisibility(View.INVISIBLE);
         loopProgress.setColor(primary_light);
+        loopProgress.setDuration((int) duration);
         params = new RelativeLayout.LayoutParams(300,300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(loopProgress, params);
@@ -484,11 +492,13 @@ public class LoopActivity extends ActionBarActivity {
             mLoops.get(i).setCurrentState("loading");
             mLoops.get(i).setIndex(index);
             mLoops.get(i).setId(loops.get(index).id);
+            Log.d(TAG, "WE GOT HERE FAM");
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
                 new Callback<Response>() {
                     @Override
                     public void success(Response result, Response response) {
+                        Log.d(TAG,"SUCCESS INSIDE HERE");
                         StreamingTask task = new StreamingTask();
                         task.execute(new Object[]{result, index});
                     }
@@ -506,10 +516,6 @@ public class LoopActivity extends ActionBarActivity {
      *  GLOBAL AUDIO FUNCTIONS
      */
 
-    private short[] getAudioData() {
-        return mAudioData;
-    }
-
     private void setAudioData(short[] audioData) {
         mAudioData = audioData;
     }
@@ -521,7 +527,7 @@ public class LoopActivity extends ActionBarActivity {
         int localLength = audioData.length;
         int index = 0;
         // short [] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short [] result = new short[bar];
+        short [] result = new short[(int)bar];
         // while(index < globalLength || index < localLength) {
         while(index<bar) {
             short sum = 0;
@@ -540,7 +546,7 @@ public class LoopActivity extends ActionBarActivity {
         int localLength = audioData.length;
         int index = 0;
         //short[] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short [] result = new short[bar];
+        short [] result = new short[(int) bar];
         // while (index < globalLength || index < localLength) {
         while(index<bar) {
             short sum = 0;
@@ -596,14 +602,18 @@ public class LoopActivity extends ActionBarActivity {
 
     };
 
-    private View.OnLongClickListener setLoopButtonDelete = new View.OnLongClickListener() {
+    private View.OnLongClickListener setLoopButtonSelected = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(100);
-            toDelete = true;
-            selected = v.getId();
-            materialMenu.animateIconState(MaterialMenuDrawable.IconState.X);
+            if(selected == v.getId()) {
+                selected = -1;
+                materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+            } else {
+                selected = v.getId();
+                materialMenu.animateIconState(MaterialMenuDrawable.IconState.X);
+            }
             animateBottomToolbar();
             return true;
         }
@@ -620,7 +630,7 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "THREAD PLAYIN NOW");
             mAudioTrack.play();
             Log.d(TAG, "PLAY");
-            int currentBeat = 1;
+            currentBeat = 1;
             while(playing) {
                 if(minBufferSize * currentBeat > mAudioData.length) {
                     currentBeat = 1;
@@ -636,7 +646,6 @@ public class LoopActivity extends ActionBarActivity {
         protected void onProgressUpdate(Integer... param) {
             setLoopsProgress(param[0]);
         }
-
     }
 
     private class RecordingTask extends AsyncTask<Integer, Integer, Integer> {
@@ -656,7 +665,15 @@ public class LoopActivity extends ActionBarActivity {
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
 
                 short[] tempAudioData = new short[minBufferSize];
-
+                while(currentBeat != 1) {
+                    try
+                    {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
                 mAudioRecord.startRecording();
                 publishProgress(id);
                 while(recording) {
@@ -711,6 +728,7 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected Integer doInBackground(Object... params) {
+            Log.d(TAG, "HELP");
             final Response res = (Response) params[0];
             final int index = (int) params[1];
             publishProgress(index);
@@ -753,7 +771,7 @@ public class LoopActivity extends ActionBarActivity {
         loop.setCurrentState("loading");
         addAudioData(loop.getAudioData());
         loopButton.setOnClickListener(togglePlayOnClickListener);
-        loopButton.setOnLongClickListener(setLoopButtonDelete);
+        loopButton.setOnLongClickListener(setLoopButtonSelected);
         loop.setCurrentState("playing");
     }
 

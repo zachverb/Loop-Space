@@ -58,12 +58,7 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
         setContentView(R.layout.activity_track_create);
         init();
 
-
-
-
-
     }
-
 
     protected synchronized void buildGoogleApiClient() {
 
@@ -74,15 +69,11 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
                 .build();
     }
 
-
-
-
     private void init() {
         setUpRestAdapter();
         setUpViews();
         buildGoogleApiClient();
         mGoogleApiClient.connect();
-
     }
 
     private void setUpRestAdapter() {
@@ -192,6 +183,7 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
                 if (addressList != null && addressList.size() > 0) {
                     Address address = addressList.get(0);
                     city = address.getLocality();
+                    mGoogleApiClient.disconnect();
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Unable connect to Geocoder", e);
