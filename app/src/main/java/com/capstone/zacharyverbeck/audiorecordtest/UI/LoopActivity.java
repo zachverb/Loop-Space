@@ -392,7 +392,7 @@ public class LoopActivity extends ActionBarActivity {
         if(selected != -1) {
             Loop loop = mLoops.get(id);
             if(loop.isPlaying()) {
-                subtractAudioData(loop.getAudioData());
+                subtractAudioData(loop.getAudioData(), loop.getBars());
             }
             mLoopsLength--;
             ((LinearLayout) mLoops.get(id).getContainer().getParent()).removeView(mLoops.get(id).getContainer());
@@ -563,11 +563,6 @@ public class LoopActivity extends ActionBarActivity {
             }
             sum+=globalAudioData[globalIndex];
             sum+=audioData[localIndex];
-//            if(index % 1000 == 0) {
-//                Log.d(TAG, "SUM: " + sum + " INDEX: " + index);
-//                Log.d(TAG, "mAudioData[globalIndex] = " + mAudioData[globalIndex] + "GLOBAL INDEX" + globalIndex);
-//                Log.d(TAG, "audioData[localIndex] = " + audioData[localIndex] + " LOCALINDEX" + localIndex);
-//            }
             result[index] = sum;
             globalIndex++;
             localIndex++;
@@ -577,24 +572,53 @@ public class LoopActivity extends ActionBarActivity {
         setAudioData(result);
     }
 
-    // Removes audioData from the global mAudioData
-    // TODO: Handle Clipping effectively.
-    private void subtractAudioData(short[] audioData) {
-        int globalLength = mAudioData.length;
-        int localLength = audioData.length;
+    private void subtractAudioData(short[] audioData, int bars) {
+        short[] globalAudioData = mAudioData;
+        int globalLength = bar * totalBars;
+        Log.d(TAG, "globalLength = " + globalLength);
+        int localLength = bar * bars;
+        Log.d(TAG, "localLength = " + localLength);
+        short[] result = new short[Math.max(globalLength, localLength)];
+        int globalIndex = 0;
+        int localIndex = 0;
         int index = 0;
-        //short[] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short [] result = new short[bar];
-        // while (index < globalLength || index < localLength) {
-        while(index<bar) {
+        while(index < globalLength || index < localLength) {
             short sum = 0;
-            if (index < globalLength) sum += mAudioData[index];
-            if (index < localLength) sum -= audioData[index];
+            if(globalIndex >= globalLength) {
+                globalIndex = 0;
+            }
+            if(localIndex >= localLength) {
+                localIndex = 0;
+            }
+            sum+=globalAudioData[globalIndex];
+            sum-=audioData[localIndex];
             result[index] = sum;
+            globalIndex++;
+            localIndex++;
             index++;
         }
+        totalBars = Math.max(totalBars, bars);
         setAudioData(result);
     }
+
+//    // Removes audioData from the global mAudioData
+//    // TODO: Handle Clipping effectively.
+//    private void subtractAudioData(short[] audioData) {
+//        int globalLength = mAudioData.length;
+//        int localLength = audioData.length;
+//        int index = 0;
+//        //short[] result = new short[Math.max(mAudioData.length, audioData.length)];
+//        short [] result = new short[bar];
+//        // while (index < globalLength || index < localLength) {
+//        while(index<bar) {
+//            short sum = 0;
+//            if (index < globalLength) sum += mAudioData[index];
+//            if (index < localLength) sum -= audioData[index];
+//            result[index] = sum;
+//            index++;
+//        }
+//        setAudioData(result);
+//    }
 
     /*
      *  ONCLICK LISTENERS
@@ -629,7 +653,7 @@ public class LoopActivity extends ActionBarActivity {
         public void onClick(View v) {
             Loop loop = mLoops.get(v.getId());
             if(loop.isPlaying()) {
-                subtractAudioData(loop.getAudioData());
+                subtractAudioData(loop.getAudioData(), loop.getBars());
                 loop.setCurrentState("paused");
             } else {
                 addAudioData(loop.getAudioData(), loop.getBars());
@@ -670,11 +694,11 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "PLAY");
             currentBeat = 1;
             while(playing) {
-                if(minBufferSize * currentBeat > mAudioData.length) {
+                if(currentBeat > totalBars) {
                     currentBeat = 1;
-                    publishProgress(currentBeat);
                 }
-                mAudioTrack.write(mAudioData, (minBufferSize * (currentBeat - 1)), minBufferSize);
+                publishProgress(currentBeat);
+                mAudioTrack.write(mAudioData, (bar * (currentBeat - 1)), bar);
                 currentBeat++;
             }
             return true;

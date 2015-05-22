@@ -56,6 +56,7 @@ public class Loop {
         this.setIsPlaying(true);
         this.setCurrentState("ready");
         this.barSize = barSize;
+        this.setBars(1);
     }
 
     public LoopButton getLoopButton() {
@@ -236,10 +237,11 @@ public class Loop {
     }
 
     public void setLoopProgress(int beat) {
-        //int currentBar = beat % barSize;
-        if (beat == bars) {
+        while(beat > bars) {
+            beat = beat - bars;
+        }
+        if (beat == 1) {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
-            // currentBar = 1;
         }
         this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
     }
@@ -249,8 +251,7 @@ public class Loop {
     }
 
     public void setBars(int bars) {
-        LoopProgressBar loopProgressBar = this.getLoopProgressBar();
-        loopProgressBar.setDuration(loopProgressBar.getDuration() * bars);
+        this.getLoopProgressBar().setMax(bars);
         this.bars = bars;
     }
 
