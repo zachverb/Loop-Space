@@ -544,6 +544,7 @@ public class LoopActivity extends ActionBarActivity {
     // TODO: Handle Clipping effectively.
     // PRE: takes in an array of pcm to add to the global array, and the bars it takes up
     private void addAudioData(short[] audioData, int bars) {
+        short[] globalAudioData = mAudioData;
         int globalLength = bar * totalBars;
         Log.d(TAG, "globalLength = " + globalLength);
         int localLength = bar * bars;
@@ -560,14 +561,16 @@ public class LoopActivity extends ActionBarActivity {
             if(localIndex >= localLength) {
                 localIndex = 0;
             }
-            Log.d(TAG, "mAudioData[globalIndex] = " + mAudioData[globalIndex]);
-            sum+=mAudioData[globalIndex];
-            Log.d(TAG, "audioData[localIndex] = " + audioData[localIndex]);
+            sum+=globalAudioData[globalIndex];
             sum+=audioData[localIndex];
-            if(index % 1000 == 0) {
-                Log.d(TAG, "SUM: " + sum);
-            }
+//            if(index % 1000 == 0) {
+//                Log.d(TAG, "SUM: " + sum + " INDEX: " + index);
+//                Log.d(TAG, "mAudioData[globalIndex] = " + mAudioData[globalIndex] + "GLOBAL INDEX" + globalIndex);
+//                Log.d(TAG, "audioData[localIndex] = " + audioData[localIndex] + " LOCALINDEX" + localIndex);
+//            }
             result[index] = sum;
+            globalIndex++;
+            localIndex++;
             index++;
         }
         totalBars = Math.max(totalBars, bars);

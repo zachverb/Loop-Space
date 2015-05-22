@@ -190,6 +190,10 @@ public class Loop {
                 setBars(Integer.highestOneBit(bars - 1));
             }
             Log.d("LoopActivity", this.bars + " many bars");
+
+//            for(int i = 0; i < audioData.length; i+=1000) {
+//                Log.d("LoopActivity", "OK FINE HERE: " + audioData[i] + " AT " + i);
+//            }
         }
         this.audioData = audioData;
     }
