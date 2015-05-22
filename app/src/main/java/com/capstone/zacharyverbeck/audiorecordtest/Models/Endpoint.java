@@ -6,5 +6,6 @@ package com.capstone.zacharyverbeck.audiorecordtest.Models;
 public class Endpoint {
     public boolean type;
     public String endpoint;
+    public int id;
 }
 

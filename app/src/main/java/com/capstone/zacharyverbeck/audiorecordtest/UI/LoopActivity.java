@@ -116,6 +116,8 @@ public class LoopActivity extends ActionBarActivity {
 
     private int currentBeat;
 
+    private int totalBars = 1;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -243,9 +245,7 @@ public class LoopActivity extends ActionBarActivity {
             public boolean onMenuItemClick(final MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_delete:
-                        deleteLoop(selected);
-                        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
-                        animateBottomToolbar();
+                        deleteFromServer(selected);
                         break;
                 }
                 return true;
@@ -314,7 +314,7 @@ public class LoopActivity extends ActionBarActivity {
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
 
-        mAudioData = new short[beat];
+        mAudioData = new short[bar];
     }
 
     private void startAudio() {
@@ -399,7 +399,27 @@ public class LoopActivity extends ActionBarActivity {
             mLoops.remove(id);
             refreshLayout();
             selected = -1;
+            materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+            animateBottomToolbar();
         }
+    }
+
+    private void deleteFromServer(int id) {
+         service.deleteLoop(trackId, mLoops.get(id).getId() + "", new Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                deleteLoop(selected);
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Dialog dialog = new Dialog(LoopActivity.this, "Permission error:", "You don't have access to delete this loop!");
+                dialog.show();
+                Log.d(TAG, "failed to delete loop");
+                error.printStackTrace();
+            }
+        });
     }
 
     public void refreshLayout() {
@@ -457,7 +477,7 @@ public class LoopActivity extends ActionBarActivity {
         relativeLayout.addView(loopProgress, params);
 
         // Adding the loop to the global container
-        mLoops.add(mLoopsLength, new Loop(relativeLayout));
+        mLoops.add(mLoopsLength, new Loop(relativeLayout, bar));
         mLoops.get(mLoopsLength).setIndex(mLoopsLength);
         return relativeLayout;
     }
@@ -489,9 +509,9 @@ public class LoopActivity extends ActionBarActivity {
             final int index = i;
             final String endpoint = loops.get(index).endpoint;
             addToLayout();
-            mLoops.get(i).setCurrentState("loading");
-            mLoops.get(i).setIndex(index);
-            mLoops.get(i).setId(loops.get(index).id);
+            mLoops.get(index).setCurrentState("loading");
+            mLoops.get(index).setIndex(index);
+            mLoops.get(index).setId(loops.get(index).id);
             Log.d(TAG, "WE GOT HERE FAM");
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
@@ -522,20 +542,35 @@ public class LoopActivity extends ActionBarActivity {
 
     // Adds new audioData to the global mAudioData
     // TODO: Handle Clipping effectively.
-    private void addAudioData(short[] audioData) {
-        int globalLength = mAudioData.length;
-        int localLength = audioData.length;
+    // PRE: takes in an array of pcm to add to the global array, and the bars it takes up
+    private void addAudioData(short[] audioData, int bars) {
+        int globalLength = bar * totalBars;
+        Log.d(TAG, "globalLength = " + globalLength);
+        int localLength = bar * bars;
+        Log.d(TAG, "localLength = " + localLength);
+        short[] result = new short[Math.max(globalLength, localLength)];
+        int globalIndex = 0;
+        int localIndex = 0;
         int index = 0;
-        // short [] result = new short[Math.max(mAudioData.length, audioData.length)];
-        short[] result = new short[bar];
-        // while(index < globalLength || index < localLength) {
-        while(index<bar) {
+        while(index < globalLength || index < localLength) {
             short sum = 0;
-            if(index < globalLength) sum+=mAudioData[index];
-            if(index < localLength) sum+=audioData[index];
+            if(globalIndex >= globalLength) {
+                globalIndex = 0;
+            }
+            if(localIndex >= localLength) {
+                localIndex = 0;
+            }
+            Log.d(TAG, "mAudioData[globalIndex] = " + mAudioData[globalIndex]);
+            sum+=mAudioData[globalIndex];
+            Log.d(TAG, "audioData[localIndex] = " + audioData[localIndex]);
+            sum+=audioData[localIndex];
+            if(index % 1000 == 0) {
+                Log.d(TAG, "SUM: " + sum);
+            }
             result[index] = sum;
             index++;
         }
+        totalBars = Math.max(totalBars, bars);
         setAudioData(result);
     }
 
@@ -594,7 +629,7 @@ public class LoopActivity extends ActionBarActivity {
                 subtractAudioData(loop.getAudioData());
                 loop.setCurrentState("paused");
             } else {
-                addAudioData(loop.getAudioData());
+                addAudioData(loop.getAudioData(), loop.getBars());
                 loop.setCurrentState("playing");
             }
             mLoops.get(v.getId()).setIsPlaying(!loop.isPlaying());
@@ -696,7 +731,9 @@ public class LoopActivity extends ActionBarActivity {
                     @Override
                     public void success(Endpoint data, Response response) {
                         if(data.type == true) {
-                            mLoops.get(id).setEndpoint(data.endpoint);
+                            Loop loop = mLoops.get(id);
+                            loop.setEndpoint(data.endpoint);
+                            loop.setId(data.id);
                         } else {
                             Log.d("Spacers", "Something went wrong.");
                         }
@@ -773,7 +810,7 @@ public class LoopActivity extends ActionBarActivity {
     public void taskPostExecute(Integer index) {
         Loop loop = mLoops.get(index);
         LoopButton loopButton = loop.getLoopButton();
-        addAudioData(loop.getAudioData());
+        addAudioData(loop.getAudioData(), loop.getBars());
         loopButton.setOnClickListener(togglePlayOnClickListener);
         loopButton.setOnLongClickListener(setLoopButtonSelected);
         loop.setCurrentState("playing");

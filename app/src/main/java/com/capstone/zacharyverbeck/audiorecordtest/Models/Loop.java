@@ -18,8 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.capstone.zacharyverbeck.audiorecordtest.R.color.loop_button_color;
-
 /**
  * Created by zacharyverbeck on 4/23/15.
  */
@@ -36,6 +34,8 @@ public class Loop {
     private short[] audioData;
     private boolean isPlaying;
     private String currentState;
+    private int barSize;
+    private int bars;
 
     public boolean isPlaying() {
         return isPlaying;
@@ -45,7 +45,7 @@ public class Loop {
         this.isPlaying = isPlaying;
     }
 
-    public Loop(RelativeLayout layout) {
+    public Loop(RelativeLayout layout, int barSize) {
         this.setContainer(layout);
         this.setLoopButton((LoopButton) layout.getChildAt(0));
         this.setProgressBar((ProgressBar) layout.getChildAt(1));
@@ -55,6 +55,7 @@ public class Loop {
         this.setAudioData(null);
         this.setIsPlaying(true);
         this.setCurrentState("ready");
+        this.barSize = barSize;
     }
 
     public LoopButton getLoopButton() {
@@ -97,7 +98,6 @@ public class Loop {
             setProgressBarInvisible();
         }
         LoopButton button = this.getLoopButton();
-        Log.d("TrackListActivity", loop_button_color + "");
         switch(state) {
             case "ready":
                 button.setImageResource(R.drawable.ic_mic_none_white_48dp);
@@ -177,19 +177,37 @@ public class Loop {
     }
 
     public void setAudioData(short[] audioData) {
+        if(audioData != null) {
+            Log.d("LoopActivity", "Length = " + audioData.length);
+            Log.d("LoopActivity", "Length = " + audioData.length % barSize);
+            int bars = (audioData.length - (audioData.length % barSize));
+            Log.d("LoopActivity", bars + " Bars b4 division");
+            bars = bars / barSize;
+            Log.d("LoopActivity", bars + " bars aftr division");
+            if (bars <= 2) {
+                setBars(bars);
+            } else {
+                setBars(Integer.highestOneBit(bars - 1));
+            }
+            Log.d("LoopActivity", this.bars + " many bars");
+        }
         this.audioData = audioData;
     }
 
     private short[] getAudioDataFromFile(File file) {
         int shortSizeInBytes = Short.SIZE / Byte.SIZE;
-        short[] audioData = new short[(int) (file.length() / shortSizeInBytes)];
+        int length = (int) (file.length() / shortSizeInBytes);
+        if(length < barSize) {
+            length = barSize;
+        }
+        short[] audioData = new short[length];
         try {
             InputStream inputStream = new FileInputStream(file);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
             DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
 
             int j = 0;
-            while (dataInputStream.available() > 0) {
+            while (dataInputStream.available() > 0 && j < length) {
                 audioData[j] += (dataInputStream.readShort() * .5);
                 j++;
             }
@@ -214,9 +232,22 @@ public class Loop {
     }
 
     public void setLoopProgress(int beat) {
-        if (beat == 1) {
+        //int currentBar = beat % barSize;
+        if (beat == bars) {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
+            // currentBar = 1;
         }
         this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
     }
+
+    public int getBars() {
+        return bars;
+    }
+
+    public void setBars(int bars) {
+        LoopProgressBar loopProgressBar = this.getLoopProgressBar();
+        loopProgressBar.setDuration(loopProgressBar.getDuration() * bars);
+        this.bars = bars;
+    }
+
 }

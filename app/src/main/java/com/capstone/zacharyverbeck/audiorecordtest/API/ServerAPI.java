@@ -9,7 +9,9 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.User;
 import java.util.List;
 
 import retrofit.Callback;
+import retrofit.client.Response;
 import retrofit.http.Body;
+import retrofit.http.DELETE;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
 import retrofit.http.POST;
@@ -47,6 +49,6 @@ public interface ServerAPI {
     @GET("/tracks/{track_id}/loops")
     public void getLoops(@Path("track_id") String trackId, Callback<List<LoopFile>> callback);
 
-    @POST("/tracks/{track_id}/loops")
-    public void addLoop(@Path("track_id") String trackId, @Body String endpoint, Callback<Data> callback);
+    @DELETE("/tracks/{track_id}/loops/{loop_id}")
+    public void deleteLoop(@Path("track_id") String trackId, @Path("loop_id") String loopId, Callback<Response> callback);
 }
