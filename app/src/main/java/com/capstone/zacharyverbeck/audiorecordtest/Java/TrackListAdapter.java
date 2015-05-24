@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,9 @@ import com.capstone.zacharyverbeck.audiorecordtest.Models.Track;
 import com.capstone.zacharyverbeck.audiorecordtest.R;
 import com.capstone.zacharyverbeck.audiorecordtest.UI.LoopActivity;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,12 +37,16 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         public TextView owner;
         public RelativeLayout mContainer;
         public LoopButton mLoopButton;
+        public TextView timeStamp;
+        public TextView city;
 
         public ViewHolder(View v) {
             super(v);
             title = (TextView) v.findViewById(R.id.title);
             owner = (TextView) v.findViewById(R.id.owner);
             mContainer = (RelativeLayout) v.findViewById(R.id.row);
+            timeStamp = (TextView) v.findViewById(R.id.timeStamp);
+            city = (TextView) v.findViewById(R.id.city);
             mLoopButton = (LoopButton) v.findViewById(R.id.circle);
             mLoopButton.setClickable(false);
             mLoopButton.setOnClickListener(null);
@@ -68,11 +76,24 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         final int index = position;
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final int trackId = mDataset.get(index).id;
-        final int bpm = mDataset.get(index).bpm;
-        holder.title.setText(mDataset.get(index).title);
-        holder.owner.setText(mDataset.get(index).User.name);
-        holder.mLoopButton.setText("3", 50f, Color.WHITE);
+        final Track track = mDataset.get(index);
+        final int trackId = track.id;
+        final int bpm = track.bpm;
+        String username = track.User.name;
+        holder.title.setText(track.title.substring(0, 1).toUpperCase() + track.title.substring(1));
+        holder.owner.setText(username);
+        holder.mLoopButton.setText(username.substring(0,1).toUpperCase(), 60f, Color.WHITE);
+        String date = mDataset.get(index).createdAt;
+        Date formatted = null;
+        try {
+            formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(date.replaceAll("Z$", "+0000"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        SimpleDateFormat outputFormatter = new SimpleDateFormat("MMM d, h:mm a");
+        holder.timeStamp.setText(outputFormatter.format(formatted));
+        holder.city.setText(track.city);
+        Log.d("TrackListAdapter", formatted.toString());
         //Log.d("WHY", mDataset.get(index).user.email);
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
