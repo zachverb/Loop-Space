@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.ImageButton;
@@ -201,6 +202,8 @@ public class LoopButton extends ImageButton {
         textPaint.setFakeBoldText(true);
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setTextAlign(Paint.Align.CENTER);
+        Typeface tf = Typeface.create("sans-serif-thin",Typeface.NORMAL);
+        textPaint.setTypeface(tf);
 
         this.invalidate();
     }

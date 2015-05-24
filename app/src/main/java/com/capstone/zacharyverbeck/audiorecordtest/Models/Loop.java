@@ -237,8 +237,8 @@ public class Loop {
     }
 
     public void setLoopProgress(int beat) {
-        while(beat > bars) {
-            beat = beat - bars;
+        while(beat > (bars * 4)) {
+            beat = beat - (bars * 4);
         }
         if (beat == 1) {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
@@ -251,7 +251,7 @@ public class Loop {
     }
 
     public void setBars(int bars) {
-        this.getLoopProgressBar().setMax(bars);
+        this.getLoopProgressBar().setMax(bars * 4);
         this.bars = bars;
     }
 

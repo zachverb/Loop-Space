@@ -74,7 +74,7 @@ public class LoopActivity extends ActionBarActivity {
 
     public String TAG = "LoopActivity";
 
-    public int sampleRate = 44100;
+    public int sampleRate;
 
     public double bpm;
 
@@ -196,11 +196,12 @@ public class LoopActivity extends ActionBarActivity {
 
     private void initVariables() {
         trackId = getIntent().getIntExtra("trackId", -1) + "";
+        sampleRate = 44100;
         bpm = (double) getIntent().getIntExtra("BPM", 60);
         Log.d(TAG, bpm + "");
         beat = (int) ((60.0/bpm) * sampleRate);
         Log.d(TAG, beat + "");
-        duration = (int) ((60.0/bpm) * 4000);
+        duration = (int) ((60.0/bpm) * 1000);
         Log.d(TAG, duration + "");
         bar = beat * 4;
         Log.d(TAG, bar + "");
@@ -246,6 +247,9 @@ public class LoopActivity extends ActionBarActivity {
                 switch (menuItem.getItemId()) {
                     case R.id.action_delete:
                         deleteFromServer(selected);
+                        selected = -1;
+                        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+                        animateBottomToolbar();
                         break;
                 }
                 return true;
@@ -389,27 +393,22 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void deleteLoop(int id) {
-        if(selected != -1) {
-            Loop loop = mLoops.get(id);
-            if(loop.isPlaying()) {
-                subtractAudioData(loop.getAudioData(), loop.getBars());
-            }
-            mLoopsLength--;
-            ((LinearLayout) mLoops.get(id).getContainer().getParent()).removeView(mLoops.get(id).getContainer());
-            mLoops.remove(id);
-            refreshLayout();
-            selected = -1;
-            materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
-            animateBottomToolbar();
+        Loop loop = mLoops.get(id);
+        if(loop.isPlaying()) {
+            deleteAudioData(loop.getAudioData());
         }
+        mLoopsLength--;
+        ((LinearLayout) mLoops.get(id).getContainer().getParent()).removeView(mLoops.get(id).getContainer());
+        mLoops.remove(id);
+        refreshLayout();
     }
 
     private void deleteFromServer(int id) {
+         final int loopId = id;
          service.deleteLoop(trackId, mLoops.get(id).getId() + "", new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
-                deleteLoop(selected);
-
+                deleteLoop(loopId);
             }
 
             @Override
@@ -462,7 +461,7 @@ public class LoopActivity extends ActionBarActivity {
         ProgressBar progressBar = new ProgressBar(LoopActivity.this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.INVISIBLE);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100,100);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300,300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(progressBar, params);
 
@@ -544,11 +543,9 @@ public class LoopActivity extends ActionBarActivity {
     // TODO: Handle Clipping effectively.
     // PRE: takes in an array of pcm to add to the global array, and the bars it takes up
     private void addAudioData(short[] audioData, int bars) {
-        short[] globalAudioData = mAudioData;
         int globalLength = bar * totalBars;
-        Log.d(TAG, "globalLength = " + globalLength);
         int localLength = bar * bars;
-        Log.d(TAG, "localLength = " + localLength);
+        short[] globalAudioData = mAudioData;
         short[] result = new short[Math.max(globalLength, localLength)];
         int globalIndex = 0;
         int localIndex = 0;
@@ -572,38 +569,61 @@ public class LoopActivity extends ActionBarActivity {
         setAudioData(result);
     }
 
-    private void subtractAudioData(short[] audioData, int bars) {
-        short[] globalAudioData = mAudioData;
+    private void muteAudioData(short[] audioData, int bars) {
         int globalLength = bar * totalBars;
-        Log.d(TAG, "globalLength = " + globalLength);
         int localLength = bar * bars;
-        Log.d(TAG, "localLength = " + localLength);
+        short[] globalAudioData = mAudioData;
         short[] result = new short[Math.max(globalLength, localLength)];
         int globalIndex = 0;
         int localIndex = 0;
         int index = 0;
-        while(index < globalLength || index < localLength) {
+        while (index < globalLength || index < localLength) {
             short sum = 0;
-            if(globalIndex >= globalLength) {
+            if (globalIndex >= globalLength) {
                 globalIndex = 0;
             }
-            if(localIndex >= localLength) {
+            if (localIndex >= localLength) {
                 localIndex = 0;
             }
-            sum+=globalAudioData[globalIndex];
-            sum-=audioData[localIndex];
+            sum += globalAudioData[globalIndex];
+            sum -= audioData[localIndex];
             result[index] = sum;
             globalIndex++;
             localIndex++;
             index++;
         }
-        totalBars = Math.max(totalBars, bars);
         setAudioData(result);
+    }
+
+    private void deleteAudioData(short[] audioData) {
+        findTotalBars();
+        short[] globalAudioData = mAudioData;
+        int globalLength = bar * totalBars;
+        short[] result = new short[globalLength];
+        int index = 0;
+        while(index < globalLength) {
+            short sum = 0;
+            sum+=globalAudioData[index];
+            sum-=audioData[index];
+            result[index] = sum;
+            index++;
+        }
+        setAudioData(result);
+    }
+
+    public void findTotalBars() {
+        int bars = 0;
+        for(Loop loop : mLoops) {
+            if(loop.isPlaying()) {
+                bars = Math.max(bars, loop.getBars());
+            }
+        }
+        totalBars = bars;
     }
 
 //    // Removes audioData from the global mAudioData
 //    // TODO: Handle Clipping effectively.
-//    private void subtractAudioData(short[] audioData) {
+//    private void muteAudioData(short[] audioData) {
 //        int globalLength = mAudioData.length;
 //        int localLength = audioData.length;
 //        int index = 0;
@@ -653,13 +673,15 @@ public class LoopActivity extends ActionBarActivity {
         public void onClick(View v) {
             Loop loop = mLoops.get(v.getId());
             if(loop.isPlaying()) {
-                subtractAudioData(loop.getAudioData(), loop.getBars());
+                //necessary to set it before checking the total bars in the subtractMethod
+                mLoops.get(v.getId()).setIsPlaying(false);
+                muteAudioData(loop.getAudioData(), loop.getBars());
                 loop.setCurrentState("paused");
             } else {
+                mLoops.get(v.getId()).setIsPlaying(true);
                 addAudioData(loop.getAudioData(), loop.getBars());
                 loop.setCurrentState("playing");
             }
-            mLoops.get(v.getId()).setIsPlaying(!loop.isPlaying());
         }
 
     };
@@ -694,11 +716,16 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "PLAY");
             currentBeat = 1;
             while(playing) {
-                if(currentBeat > totalBars) {
+                // totalBars is the number of bars. we are writing twice every
+                // down beat for speed, so current beat is equivalent to 4 bars * 2
+                if(currentBeat > (totalBars * 8)) {
                     currentBeat = 1;
                 }
-                publishProgress(currentBeat);
-                mAudioTrack.write(mAudioData, (bar * (currentBeat - 1)), bar);
+                // This is each time there is a down beat.
+                if(currentBeat % 2 == 1) {
+                    publishProgress((currentBeat/2) + 1);
+                }
+                mAudioTrack.write(mAudioData, ((beat / 2) * (currentBeat - 1)), (beat / 2));
                 currentBeat++;
             }
             return true;

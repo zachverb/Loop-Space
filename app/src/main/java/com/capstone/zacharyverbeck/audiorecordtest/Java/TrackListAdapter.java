@@ -2,6 +2,7 @@ package com.capstone.zacharyverbeck.audiorecordtest.Java;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,12 +32,16 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         public TextView title;
         public TextView owner;
         public RelativeLayout mContainer;
+        public LoopButton mLoopButton;
 
         public ViewHolder(View v) {
             super(v);
             title = (TextView) v.findViewById(R.id.title);
             owner = (TextView) v.findViewById(R.id.owner);
             mContainer = (RelativeLayout) v.findViewById(R.id.row);
+            mLoopButton = (LoopButton) v.findViewById(R.id.circle);
+            mLoopButton.setClickable(false);
+            mLoopButton.setOnClickListener(null);
         }
     }
 
@@ -67,6 +72,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         final int bpm = mDataset.get(index).bpm;
         holder.title.setText(mDataset.get(index).title);
         holder.owner.setText(mDataset.get(index).User.name);
+        holder.mLoopButton.setText("3", 50f, Color.WHITE);
         //Log.d("WHY", mDataset.get(index).user.email);
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
