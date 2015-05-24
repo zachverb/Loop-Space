@@ -3,6 +3,9 @@ package com.capstone.zacharyverbeck.audiorecordtest.Models;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -57,6 +60,15 @@ public class Loop {
         this.setCurrentState("ready");
         this.barSize = barSize;
         this.setBars(1);
+    }
+
+    private Animation getAnimation() {
+        Animation animation = new AlphaAnimation(1f, .9f); // Change alpha from fully visible to invisible
+        animation.setDuration(100);
+        animation.setInterpolator(new LinearInterpolator());
+        animation.setRepeatCount(1);
+        animation.setRepeatMode(Animation.REVERSE);
+        return animation;
     }
 
     public LoopButton getLoopButton() {
@@ -244,6 +256,11 @@ public class Loop {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
         }
         this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
+        //if(this.getLoopButton().getAnimation() == null) {
+        this.getLoopButton().startAnimation(getAnimation());
+        //}
+        //this.getLoopButton().getAnimation().reset();
+        //this.getLoopButton().getAnimation().startNow();
     }
 
     public int getBars() {

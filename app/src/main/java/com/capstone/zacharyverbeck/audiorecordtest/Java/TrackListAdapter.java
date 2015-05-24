@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,8 +92,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         SimpleDateFormat outputFormatter = new SimpleDateFormat("MMM d, h:mm a");
         holder.timeStamp.setText(outputFormatter.format(formatted));
         holder.city.setText(track.city);
-        Log.d("TrackListAdapter", formatted.toString());
-        //Log.d("WHY", mDataset.get(index).user.email);
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
