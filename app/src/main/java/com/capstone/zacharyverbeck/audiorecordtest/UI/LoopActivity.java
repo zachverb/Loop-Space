@@ -214,13 +214,13 @@ public class LoopActivity extends ActionBarActivity {
         bar = beat * 4;
         Log.d(TAG, bar + "");
         maxBars = bar * 8;
-        //mAudioData = new short[bar];
+        mAudioData = new short[bar];
         try {
             metronomeData = generateMetronome();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mAudioData = metronomeData;
+        addAudioData(metronomeData, 1);
     }
 
     private short[] generateMetronome() throws IOException {
@@ -554,7 +554,7 @@ public class LoopActivity extends ActionBarActivity {
             final int index = i;
             final String endpoint = loops.get(index).endpoint;
             addToLayout();
-            mLoops.get(index).setCurrentState("loading");
+            mLoops.get(index).setCurrentState("downloading");
             mLoops.get(index).setIndex(index);
             mLoops.get(index).setId(loops.get(index).id);
             Log.d(TAG, "WE GOT HERE FAM");
@@ -865,9 +865,9 @@ public class LoopActivity extends ActionBarActivity {
         @Override
         protected void onProgressUpdate(Integer... params) {
             if(params[0] == -1) {
-                setLoopLoading(params[1]);
+                mLoops.get(params[1]).setCurrentState("uploading");
             } else {
-                setRecordingImage(params[1]);
+                mLoops.get(params[1]).setCurrentState("recording");
             }
         }
 
@@ -902,21 +902,13 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            setLoopLoading(params[0]);
+            mLoops.get(params[0]).setCurrentState("downloading");
         }
 
         @Override
         protected void onPostExecute(Integer index) {
             taskPostExecute(index);
         }
-    }
-
-    public void setRecordingImage(Integer index) {
-        mLoops.get(index).setCurrentState("recording");
-    }
-
-    public void setLoopLoading(Integer index) {
-        mLoops.get(index).setCurrentState("loading");
     }
 
     public void taskPostExecute(Integer index) {

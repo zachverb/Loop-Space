@@ -107,7 +107,8 @@ public class Loop {
     }
 
     public void setCurrentState(String state) {
-        if(getCurrentState() == "loading" && state != "loading") {
+        if ((getCurrentState() == "downloading" || getCurrentState() == "uploading") &&
+            (state != "uploading" && state != "downloading")) {
             setProgressBarInvisible();
         }
         LoopButton button = this.getLoopButton();
@@ -125,8 +126,14 @@ public class Loop {
                 button.setColor(Color.parseColor("#2196F3"));
                 button.setAlpha(.5f);
                 break;
-            case "loading":
+            case "downloading":
                 button.setImageResource(R.drawable.ic_file_download_48dp);
+                button.setColor(Color.parseColor("#2196F3"));
+                button.setAlpha(.5f);
+                this.setProgressBarVisible();
+                break;
+            case "uploading":
+                button.setImageResource(R.drawable.ic_file_upload_48dp);
                 button.setColor(Color.parseColor("#2196F3"));
                 button.setAlpha(.5f);
                 this.setProgressBarVisible();
@@ -203,10 +210,6 @@ public class Loop {
                 setBars(Integer.highestOneBit(bars - 1));
             }
             Log.d("LoopActivity", this.bars + " many bars");
-
-//            for(int i = 0; i < audioData.length; i+=1000) {
-//                Log.d("LoopActivity", "OK FINE HERE: " + audioData[i] + " AT " + i);
-//            }
         }
         this.audioData = audioData;
     }
