@@ -22,7 +22,8 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateHidden" >
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:screenOrientation="portrait">
         </activity>
 
         <meta-data
@@ -40,7 +41,8 @@
         </activity>
         <activity
             android:name=".UI.SignUpActivity"
-            android:label="@string/title_activity_sign_up" >
+            android:label="@string/title_activity_sign_up"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".UI.TrackListActivity"
@@ -48,7 +50,8 @@
         </activity>
         <activity
             android:name=".UI.CreateTrackActivity"
-            android:label="@string/title_activity_create_track" >
+            android:label="@string/title_activity_create_track"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".UI.TrackCreateActivity"

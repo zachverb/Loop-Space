@@ -126,7 +126,11 @@ public class LoopActivity extends ActionBarActivity {
 
     private int totalBars = 1;
 
-    /** Called when the activity is first created. */
+    private boolean metronomePlaying = true;
+
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,7 +167,7 @@ public class LoopActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        switch(id) {
+        switch (id) {
             case R.id.action_refresh:
                 //init();
                 break;
@@ -178,18 +182,19 @@ public class LoopActivity extends ActionBarActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-//        MenuItem trash = menu.findItem(R.id.action_delete);
-//        Log.d(TAG, "heh");
-//        trash.setVisible(toDelete);
-//        trash.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                deleteLoop(selected);
-//                toDelete = false;
-//                materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
-//                return true;
-//            }
-//        });
+        MenuItem metronome = menu.findItem(R.id.action_metronome);
+        metronome.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(metronomePlaying) {
+                    muteAudioData(metronomeData, 1);
+                } else {
+                    addAudioData(metronomeData, 1);
+                }
+                metronomePlaying = !metronomePlaying;
+                return true;
+            }
+        });
         return true;
     }
 
@@ -207,9 +212,9 @@ public class LoopActivity extends ActionBarActivity {
         sampleRate = 44100;
         bpm = (double) getIntent().getIntExtra("BPM", 60);
         Log.d(TAG, bpm + "");
-        beat = (int) ((60.0/bpm) * sampleRate);
+        beat = (int) ((60.0 / bpm) * sampleRate);
         Log.d(TAG, beat + "");
-        duration = (int) ((60.0/bpm) * 1000);
+        duration = (int) ((60.0 / bpm) * 1000);
         Log.d(TAG, duration + "");
         bar = beat * 4;
         Log.d(TAG, bar + "");
@@ -246,8 +251,8 @@ public class LoopActivity extends ActionBarActivity {
         }
         short[] result = new short[bar];
         int index = 0;
-        for(int i = 0; i < bar; i++) {
-            if(index >= beat) {
+        for (int i = 0; i < bar; i++) {
+            if (index >= beat) {
                 index = 0;
             }
             result[i] = tickData[index];
@@ -257,8 +262,8 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void setupLayouts() {
-        mLeftLayout = (LinearLayout)findViewById(R.id.leftLayout);
-        mRightLayout = (LinearLayout)findViewById(R.id.rightLayout);
+        mLeftLayout = (LinearLayout) findViewById(R.id.leftLayout);
+        mRightLayout = (LinearLayout) findViewById(R.id.rightLayout);
         mLoops = new ArrayList<Loop>(6);
     }
 
@@ -308,7 +313,7 @@ public class LoopActivity extends ActionBarActivity {
 
     private void animateBottomToolbar() {
         AnimatorSet set = new AnimatorSet().setDuration(100L);
-        if(bottomToolbarShowing && selected == -1) {
+        if (bottomToolbarShowing && selected == -1) {
             //hide toolbar
             set.playTogether(
                     ObjectAnimator.ofFloat(playbar, "translationY", 0f, 200f)
@@ -368,7 +373,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void startAudio() {
-        if(!playing) {
+        if (!playing) {
             playing = true;
             PlayingTask playTask = new PlayingTask();
             playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -380,10 +385,10 @@ public class LoopActivity extends ActionBarActivity {
 
         // Find token.
         settings = PreferenceManager
-            .getDefaultSharedPreferences(this.getApplicationContext());
+                .getDefaultSharedPreferences(this.getApplicationContext());
         final String token = settings.getString("token", "");
-        if(token == "") {
-            Dialog dialog = new Dialog(getApplicationContext() , "Error!", "You must be signed in!");
+        if (token == "") {
+            Dialog dialog = new Dialog(getApplicationContext(), "Error!", "You must be signed in!");
             dialog.show();
             Intent intent = new Intent(LoopActivity.this, LoginActivity.class);
             startActivity(intent);
@@ -425,7 +430,7 @@ public class LoopActivity extends ActionBarActivity {
 
     // places a button in the view.
     public void addToLayout() {
-        if(mLoopsLength < 6) {
+        if (mLoopsLength < 6) {
             if (mLoopsLength % 2 == 0) {
                 mLeftLayout.addView(addLoopObject());
             } else {
@@ -433,14 +438,14 @@ public class LoopActivity extends ActionBarActivity {
             }
             mLoopsLength++;
         } else {
-            Dialog dialog = new Dialog(LoopActivity.this , "Error!", "Max amount of loops reached!");
+            Dialog dialog = new Dialog(LoopActivity.this, "Error!", "Max amount of loops reached!");
             dialog.show();
         }
     }
 
     public void deleteLoop(int id) {
         Loop loop = mLoops.get(id);
-        if(loop.isPlaying()) {
+        if (loop.isPlaying()) {
             deleteAudioData(loop.getAudioData());
         }
         mLoopsLength--;
@@ -450,8 +455,8 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void deleteFromServer(int id) {
-         final int loopId = id;
-         service.deleteLoop(trackId, mLoops.get(id).getId() + "", new Callback<Response>() {
+        final int loopId = id;
+        service.deleteLoop(trackId, mLoops.get(id).getId() + "", new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
                 deleteLoop(loopId);
@@ -469,9 +474,9 @@ public class LoopActivity extends ActionBarActivity {
 
     public void refreshLayout() {
         int index = 0;
-        for(Loop loop : mLoops) {
+        for (Loop loop : mLoops) {
             loop.setIndex(index);
-            ((LinearLayout)loop.getContainer().getParent()).removeView(loop.getContainer());
+            ((LinearLayout) loop.getContainer().getParent()).removeView(loop.getContainer());
             if (index % 2 == 0) {
                 mLeftLayout.addView(loop.getContainer());
             } else {
@@ -507,7 +512,7 @@ public class LoopActivity extends ActionBarActivity {
         ProgressBar progressBar = new ProgressBar(LoopActivity.this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.INVISIBLE);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300,300);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300, 300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(progressBar, params);
 
@@ -517,7 +522,7 @@ public class LoopActivity extends ActionBarActivity {
         loopProgress.setVisibility(View.INVISIBLE);
         loopProgress.setColor(primary_light);
         loopProgress.setDuration(duration);
-        params = new RelativeLayout.LayoutParams(300,300);
+        params = new RelativeLayout.LayoutParams(300, 300);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(loopProgress, params);
 
@@ -534,18 +539,18 @@ public class LoopActivity extends ActionBarActivity {
     // gets the endpoints for each track
     private void getTrackInfo() {
         service.getLoops(trackId,
-            new Callback<List<LoopFile>>() {
-                @Override
-                public void success(List<LoopFile> data, Response response) {
-                    downloadLoops(data);
-                }
+                new Callback<List<LoopFile>>() {
+                    @Override
+                    public void success(List<LoopFile> data, Response response) {
+                        downloadLoops(data);
+                    }
 
-                @Override
-                public void failure(RetrofitError retrofitError) {
-                    Log.d(TAG, "failed grabbing all loop endpoints");
-                    retrofitError.printStackTrace();
-                }
-            });
+                    @Override
+                    public void failure(RetrofitError retrofitError) {
+                        Log.d(TAG, "failed grabbing all loop endpoints");
+                        retrofitError.printStackTrace();
+                    }
+                });
     }
 
     // downloads each track from their given endpoint.
@@ -560,20 +565,20 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "WE GOT HERE FAM");
             Log.d(TAG, endpoint);
             s3Service.getLoop(endpoint,
-                new Callback<Response>() {
-                    @Override
-                    public void success(Response result, Response response) {
-                        Log.d(TAG,"SUCCESS INSIDE HERE");
-                        StreamingTask task = new StreamingTask();
-                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{result, index});
-                    }
+                    new Callback<Response>() {
+                        @Override
+                        public void success(Response result, Response response) {
+                            Log.d(TAG, "SUCCESS INSIDE HERE");
+                            StreamingTask task = new StreamingTask();
+                            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{result, index});
+                        }
 
-                    @Override
-                    public void failure(RetrofitError retrofitError) {
-                        Log.d(TAG, "FAK");
-                        retrofitError.printStackTrace();
-                    }
-                });
+                        @Override
+                        public void failure(RetrofitError retrofitError) {
+                            Log.d(TAG, "FAK");
+                            retrofitError.printStackTrace();
+                        }
+                    });
         }
     }
 
@@ -596,16 +601,16 @@ public class LoopActivity extends ActionBarActivity {
         int globalIndex = 0;
         int localIndex = 0;
         int index = 0;
-        while(index < globalLength || index < localLength) {
+        while (index < globalLength || index < localLength) {
             short sum = 0;
-            if(globalIndex >= globalLength) {
+            if (globalIndex >= globalLength) {
                 globalIndex = 0;
             }
-            if(localIndex >= localLength) {
+            if (localIndex >= localLength) {
                 localIndex = 0;
             }
-            sum+=globalAudioData[globalIndex];
-            sum+=audioData[localIndex];
+            sum += globalAudioData[globalIndex];
+            sum += audioData[localIndex];
             result[index] = sum;
             globalIndex++;
             localIndex++;
@@ -647,10 +652,10 @@ public class LoopActivity extends ActionBarActivity {
         int globalLength = bar * totalBars;
         short[] result = new short[globalLength];
         int index = 0;
-        while(index < globalLength) {
+        while (index < globalLength) {
             short sum = 0;
-            sum+=globalAudioData[index];
-            sum-=audioData[index];
+            sum += globalAudioData[index];
+            sum -= audioData[index];
             result[index] = sum;
             index++;
         }
@@ -659,8 +664,8 @@ public class LoopActivity extends ActionBarActivity {
 
     public void findTotalBars() {
         int bars = 0;
-        for(Loop loop : mLoops) {
-            if(loop.isPlaying()) {
+        for (Loop loop : mLoops) {
+            if (loop.isPlaying()) {
                 bars = Math.max(bars, loop.getBars());
             }
         }
@@ -705,7 +710,7 @@ public class LoopActivity extends ActionBarActivity {
     };
 
     // Stop the recording of the button.
-    public View.OnClickListener stopRecOnClickListener = new View.OnClickListener(){
+    public View.OnClickListener stopRecOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Log.d(TAG, "STOP REC");
@@ -714,12 +719,12 @@ public class LoopActivity extends ActionBarActivity {
     };
 
     // toggles individual audio tracks to play/not play
-    public View.OnClickListener togglePlayOnClickListener = new View.OnClickListener(){
+    public View.OnClickListener togglePlayOnClickListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
             Loop loop = mLoops.get(v.getId());
-            if(loop.isPlaying()) {
+            if (loop.isPlaying()) {
                 //necessary to set it before checking the total bars in the subtractMethod
                 mLoops.get(v.getId()).setIsPlaying(false);
                 muteAudioData(loop.getAudioData(), loop.getBars());
@@ -738,7 +743,7 @@ public class LoopActivity extends ActionBarActivity {
         public boolean onLongClick(View v) {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(100);
-            if(selected == v.getId()) {
+            if (selected == v.getId()) {
                 selected = -1;
                 materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
             } else {
@@ -762,12 +767,12 @@ public class LoopActivity extends ActionBarActivity {
             mAudioTrack.play();
             Log.d(TAG, "PLAY");
             currentBeat = 1;
-            while(playing) {
-                if(recordFlag == true) {
+            while (playing) {
+                if (recordFlag == true) {
                     currentBeat = 0;
-                    for(int i = 1; i <= 8; i++) {
-                        if(i % 2 == 1) {
-                            publishProgress(0);
+                    for (int i = 1; i <= 8; i++) {
+                        if (i % 2 == 1) {
+                            publishProgress(new Integer[] {-1, i});
                         }
                         mAudioTrack.write(metronomeData, ((beat / 2) * (i - 1)), (beat / 2));
                     }
@@ -776,12 +781,12 @@ public class LoopActivity extends ActionBarActivity {
                 }
                 // totalBars is the number of bars. we are writing twice every
                 // down beat for speed, so current beat is equivalent to 4 bars * 2
-                if(currentBeat > (totalBars * 8)) {
+                if (currentBeat > (totalBars * 8)) {
                     currentBeat = 1;
                 }
                 // This is each time there is a down beat.
-                if(currentBeat % 2 == 1) {
-                    publishProgress((currentBeat/2) + 1);
+                if (currentBeat % 2 == 1) {
+                    publishProgress(new Integer[] {1, (currentBeat / 2) + 1});
                 }
                 mAudioTrack.write(mAudioData, ((beat / 2) * (currentBeat - 1)), (beat / 2));
                 currentBeat++;
@@ -791,7 +796,11 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... param) {
-            setLoopsProgress(param[0]);
+            if(param[0] == -1) {
+                setLoopsProgress(param[1]);
+            } else {
+                setLoopsCountDown(param[1]);
+            }
         }
     }
 
@@ -812,21 +821,19 @@ public class LoopActivity extends ActionBarActivity {
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
 
                 short[] tempAudioData = new short[minBufferSize];
-                while(currentBeat != 1) {
-                    try
-                    {
+                while (recordFlag == false) {
+                    try {
                         Thread.sleep(10);
-                    } catch (InterruptedException e)
-                    {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
                 mAudioRecord.startRecording();
                 publishProgress(new Integer[]{1, id});
-                while(recording) {
+                while (recording) {
                     int numberOfShort = mAudioRecord.read(tempAudioData, 0, minBufferSize);
 
-                    for(int i = 0; i < numberOfShort; i++){
+                    for (int i = 0; i < numberOfShort; i++) {
                         dataOutputStream.writeShort(tempAudioData[i]);
                     }
                 }
@@ -842,7 +849,7 @@ public class LoopActivity extends ActionBarActivity {
                 service.upload(soundFile, new Callback<Endpoint>() {
                     @Override
                     public void success(Endpoint data, Response response) {
-                        if(data.type == true) {
+                        if (data.type == true) {
                             Loop loop = mLoops.get(id);
                             loop.setEndpoint(data.endpoint);
                             loop.setId(data.id);
@@ -864,7 +871,7 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected void onProgressUpdate(Integer... params) {
-            if(params[0] == -1) {
+            if (params[0] == -1) {
                 mLoops.get(params[1]).setCurrentState("uploading");
             } else {
                 mLoops.get(params[1]).setCurrentState("recording");
@@ -921,7 +928,13 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void setLoopsProgress(Integer value) {
-        for(int i = 0; i < mLoopsLength; i++) {
+        for (int i = 0; i < mLoopsLength; i++) {
+            mLoops.get(i).setLoopProgress(value);
+        }
+    }
+
+    public void setLoopsCountDown(Integer value) {
+        for (int i = 0; i < mLoopsLength; i++) {
             mLoops.get(i).setLoopProgress(value);
         }
     }
