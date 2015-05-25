@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -43,9 +44,12 @@ import com.gc.materialdesign.widgets.SnackBar;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,6 +73,8 @@ public class LoopActivity extends ActionBarActivity {
     public int mLoopsLength = 0;
 
     public boolean recording;
+
+    private boolean recordFlag = false;
 
     public boolean playing = false;
 
@@ -105,6 +111,8 @@ public class LoopActivity extends ActionBarActivity {
     public String trackId;
 
     public short[] mAudioData;
+
+    public short[] metronomeData;
 
     private MaterialMenuDrawable materialMenu;
 
@@ -206,6 +214,46 @@ public class LoopActivity extends ActionBarActivity {
         bar = beat * 4;
         Log.d(TAG, bar + "");
         maxBars = bar * 8;
+        //mAudioData = new short[bar];
+        try {
+            metronomeData = generateMetronome();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mAudioData = metronomeData;
+    }
+
+    private short[] generateMetronome() throws IOException {
+        AssetManager assetManager = this.getAssets();
+        InputStream tick = assetManager.open("tick.pcm");
+        short[] tickData = new short[beat];
+        try {
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(tick);
+            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+
+            int j = 0;
+            while (dataInputStream.available() > 0 && j < beat) {
+                tickData[j] += (dataInputStream.readShort() * .5);
+                j++;
+            }
+
+            dataInputStream.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        short[] result = new short[bar];
+        int index = 0;
+        for(int i = 0; i < bar; i++) {
+            if(index >= beat) {
+                index = 0;
+            }
+            result[i] = tickData[index];
+            index++;
+        }
+        return result;
     }
 
     private void setupLayouts() {
@@ -317,8 +365,6 @@ public class LoopActivity extends ActionBarActivity {
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
-
-        mAudioData = new short[bar];
     }
 
     private void startAudio() {
@@ -519,7 +565,7 @@ public class LoopActivity extends ActionBarActivity {
                     public void success(Response result, Response response) {
                         Log.d(TAG,"SUCCESS INSIDE HERE");
                         StreamingTask task = new StreamingTask();
-                        task.execute(new Object[]{result, index});
+                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{result, index});
                     }
 
                     @Override
@@ -651,6 +697,7 @@ public class LoopActivity extends ActionBarActivity {
             final int buttonId = v.getId();
             Log.d(TAG, "START REC");
             recording = true;
+            recordFlag = true;
             RecordingTask task = new RecordingTask();
             task.execute(buttonId);
             v.setOnClickListener(stopRecOnClickListener);
@@ -716,6 +763,17 @@ public class LoopActivity extends ActionBarActivity {
             Log.d(TAG, "PLAY");
             currentBeat = 1;
             while(playing) {
+                if(recordFlag == true) {
+                    currentBeat = 0;
+                    for(int i = 1; i <= 8; i++) {
+                        if(i % 2 == 1) {
+                            publishProgress(0);
+                        }
+                        mAudioTrack.write(metronomeData, ((beat / 2) * (i - 1)), (beat / 2));
+                    }
+                    currentBeat = 1;
+                    recordFlag = false;
+                }
                 // totalBars is the number of bars. we are writing twice every
                 // down beat for speed, so current beat is equivalent to 4 bars * 2
                 if(currentBeat > (totalBars * 8)) {

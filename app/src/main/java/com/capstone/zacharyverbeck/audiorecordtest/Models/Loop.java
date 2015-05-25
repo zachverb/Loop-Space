@@ -63,7 +63,7 @@ public class Loop {
     }
 
     private Animation getAnimation() {
-        Animation animation = new AlphaAnimation(1f, .9f); // Change alpha from fully visible to invisible
+        Animation animation = new AlphaAnimation(1f, .5f); // Change alpha from fully visible to invisible
         animation.setDuration(100);
         animation.setInterpolator(new LinearInterpolator());
         animation.setRepeatCount(1);
@@ -256,11 +256,7 @@ public class Loop {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
         }
         this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
-        //if(this.getLoopButton().getAnimation() == null) {
         this.getLoopButton().startAnimation(getAnimation());
-        //}
-        //this.getLoopButton().getAnimation().reset();
-        //this.getLoopButton().getAnimation().startNow();
     }
 
     public int getBars() {
