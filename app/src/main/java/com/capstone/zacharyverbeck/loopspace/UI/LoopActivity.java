@@ -611,10 +611,9 @@ public class LoopActivity extends ActionBarActivity {
             }
             sum += globalAudioData[globalIndex];
             sum += audioData[localIndex];
-            if(sum > Short.MAX_VALUE){
+            if (sum > Short.MAX_VALUE) {
                 sum = Short.MAX_VALUE;
-            }
-            else if (sum < Short.MIN_VALUE){
+            } else if (sum < Short.MIN_VALUE) {
                 sum = Short.MIN_VALUE;
             }
             result[index] = sum;
@@ -645,10 +644,9 @@ public class LoopActivity extends ActionBarActivity {
             }
             sum += globalAudioData[globalIndex];
             sum -= audioData[localIndex];
-            if(sum > Short.MAX_VALUE){
+            if (sum > Short.MAX_VALUE) {
                 sum = Short.MAX_VALUE;
-            }
-            else if (sum < Short.MIN_VALUE){
+            } else if (sum < Short.MIN_VALUE) {
                 sum = Short.MIN_VALUE;
             }
             result[index] = sum;

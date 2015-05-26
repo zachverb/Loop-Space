@@ -50,14 +50,14 @@ public class LoginActivity extends Activity {
     }
 
     public void init() {
-        mSignUpButton = (ButtonRectangle)findViewById(R.id.signUpButton);
-        mLoginButton = (ButtonRectangle)findViewById(R.id.logInButton);
+        mSignUpButton = (ButtonRectangle) findViewById(R.id.signUpButton);
+        mLoginButton = (ButtonRectangle) findViewById(R.id.logInButton);
 
         mSignUpButton.setRippleSpeed(100f);
         mLoginButton.setRippleSpeed(100f);
 
-        mEmailField = (EditText)findViewById(R.id.usernameField);
-        mPasswordField = (EditText)findViewById(R.id.passwordField);
+        mEmailField = (EditText) findViewById(R.id.usernameField);
+        mPasswordField = (EditText) findViewById(R.id.passwordField);
 
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://secret-spire-6485.herokuapp.com/")
@@ -87,11 +87,11 @@ public class LoginActivity extends Activity {
             service.authenticate(new User(email, password), new Callback<Data>() {
                 @Override
                 public void success(Data data, Response response) {
-                    if(loginDialog.isShowing()) {
+                    if (loginDialog.isShowing()) {
                         loginDialog.dismiss();
                     }
                     Log.d(TAG, data.type + data.token);
-                    if(data.error == null && data.type) {
+                    if (data.error == null && data.type) {
                         mGlobal.saveToken(data.token);
                         mGlobal.saveUserId(data.id);
                         Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
@@ -104,10 +104,10 @@ public class LoginActivity extends Activity {
 
                 @Override
                 public void failure(RetrofitError retrofitError) {
-                    if(loginDialog.isShowing()) {
+                    if (loginDialog.isShowing()) {
                         loginDialog.dismiss();
                     }
-                    Dialog dialog = new Dialog(LoginActivity.this , "Error!", "Network error!");
+                    Dialog dialog = new Dialog(LoginActivity.this, "Error!", "Network error!");
                     dialog.show();
 
                     retrofitError.printStackTrace();

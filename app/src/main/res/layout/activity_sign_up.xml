@@ -13,12 +13,12 @@
         android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
         android:padding="20dp"
-        android:weightSum="1"
-        android:layout_alignParentBottom="true">
+        android:weightSum="1">
 
 
         <LinearLayout
@@ -26,16 +26,16 @@
             android:layout_height="64dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="10dp"
-            android:orientation="horizontal"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/userImage"
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:src="@drawable/ic_account_circle_white_48dp"
-                android:padding="7dp"/>
+                android:padding="7dp"
+                android:src="@drawable/ic_account_circle_white_48dp"/>
 
             <EditText
                 android:id="@+id/usernameField"
@@ -65,8 +65,8 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:src="@drawable/ic_email_white_48dp"
-                android:padding="7dp"/>
+                android:padding="7dp"
+                android:src="@drawable/ic_email_white_48dp"/>
 
             <EditText
                 android:id="@+id/emailField"
@@ -94,8 +94,8 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:src="@drawable/ic_lock_white_48dp"
-                android:padding="7dp"/>
+                android:padding="7dp"
+                android:src="@drawable/ic_lock_white_48dp"/>
 
             <EditText
                 android:id="@+id/passwordField"
@@ -124,8 +124,8 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:src="@drawable/ic_phone_android_white_48dp"
-                android:padding="7dp"/>
+                android:padding="7dp"
+                android:src="@drawable/ic_phone_android_white_48dp"/>
 
             <EditText
                 android:id="@+id/phoneNumberField"
@@ -153,23 +153,23 @@
             android:id="@+id/signUpButton"
             android:layout_width="245dp"
             android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
             android:background="@color/accent"
             android:text="SIGN UP"
             android:textColor="@android:color/white"
-            android:textColorHighlight="@android:color/secondary_text_light"
-            android:layout_marginTop="10dp"
-            android:layout_gravity="center_horizontal"/>
+            android:textColorHighlight="@android:color/secondary_text_light"/>
 
 
         <com.gc.materialdesign.views.ButtonFlat
             android:id="@+id/cancelButton"
             android:layout_width="245dp"
             android:layout_height="50dp"
+            android:layout_below="@+id/parent"
+            android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:background="@android:color/white"
-            android:text="CANCEL"
-            android:layout_below="@+id/parent"
-            android:layout_centerHorizontal="true"/>
+            android:text="CANCEL"/>
 
     </LinearLayout>
 
