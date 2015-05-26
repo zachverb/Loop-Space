@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.capstone.zacharyverbeck.audiorecordtest" >
+    package="com.capstone.zacharyverbeck.loopspace" >
 
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -13,9 +13,10 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:screenOrientation="portrait">
         <activity
-            android:name=".UI.LoopActivity"
+            android:name="com.capstone.zacharyverbeck.loopspace.UI.LoopActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
         </activity>
@@ -31,8 +32,9 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".UI.LoginActivity"
-            android:label="@string/title_activity_login" >
+            android:name="com.capstone.zacharyverbeck.loopspace.UI.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -40,12 +42,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".UI.SignUpActivity"
+            android:name="com.capstone.zacharyverbeck.loopspace.UI.SignUpActivity"
             android:label="@string/title_activity_sign_up"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".UI.TrackListActivity"
+            android:name="com.capstone.zacharyverbeck.loopspace.UI.TrackListActivity"
             android:label="@string/title_activity_track_list" >
         </activity>
         <activity
@@ -54,12 +56,12 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".UI.TrackCreateActivity"
+            android:name="com.capstone.zacharyverbeck.loopspace.UI.TrackCreateActivity"
             android:label="@string/title_activity_track_create"
-            android:parentActivityName=".UI.TrackListActivity" >
+            android:parentActivityName="com.capstone.zacharyverbeck.loopspace.UI.TrackListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.capstone.zacharyverbeck.audiorecordtest.UI.TrackListActivity" />
+                android:value="com.capstone.zacharyverbeck.loopspace.UI.TrackListActivity" />
         </activity>
     </application>
 
