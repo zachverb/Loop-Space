@@ -18,7 +18,8 @@
         <Spinner
             android:id="@+id/filter_spinner"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"/>
 
     </android.support.v7.widget.Toolbar>
 

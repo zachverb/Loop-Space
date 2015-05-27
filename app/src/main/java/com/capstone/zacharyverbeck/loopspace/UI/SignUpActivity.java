@@ -45,7 +45,6 @@ public class SignUpActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-
         init();
     }
 
@@ -125,11 +124,8 @@ public class SignUpActivity extends Activity {
     public View.OnClickListener cancel = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-            startActivity(intent);
+            SignUpActivity.this.finish();
         }
     };
-
-
 
 }
