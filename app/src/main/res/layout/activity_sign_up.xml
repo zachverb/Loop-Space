@@ -34,7 +34,7 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:padding="7dp"
+                android:padding="15dp"
                 android:src="@drawable/ic_account_circle_white_48dp"/>
 
             <EditText
@@ -65,7 +65,7 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:padding="7dp"
+                android:padding="15dp"
                 android:src="@drawable/ic_email_white_48dp"/>
 
             <EditText
@@ -94,7 +94,7 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:padding="7dp"
+                android:padding="15dp"
                 android:src="@drawable/ic_lock_white_48dp"/>
 
             <EditText
@@ -124,7 +124,7 @@
                 android:layout_width="64dp"
                 android:layout_height="match_parent"
                 android:background="@color/accent"
-                android:padding="7dp"
+                android:padding="15dp"
                 android:src="@drawable/ic_phone_android_white_48dp"/>
 
             <EditText
@@ -151,10 +151,9 @@
 
         <com.gc.materialdesign.views.ButtonRectangle
             android:id="@+id/signUpButton"
-            android:layout_width="245dp"
-            android:layout_height="60dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
             android:background="@color/accent"
             android:text="SIGN UP"
             android:textColor="@android:color/white"
@@ -163,13 +162,14 @@
 
         <com.gc.materialdesign.views.ButtonFlat
             android:id="@+id/cancelButton"
-            android:layout_width="245dp"
-            android:layout_height="50dp"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
             android:layout_below="@+id/parent"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:background="@android:color/white"
-            android:text="CANCEL"/>
+            android:text="CANCEL"
+            android:layout_marginTop="10dp"/>
 
     </LinearLayout>
 
