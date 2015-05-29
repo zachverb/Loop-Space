@@ -45,42 +45,24 @@
                 android:layout_toRightOf="@+id/circle"
                 android:gravity="center_vertical"
                 android:text="Song Title"
-                android:textColor="@android:color/black"
+                android:textColor="@color/primary_text"
                 android:textSize="18sp"/>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:weightSum="4">
-
-            <TextView
-                android:id="@+id/owner"
-                android:layout_width="wrap_content"
-                android:layout_height="26dip"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:ellipsize="marquee"
-                android:singleLine="true"
-                android:text="Owner Username"
-                android:textColor="@android:color/darker_gray"
-                android:gravity="center_vertical"
-                android:layout_weight="3"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Time Stamp"
-                android:id="@+id/timeStamp"
-                android:layout_weight="1"
-                android:textColor="@android:color/darker_gray"
-                android:gravity="right"
-                android:paddingRight="10dp"/>
-        </LinearLayout>
-
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Time Stamp"
+        android:id="@+id/timeStamp"
+        android:layout_weight="1"
+        android:textColor="@android:color/secondary_text_light"
+        android:gravity="bottom"
+        android:layout_below="@+id/text"
+        android:layout_toRightOf="@+id/circle"
+        android:layout_toEndOf="@+id/circle"/>
 
 </RelativeLayout>

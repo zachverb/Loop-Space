@@ -15,6 +15,7 @@ import android.widget.EditText;
 
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
 import com.capstone.zacharyverbeck.loopspace.Java.CommentListAdapter;
+import com.capstone.zacharyverbeck.loopspace.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.loopspace.Models.Comment;
 import com.capstone.zacharyverbeck.loopspace.R;
 import com.gc.materialdesign.views.ButtonRectangle;
@@ -40,6 +41,7 @@ public class CommentActivity extends ActionBarActivity {
     private String city;
     private EditText mCommentBox;
     private ButtonRectangle mSubmitButton;
+    private GlobalFunctions mGlobal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,9 @@ public class CommentActivity extends ActionBarActivity {
 
     private void init() {
         trackId = getIntent().getIntExtra("trackId", -1) + "";
+
+        mGlobal = new GlobalFunctions(this);
+        mGlobal.setupUI(findViewById(R.id.container));
 
         mCommentList = (RecyclerView) findViewById(R.id.commentlist);
 
@@ -80,6 +85,8 @@ public class CommentActivity extends ActionBarActivity {
             public void onClick(View v) {
                 if(mCommentBox.getText().length() != 0) {
                     newComment(mCommentBox.getText().toString());
+                    mGlobal.hideSoftKeyboard(CommentActivity.this);
+                    mCommentBox.setText("");
                 }
             }
         });

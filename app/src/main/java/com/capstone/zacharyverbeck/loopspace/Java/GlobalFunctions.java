@@ -42,6 +42,7 @@ public class GlobalFunctions {
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
+
     public void setupUI(View view) {
         //Set up touch listener for non-text box views to hide keyboard.
         if(!(view instanceof EditText)) {

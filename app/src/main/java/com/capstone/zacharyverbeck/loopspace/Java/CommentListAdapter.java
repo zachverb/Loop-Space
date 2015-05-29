@@ -35,7 +35,6 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         public ViewHolder(View v) {
             super(v);
             comment = (TextView) v.findViewById(R.id.commentText);
-            owner = (TextView) v.findViewById(R.id.owner);
             mContainer = (RelativeLayout) v.findViewById(R.id.row);
             timeStamp = (TextView) v.findViewById(R.id.timeStamp);
             mLoopButton = (LoopButton) v.findViewById(R.id.circle);
@@ -67,7 +66,6 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         // final int commentId = comment.id;
         String username = comment.User.name;
         holder.comment.setText(comment.comment.substring(0, 1).toUpperCase() + comment.comment.substring(1));
-        holder.owner.setText(username);
         holder.mLoopButton.setText(username.substring(0, 1).toUpperCase(), 60f, Color.WHITE);
         String date = mCommentsList.get(index).createdAt;
         Date formatted = null;
