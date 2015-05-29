@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.capstone.zacharyverbeck.loopspace.Models.Track;
 import com.capstone.zacharyverbeck.loopspace.R;
-import com.capstone.zacharyverbeck.loopspace.UI.LoopActivity;
+import com.capstone.zacharyverbeck.loopspace.UI.CommentActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,7 +64,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                                                    int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.row_layout, parent, false);
+                .inflate(R.layout.track_row_layout, parent, false);
         // set the view's size, margins, paddings and layout parameters
         //...
         ViewHolder vh = new ViewHolder(v);
@@ -95,7 +95,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent loopIntent = new Intent(mContext, LoopActivity.class);
+                Intent loopIntent = new Intent(mContext, CommentActivity.class);
                 loopIntent.putExtra("trackId", trackId);
                 loopIntent.putExtra("BPM", bpm);
                 loopIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -93,36 +93,6 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
         return distance;
     }
 
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-            .addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this)
-            .addApi(LocationServices.API)
-            .build();
-    }
-
-
-    private void setUpRestAdapter() {
-        SharedPreferences settings = PreferenceManager
-                .getDefaultSharedPreferences(this.getApplicationContext());
-
-        final String token = settings.getString("token", "");
-
-        // setup heroku connection
-        RequestInterceptor interceptor = new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                request.addHeader("Accept", "application/json");
-                request.addHeader("Authorization", token);
-            }
-        };
-        RestAdapter serverRestAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
-                .setRequestInterceptor(interceptor)
-                .build();
-        service = serverRestAdapter.create(ServerAPI.class);
-    }
-
     private void init() {
         buildGoogleApiClient();
         mGoogleApiClient.connect();
@@ -173,13 +143,42 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
         filterStrings = new ArrayList<String>(Arrays.asList(new String[]{"Filter Nearby", "Filter by City: ", "Global Filter"}));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                 android.R.layout.simple_spinner_item, filterStrings);
+                android.R.layout.simple_spinner_item, filterStrings);
 
         adapter.setNotifyOnChange(true);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mFiltersSpinner.setAdapter(adapter);
         mFiltersSpinner.setOnItemSelectedListener(this);
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    private void setUpRestAdapter() {
+        SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+
+        final String token = settings.getString("token", "");
+
+        // setup heroku connection
+        RequestInterceptor interceptor = new RequestInterceptor() {
+            @Override
+            public void intercept(RequestFacade request) {
+                request.addHeader("Accept", "application/json");
+                request.addHeader("Authorization", token);
+            }
+        };
+        RestAdapter serverRestAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                .setRequestInterceptor(interceptor)
+                .build();
+        service = serverRestAdapter.create(ServerAPI.class);
     }
 
     @Override

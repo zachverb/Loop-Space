@@ -1,5 +1,6 @@
 package com.capstone.zacharyverbeck.loopspace.API;
 
+import com.capstone.zacharyverbeck.loopspace.Models.Comment;
 import com.capstone.zacharyverbeck.loopspace.Models.Data;
 import com.capstone.zacharyverbeck.loopspace.Models.Endpoint;
 import com.capstone.zacharyverbeck.loopspace.Models.LoopFile;
@@ -48,6 +49,9 @@ public interface ServerAPI {
 
     @GET("/tracks/{track_id}/loops")
     public void getLoops(@Path("track_id") String trackId, Callback<List<LoopFile>> callback);
+
+    @GET("/tracks/{track_id}/comments")
+    public void getComments(@Path("track_id") String trackId, Callback<List<Comment>> callback);
 
     @DELETE("/tracks/{track_id}/loops/{loop_id}")
     public void deleteLoop(@Path("track_id") String trackId, @Path("loop_id") String loopId, Callback<Response> callback);
