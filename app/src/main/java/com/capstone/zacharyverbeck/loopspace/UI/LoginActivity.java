@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -45,8 +46,19 @@ public class LoginActivity extends Activity {
 
         init();
 
-        mLoginButton.setOnClickListener(logIn);
-        mSignUpButton.setOnClickListener(goToSignUpActivity);
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                login();
+            }
+        });
+        mSignUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public void init() {
@@ -58,6 +70,17 @@ public class LoginActivity extends Activity {
 
         mEmailField = (EditText) findViewById(R.id.usernameField);
         mPasswordField = (EditText) findViewById(R.id.passwordField);
+        mPasswordField.setOnKeyListener(new View.OnKeyListener() {
+
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    login();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://secret-spire-6485.herokuapp.com/")
@@ -73,55 +96,45 @@ public class LoginActivity extends Activity {
 
     }
 
-    public View.OnClickListener logIn = new ButtonRectangle.OnClickListener() {
-        public void onClick(View v) {
-            String email = mEmailField.getText().toString();
-            String password = mPasswordField.getText().toString();
-            final ProgressDialog loginDialog = new ProgressDialog(LoginActivity.this);
-            loginDialog.setIndeterminate(true);
-            loginDialog.setTitle("Please Wait");
-            loginDialog.setMessage("Logging in");
-            loginDialog.show();
+    public void login() {
+        String email = mEmailField.getText().toString();
+        String password = mPasswordField.getText().toString();
+        final ProgressDialog loginDialog = new ProgressDialog(LoginActivity.this);
+        loginDialog.setIndeterminate(true);
+        loginDialog.setTitle("Please Wait");
+        loginDialog.setMessage("Logging in");
+        loginDialog.show();
 
 
-            service.authenticate(new User(email, password), new Callback<Data>() {
-                @Override
-                public void success(Data data, Response response) {
-                    if (loginDialog.isShowing()) {
-                        loginDialog.dismiss();
-                    }
-                    Log.d(TAG, data.type + data.token);
-                    if (data.error == null && data.type) {
-                        mGlobal.saveToken(data.token);
-                        mGlobal.saveUserId(data.id);
-                        Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
-                        startActivity(intent);
-                    } else {
-                        Dialog dialog = new Dialog(LoginActivity.this, "Error!", data.error);
-                        dialog.show();
-                    }
+        service.authenticate(new User(email, password), new Callback<Data>() {
+            @Override
+            public void success(Data data, Response response) {
+                if (loginDialog.isShowing()) {
+                    loginDialog.dismiss();
                 }
-
-                @Override
-                public void failure(RetrofitError retrofitError) {
-                    if (loginDialog.isShowing()) {
-                        loginDialog.dismiss();
-                    }
-                    Dialog dialog = new Dialog(LoginActivity.this, "Error!", "Network error!");
+                Log.d(TAG, data.type + data.token);
+                if (data.error == null && data.type) {
+                    mGlobal.saveToken(data.token);
+                    mGlobal.saveUserId(data.id);
+                    Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
+                    startActivity(intent);
+                } else {
+                    Dialog dialog = new Dialog(LoginActivity.this, "Error!", data.error);
                     dialog.show();
-
-                    retrofitError.printStackTrace();
                 }
-            });
-        }
-    };
+            }
 
-    public View.OnClickListener goToSignUpActivity = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-            startActivity(intent);
-        }
-    };
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                if (loginDialog.isShowing()) {
+                    loginDialog.dismiss();
+                }
+                Dialog dialog = new Dialog(LoginActivity.this, "Error!", "Network error!");
+                dialog.show();
+
+                retrofitError.printStackTrace();
+            }
+        });
+    }
 
 }

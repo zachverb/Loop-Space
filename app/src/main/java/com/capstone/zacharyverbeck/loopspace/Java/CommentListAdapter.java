@@ -1,7 +1,6 @@
 package com.capstone.zacharyverbeck.loopspace.Java;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +28,6 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         public TextView comment;
         public TextView owner;
         public TextView timeStamp;
-        public LoopButton mLoopButton;
         public RelativeLayout mContainer;
 
         public ViewHolder(View v) {
@@ -38,9 +36,6 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
             owner = (TextView) v.findViewById(R.id.owner);
             mContainer = (RelativeLayout) v.findViewById(R.id.row);
             timeStamp = (TextView) v.findViewById(R.id.timeStamp);
-            mLoopButton = (LoopButton) v.findViewById(R.id.circle);
-            mLoopButton.setClickable(false);
-            mLoopButton.setOnClickListener(null);
         }
     }
 
@@ -68,7 +63,6 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         String username = comment.User.name;
         holder.comment.setText(comment.comment.substring(0, 1).toUpperCase() + comment.comment.substring(1));
         holder.owner.setText(username);
-        holder.mLoopButton.setText(username.substring(0, 1).toUpperCase(), 60f, Color.WHITE);
         String date = mCommentsList.get(index).createdAt;
         Date formatted = null;
         try {

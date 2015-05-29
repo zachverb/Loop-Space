@@ -287,8 +287,7 @@ public class LoopActivity extends ActionBarActivity {
                     animateBottomToolbar();
                 } else {
                     Log.d(TAG, "home selected");
-                    Intent intent = new Intent(LoopActivity.this, TrackListActivity.class);
-                    startActivity(intent);
+                    LoopActivity.this.finish();
                 }
             }
         });
@@ -814,7 +813,7 @@ public class LoopActivity extends ActionBarActivity {
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
 
                 short[] tempAudioData = new short[minBufferSize];
-                while (recordFlag == false) {
+                while (recordFlag != false) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {

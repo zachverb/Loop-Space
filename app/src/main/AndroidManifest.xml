@@ -57,7 +57,8 @@
         <activity
             android:name=".UI.TrackCreateActivity"
             android:label="@string/title_activity_track_create"
-            android:parentActivityName=".UI.TrackListActivity" >
+            android:parentActivityName=".UI.TrackListActivity"
+            android:noHistory="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.capstone.zacharyverbeck.loopspace.UI.TrackListActivity" />

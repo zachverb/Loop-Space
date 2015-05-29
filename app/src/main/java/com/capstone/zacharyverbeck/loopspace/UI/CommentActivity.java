@@ -1,6 +1,8 @@
 package com.capstone.zacharyverbeck.loopspace.UI;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
 import com.capstone.zacharyverbeck.loopspace.Java.CommentListAdapter;
 import com.capstone.zacharyverbeck.loopspace.Java.GlobalFunctions;
@@ -42,13 +45,32 @@ public class CommentActivity extends ActionBarActivity {
     private EditText mCommentBox;
     private ButtonRectangle mSubmitButton;
     private GlobalFunctions mGlobal;
+    private MaterialMenuDrawable materialMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comment);
         setUpRestAdapter();
+        setUpToolbar();
         init();
+    }
+
+    private void setUpToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Current Track");
+        setSupportActionBar(toolbar);
+
+        materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
+        materialMenu.setIconState(MaterialMenuDrawable.IconState.ARROW);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "home selected");
+                CommentActivity.this.finish();
+            }
+        });
+        toolbar.setNavigationIcon(materialMenu);
     }
 
     private void init() {
@@ -130,7 +152,11 @@ public class CommentActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_collaborate) {
+            Intent loopIntent = new Intent(CommentActivity.this, LoopActivity.class);
+            loopIntent.putExtra("trackId", Integer.parseInt(trackId));
+            loopIntent.putExtra("BPM", getIntent().getIntExtra("BPM", -1));
+            startActivity(loopIntent);
             return true;
         }
 
