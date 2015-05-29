@@ -9,4 +9,10 @@ public class Comment {
     public User User;
     public String createdAt;
     public String updatedAt;
+    public String city;
+
+    public Comment(String comment, String city) {
+        this.comment = comment;
+        this.city = city;
+    }
 }

@@ -65,6 +65,7 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
     private int filterIndex = 0;
     private Toolbar toolbar;
     private List<String> filterStrings;
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +100,6 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
         mProgressBar = (ProgressBarCircularIndeterminate) findViewById(R.id.refreshProgress);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.trackList);
-
 
         mRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(TrackListActivity.this)
                 .color(R.color.divider)
@@ -161,7 +161,7 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
     }
 
     private void setUpRestAdapter() {
-        SharedPreferences settings = PreferenceManager
+        settings = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext());
 
         final String token = settings.getString("token", "");
@@ -219,7 +219,7 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
     }
 
     public void getTracks() {
-        switch(filterIndex) {
+        switch (filterIndex) {
             case 0:
                 getNearby();
                 break;
@@ -307,10 +307,14 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
 
+
+        SharedPreferences.Editor editor = settings.edit();
         if (mLastLocation != null) {
             longitude = mLastLocation.getLongitude();
             latitude = mLastLocation.getLatitude();
 
+            editor.putLong("longitude", (long)longitude);
+            editor.putLong("latitude", (long) latitude);
             Geocoder geocoder = new Geocoder(this, Locale.getDefault());
             try {
                 List<Address> addressList = geocoder.getFromLocation(
@@ -318,6 +322,8 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
                 if (addressList != null && addressList.size() > 0) {
                     Address address = addressList.get(0);
                     city = address.getLocality();
+                    editor.putString("city", city);
+                    editor.commit();
                     filterStrings.set(1, filterStrings.get(1) + city);
                     mGoogleApiClient.disconnect();
                 }

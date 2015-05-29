@@ -11,11 +11,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
 import com.capstone.zacharyverbeck.loopspace.Java.CommentListAdapter;
 import com.capstone.zacharyverbeck.loopspace.Models.Comment;
 import com.capstone.zacharyverbeck.loopspace.R;
+import com.gc.materialdesign.views.ButtonRectangle;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.List;
@@ -35,6 +37,9 @@ public class CommentActivity extends ActionBarActivity {
     private Toolbar toolbar;
     private ServerAPI service;
     private String trackId;
+    private String city;
+    private EditText mCommentBox;
+    private ButtonRectangle mSubmitButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +72,17 @@ public class CommentActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        mCommentBox = (EditText) findViewById(R.id.commentBox);
+        mSubmitButton = (ButtonRectangle) findViewById(R.id.submitButton);
+
+        mSubmitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mCommentBox.getText().length() != 0) {
+                    newComment(mCommentBox.getText().toString());
+                }
+            }
+        });
         getComments();
     }
 
@@ -75,6 +91,7 @@ public class CommentActivity extends ActionBarActivity {
                 .getDefaultSharedPreferences(this.getApplicationContext());
 
         final String token = settings.getString("token", "");
+        city = settings.getString("city", "");
 
         // setup heroku connection
         RequestInterceptor interceptor = new RequestInterceptor() {
@@ -121,6 +138,21 @@ public class CommentActivity extends ActionBarActivity {
 
                 mCommentList.setAdapter(mAdapter);
                 mCommentList.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(TAG, "Failed to retrieve tracklist");
+                error.printStackTrace();
+            }
+        });
+    }
+
+    public void newComment(String comment) {
+        service.newComment(trackId, new Comment(comment, city), new Callback<Comment>() {
+            @Override
+            public void success(Comment comment, Response response) {
+                getComments();
             }
 
             @Override

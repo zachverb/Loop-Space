@@ -53,6 +53,9 @@ public interface ServerAPI {
     @GET("/tracks/{track_id}/comments")
     public void getComments(@Path("track_id") String trackId, Callback<List<Comment>> callback);
 
+    @POST("/tracks/{track_id}/comments")
+    public void newComment(@Path("track_id") String trackId, @Body Comment comment, Callback<Comment> callback);
+
     @DELETE("/tracks/{track_id}/loops/{loop_id}")
     public void deleteLoop(@Path("track_id") String trackId, @Path("loop_id") String loopId, Callback<Response> callback);
 }

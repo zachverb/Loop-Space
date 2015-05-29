@@ -2,8 +2,6 @@ package com.capstone.zacharyverbeck.loopspace.UI;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -21,15 +19,7 @@ import com.capstone.zacharyverbeck.loopspace.Models.Track;
 import com.capstone.zacharyverbeck.loopspace.R;
 import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.widgets.Dialog;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationServices;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -37,7 +27,7 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class TrackCreateActivity extends ActionBarActivity implements ConnectionCallbacks, OnConnectionFailedListener {
+public class TrackCreateActivity extends ActionBarActivity {
 
     public String TAG = "TrackListActivity";
     public ServerAPI service;
@@ -50,6 +40,7 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
     private double latitude;
     private double longitude;
     private String city;
+    private SharedPreferences settings;
 
 
     @Override
@@ -60,20 +51,19 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
 
     }
 
-    protected synchronized void buildGoogleApiClient() {
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
     private void init() {
+        setUpVars();
         setUpRestAdapter();
         setUpViews();
-        buildGoogleApiClient();
-        mGoogleApiClient.connect();
+    }
+
+    private void setUpVars() {
+        settings = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+
+        latitude = settings.getLong("latitude", 0);
+        longitude = settings.getLong("longitude", 0);
+        city = settings.getString("city", "");
     }
 
     private void setUpRestAdapter() {
@@ -167,45 +157,5 @@ public class TrackCreateActivity extends ActionBarActivity implements Connection
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
 
-        if (mLastLocation != null) {
-            longitude = mLastLocation.getLongitude();
-            latitude = mLastLocation.getLatitude();
-
-            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-            try {
-                List<Address> addressList = geocoder.getFromLocation(
-                        latitude, longitude, 1);
-                if (addressList != null && addressList.size() > 0) {
-                    Address address = addressList.get(0);
-                    city = address.getLocality();
-                    mGoogleApiClient.disconnect();
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Unable connect to Geocoder", e);
-            }
-            Log.d(TAG, String.valueOf(mLastLocation.getLatitude()));
-        }
-
-
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(TAG, "Connection suspended");
-        mGoogleApiClient.connect();
-
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
-
-    }
 }
