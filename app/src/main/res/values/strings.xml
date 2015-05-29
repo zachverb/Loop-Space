@@ -16,5 +16,6 @@
         <item>Tracks in City</item>
         <item>Global Tracks</item>
     </string-array>
+    <string name="title_activity_comment">CommentActivity</string>
 
 </resources>
