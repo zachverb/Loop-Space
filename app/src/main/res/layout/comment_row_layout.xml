@@ -45,8 +45,9 @@
                 android:layout_toRightOf="@+id/circle"
                 android:gravity="center_vertical"
                 android:text="Song Title"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"/>
+                android:textColor="@color/primary_text"
+                android:textSize="14sp"
+                android:textStyle="normal"/>
 
         </LinearLayout>
 
@@ -54,7 +55,20 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="4">
+            android:weightSum="4"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Time Stamp"
+                android:id="@+id/timeStamp"
+                android:layout_weight="1"
+                android:textColor="@android:color/darker_gray"
+                android:gravity="center_vertical|left"
+                android:paddingRight="10dp"
+                android:textStyle="bold|italic"/>
 
             <TextView
                 android:id="@+id/owner"
@@ -66,19 +80,10 @@
                 android:singleLine="true"
                 android:text="Owner Username"
                 android:textColor="@android:color/darker_gray"
-                android:gravity="center_vertical"
-                android:layout_weight="3"/>
+                android:gravity="center_vertical|right"
+                android:layout_weight="3"
+                android:textStyle="bold"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Time Stamp"
-                android:id="@+id/timeStamp"
-                android:layout_weight="1"
-                android:textColor="@android:color/darker_gray"
-                android:gravity="right"
-                android:paddingRight="10dp"/>
         </LinearLayout>
 
     </LinearLayout>
