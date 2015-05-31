@@ -126,7 +126,7 @@ public class LoopActivity extends ActionBarActivity {
 
     private int totalBars = 1;
 
-    private boolean metronomePlaying = true;
+    private boolean metronomePlaying = false;
 
     /**
      * Called when the activity is first created.
@@ -227,8 +227,6 @@ public class LoopActivity extends ActionBarActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // add the metronome, which is 1 bar.
-        addAudioData(metronomeData, 1);
     }
 
     private short[] generateMetronome() throws IOException {
