@@ -2,13 +2,19 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".MainActivity">
-      <item android:id="@+id/action_metronome"
-            android:icon="@drawable/ic_av_timer_white_24dp"
-            android:title="metronome"
-            app:showAsAction="ifRoom" />
-      <item android:id="@+id/action_add"
-            android:icon="@drawable/ic_add_white_24dp"
-            android:title="Add"
-            app:showAsAction="ifRoom" />
+    <!--<item android:id="@+id/action_metronome"-->
+    <!--android:icon="@drawable/ic_av_timer_white_24dp"-->
+    <!--android:title="metronome"-->
+    <!--app:showAsAction="ifRoom" />-->
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_refresh_white_24dp"
+        android:title="Add"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_add"
+        android:icon="@drawable/ic_add_white_24dp"
+        android:title="Add"
+        app:showAsAction="ifRoom"/>
 
 </menu>

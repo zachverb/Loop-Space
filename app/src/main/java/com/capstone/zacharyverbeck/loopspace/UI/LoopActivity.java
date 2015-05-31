@@ -182,19 +182,19 @@ public class LoopActivity extends ActionBarActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem metronome = menu.findItem(R.id.action_metronome);
-        metronome.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (metronomePlaying) {
-                    muteAudioData(metronomeData, 1);
-                } else {
-                    addAudioData(metronomeData, 1);
-                }
-                metronomePlaying = !metronomePlaying;
-                return true;
-            }
-        });
+//        MenuItem metronome = menu.findItem(R.id.action_metronome);
+//        metronome.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                if (metronomePlaying) {
+//                    muteAudioData(metronomeData, 1);
+//                } else {
+//                    addAudioData(metronomeData, 1);
+//                }
+//                metronomePlaying = !metronomePlaying;
+//                return true;
+//            }
+//        });
         return true;
     }
 
