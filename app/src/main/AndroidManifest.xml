@@ -66,10 +66,10 @@
         <activity
             android:name=".UI.CommentActivity"
             android:label="@string/title_activity_comment"
-            android:parentActivityName=".UI.TrackListActivity" >
+            android:parentActivityName=".UI.LoopActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.capstone.zacharyverbeck.loopspace.UI.TrackListActivity" />
+                android:value="com.capstone.zacharyverbeck.loopspace.UI.LoopActivity" />
         </activity>
     </application>
 

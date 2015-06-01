@@ -6,8 +6,8 @@
           <!--android:title="@string/action_settings"-->
           <!--android:orderInCategory="100"-->
           <!--app:showAsAction="never"/>-->
-      <item android:id="@+id/action_collaborate"
-            android:icon="@drawable/ic_queue_white_24dp"
-            android:title="collab"
-            app:showAsAction="ifRoom" />
+      <!--<item android:id="@+id/action_collaborate"-->
+            <!--android:icon="@drawable/ic_queue_white_24dp"-->
+            <!--android:title="collab"-->
+            <!--app:showAsAction="ifRoom" />-->
 </menu>

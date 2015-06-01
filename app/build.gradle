@@ -34,5 +34,4 @@ dependencies {
     compile 'com.github.navasmdc:MaterialDesign:1.+'
     compile 'com.yqritc:recyclerview-flexibledivider:1.2.4'
     compile 'com.balysv.materialmenu:material-menu-toolbar:1.5.3'
-    compile 'com.rengwuxian.materialedittext:library:2.1.3'
 }

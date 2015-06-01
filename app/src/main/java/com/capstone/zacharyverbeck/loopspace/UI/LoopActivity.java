@@ -168,6 +168,11 @@ public class LoopActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         switch (id) {
+            case R.id.action_comment:
+                Intent loopIntent = new Intent(LoopActivity.this, CommentActivity.class);
+                loopIntent.putExtra("trackId", Integer.parseInt(trackId));
+                startActivity(loopIntent);
+                break;
             case R.id.action_refresh:
                 //init();
                 break;
@@ -446,7 +451,7 @@ public class LoopActivity extends ActionBarActivity {
     public void deleteLoop(int id) {
         Loop loop = mLoops.get(id);
         if (loop.isPlaying()) {
-            deleteAudioData(loop.getAudioData());
+            deleteAudioData(loop.getAudioData(), loop.getBars());
         }
         mLoopsLength--;
         ((LinearLayout) mLoops.get(id).getContainer().getParent()).removeView(mLoops.get(id).getContainer());
@@ -654,18 +659,24 @@ public class LoopActivity extends ActionBarActivity {
         setAudioData(result);
     }
 
-    private void deleteAudioData(short[] audioData) {
+    private void deleteAudioData(short[] audioData, int localBars) {
         findTotalBars();
         short[] globalAudioData = mAudioData;
         int globalLength = barSize * totalBars;
+        int localLength = barSize * localBars;
         short[] result = new short[globalLength];
         int index = 0;
+        int localIndex = 0;
         while (index < globalLength) {
             short sum = 0;
+            if(localIndex >= localLength){
+                localIndex = 0;
+            }
             sum += globalAudioData[index];
-            sum -= audioData[index];
+            sum -= audioData[localIndex];
             result[index] = sum;
             index++;
+            localIndex++;
         }
         setAudioData(result);
     }

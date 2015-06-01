@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.capstone.zacharyverbeck.loopspace.Models.Track;
 import com.capstone.zacharyverbeck.loopspace.R;
-import com.capstone.zacharyverbeck.loopspace.UI.CommentActivity;
+import com.capstone.zacharyverbeck.loopspace.UI.LoopActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -95,7 +95,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent loopIntent = new Intent(mContext, CommentActivity.class);
+                Intent loopIntent = new Intent(mContext, LoopActivity.class);
                 loopIntent.putExtra("trackId", trackId);
                 loopIntent.putExtra("BPM", bpm);
                 loopIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

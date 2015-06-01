@@ -1,6 +1,5 @@
 package com.capstone.zacharyverbeck.loopspace.UI;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -151,14 +150,14 @@ public class CommentActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_collaborate) {
-            Intent loopIntent = new Intent(CommentActivity.this, LoopActivity.class);
-            loopIntent.putExtra("trackId", Integer.parseInt(trackId));
-            loopIntent.putExtra("BPM", getIntent().getIntExtra("BPM", -1));
-            startActivity(loopIntent);
-            return true;
-        }
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_collaborate) {
+//            Intent loopIntent = new Intent(CommentActivity.this, LoopActivity.class);
+//            loopIntent.putExtra("trackId", Integer.parseInt(trackId));
+//            loopIntent.putExtra("BPM", getIntent().getIntExtra("BPM", -1));
+//            startActivity(loopIntent);
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
