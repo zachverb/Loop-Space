@@ -135,21 +135,22 @@ public class LoopActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "Creating");
         init();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        playing = false;
-        mAudioTrack.pause();
-        Log.d(TAG, "Pausing");
     }
 
     @Override
     public void onResume() {
         super.onResume();
         startAudio();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "Pausing");
+        playing = false;
+        mAudioTrack.pause();
     }
 
     @Override
@@ -214,9 +215,9 @@ public class LoopActivity extends ActionBarActivity {
 
     private void initVariables() {
         trackId = getIntent().getIntExtra("trackId", -1) + "";
+        bpm = (double) getIntent().getIntExtra("BPM", 60);
         // basic samplerate, general for all devices.
         sampleRate = 44100;
-        bpm = (double) getIntent().getIntExtra("BPM", 60);
         // the length of a beatSize in samples
         beatSize = (int) ((60.0 / bpm) * sampleRate);
         // the duration of a beat in milliseconds
