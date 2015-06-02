@@ -20,11 +20,8 @@ public class LoopApplication extends Application {
         super.onCreate();
         instance = this;
         String cacheLocation = Environment.getExternalStorageDirectory() + "/loopspacecache";
-        Log.d("LoopActivity", "it was put in here man + " + cacheLocation);
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 8);
-        Log.d("LoopActivity", maxMemory + " memory");
-        Log.d("LoopActivity", (4 * 1024 * 1024) + "");
         try {
+            // creates a new cache in the folder /loopspacecache. The size is 4MiB
             mSimpleDiskCache = SimpleDiskCache.open(new File(cacheLocation), 1, (4 * 1024 * 1024));
         } catch(IOException e) {
             Log.d("Singleton", "Whoops");

@@ -74,65 +74,35 @@ import static com.capstone.zacharyverbeck.loopspace.R.color.primary_light;
 public class LoopActivity extends ActionBarActivity {
 
     public ArrayList<Loop> mLoops;
-
     public int mLoopsLength = 0;
-
     public boolean recording;
-
     private boolean recordFlag = false;
-
     public boolean playing = false;
-
     public String TAG = "LoopActivity";
-
     public int sampleRate;
-
     public double bpm;
-
     public int beatSize;
-
     public int duration;
-
     public int barSize;
-
     public int maxBars;
-
     public int minBufferSize;
-
     public AudioTrack mAudioTrack;
-
     public AudioRecord mAudioRecord;
-
     public LinearLayout mLeftLayout;
-
     public LinearLayout mRightLayout;
-
     public ServerAPI service;
-
     public S3API s3Service;
-
     public SharedPreferences settings;
-
     public String trackId;
-
     public short[] mAudioData;
-
     public short[] metronomeData;
-
     private MaterialMenuDrawable materialMenu;
-
     public Toolbar playbar;
-
     private int selected = -1;
-
     private boolean bottomToolbarShowing = true;
-
     private int currentBeat;
-
     private int totalBars = 1;
-
     private boolean metronomePlaying = false;
-
     public SimpleDiskCache mSimpleDiskCache;
 
     /**
@@ -182,7 +152,7 @@ public class LoopActivity extends ActionBarActivity {
                 startActivity(loopIntent);
                 break;
             case R.id.action_refresh:
-                //init();
+                refreshLayout();
                 break;
             case R.id.action_add:
                 addToLayout();
@@ -222,7 +192,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void initCache() {
-        LoopApplication loopApplication = (LoopApplication)getApplicationContext();
+        LoopApplication loopApplication = (LoopApplication) getApplicationContext();
         mSimpleDiskCache = loopApplication.getSimpleDiskCache();
     }
 
@@ -596,7 +566,7 @@ public class LoopActivity extends ActionBarActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if(inputStreamEntry != null) {
+            if (inputStreamEntry != null) {
                 Log.d(TAG, "PULLING FROM CACHE");
                 StreamingTask task = new StreamingTask();
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{inputStreamEntry.getInputStream(), index});
@@ -710,7 +680,7 @@ public class LoopActivity extends ActionBarActivity {
         int localIndex = 0;
         while (index < globalLength) {
             short sum = 0;
-            if(localIndex >= localLength){
+            if (localIndex >= localLength) {
                 localIndex = 0;
             }
             sum += globalAudioData[index];
@@ -894,7 +864,6 @@ public class LoopActivity extends ActionBarActivity {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                final InputStream inputStream = in;
                 service.upload(soundFile, new Callback<Endpoint>() {
                     @Override
                     public void success(Endpoint data, Response response) {
@@ -904,6 +873,7 @@ public class LoopActivity extends ActionBarActivity {
                             loop.setId(data.id);
 
                             try {
+                                InputStream inputStream = new FileInputStream(file);
                                 mSimpleDiskCache.put(data.endpoint, inputStream);
                                 inputStream.close();
                             } catch (IOException e) {
@@ -960,7 +930,7 @@ public class LoopActivity extends ActionBarActivity {
             loop.setAudioDataFromByteArray(bytes);
             InputStream is = new ByteArrayInputStream(bytes);
             try {
-                if(!mSimpleDiskCache.contains(endpoint)) {
+                if (!mSimpleDiskCache.contains(endpoint)) {
                     mSimpleDiskCache.put(endpoint, is);
                     Log.d(TAG, "PUTTING IN CACHE: " + endpoint);
                 }
