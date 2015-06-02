@@ -838,9 +838,9 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected Integer doInBackground(Integer... params) {
-            final int id = params[0];
+            final int index = params[0];
 
-            final File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
+            final File file = new File(Environment.getExternalStorageDirectory(), "test" + index + ".pcm");
             try {
                 // actually create the file which is path/to/dir/test.pcm
                 file.createNewFile();
@@ -859,7 +859,7 @@ public class LoopActivity extends ActionBarActivity {
                     }
                 }
                 mAudioRecord.startRecording();
-                publishProgress(new Integer[]{1, id});
+                publishProgress(new Integer[]{1, index});
                 while (recording) {
                     int numberOfShort = mAudioRecord.read(tempAudioData, 0, minBufferSize);
 
@@ -870,35 +870,32 @@ public class LoopActivity extends ActionBarActivity {
 
                 mAudioRecord.stop();
                 dataOutputStream.close();
-                publishProgress(new Integer[]{-1, id});
+                publishProgress(new Integer[]{-1, index});
 
-                mLoops.get(id).setFilePath(file.getAbsolutePath());
+                //mLoops.get(id).setFilePath(file.getAbsolutePath());
 
                 TypedFile soundFile = new TypedFile("binary", file);
-
+                InputStream in = null;
+                try {
+                    in = new FileInputStream(file);
+                    mLoops.get(index).setAudioDataFromInputStream(in);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                final InputStream inputStream = in;
                 service.upload(soundFile, new Callback<Endpoint>() {
                     @Override
                     public void success(Endpoint data, Response response) {
                         if (data.type == true) {
-                            Loop loop = mLoops.get(id);
+                            Loop loop = mLoops.get(index);
                             loop.setEndpoint(data.endpoint);
                             loop.setId(data.id);
-                            InputStream in = null;
+
                             try {
-                                in = new BufferedInputStream(new FileInputStream(file));
-                                mSimpleDiskCache.put(data.endpoint, in);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
+                                mSimpleDiskCache.put(data.endpoint, inputStream);
+                                inputStream.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
-                            } finally{
-                                if (in != null) {
-                                    try {
-                                        in.close();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
                             }
                         } else {
                             Log.d("Spacers", "Something went wrong.");
@@ -913,7 +910,7 @@ public class LoopActivity extends ActionBarActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return id;
+            return index;
         }
 
         @Override
@@ -960,37 +957,6 @@ public class LoopActivity extends ActionBarActivity {
             playPostExecute(index);
         }
     }
-
-//    private class StreamingTask extends AsyncTask<Object, Integer, Integer> {
-//
-//        @Override
-//        protected Integer doInBackground(Object... params) {
-//            //final Response res = (Response) params[0];
-//            final InputStream inputStream = (InputStream) params[0];
-//            final int index = (int) params[1];
-//            publishProgress(index);
-//            try {
-//                File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
-//                OutputStream out = new FileOutputStream(file);
-//                IOUtils.copy(inputStream, out);
-//                out.close();
-//                mLoops.get(index).setFilePath(file.getAbsolutePath());
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return index;
-//        }
-//
-//        @Override
-//        protected void onProgressUpdate(Integer... params) {
-//            mLoops.get(params[0]).setCurrentState("downloading");
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Integer index) {
-//            playPostExecute(index);
-//        }
-//    }
 
     // after recording/streaming, it will add the audioData
     // and start playing it.
