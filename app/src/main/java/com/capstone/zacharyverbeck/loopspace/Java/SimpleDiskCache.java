@@ -1,8 +1,5 @@
 package com.capstone.zacharyverbeck.loopspace.Java;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
@@ -34,10 +31,10 @@ public class SimpleDiskCache {
     private static final int METADATA_IDX = 1;
     private static final List<File> usedDirs = new ArrayList<File>();
 
-    private com.jakewharton.disklrucache.DiskLruCache diskLruCache;
+    private DiskLruCache diskLruCache;
     private int mAppVersion;
 
-    private SimpleDiskCache(File dir, int appVersion, long maxSize) throws IOException {
+    public SimpleDiskCache(File dir, int appVersion, long maxSize) throws IOException {
         mAppVersion = appVersion;
         diskLruCache = DiskLruCache.open(dir, appVersion, 2, maxSize);
     }
@@ -72,18 +69,6 @@ public class SimpleDiskCache {
         DiskLruCache.Snapshot snapshot = diskLruCache.get(toInternalKey(key));
         if (snapshot == null) return null;
         return new InputStreamEntry(snapshot, readMetadata(snapshot));
-    }
-
-    public BitmapEntry getBitmap(String key) throws IOException {
-        DiskLruCache.Snapshot snapshot = diskLruCache.get(toInternalKey(key));
-        if (snapshot == null) return null;
-
-        try {
-            Bitmap bitmap = BitmapFactory.decodeStream(snapshot.getInputStream(VALUE_IDX));
-            return new BitmapEntry(bitmap, readMetadata(snapshot));
-        } finally {
-            snapshot.close();
-        }
     }
 
     public StringEntry getString(String key) throws IOException {
@@ -290,24 +275,6 @@ public class SimpleDiskCache {
 
         }
 
-    }
-
-    public static class BitmapEntry {
-        private final Bitmap bitmap;
-        private final Map<String, Serializable> metadata;
-
-        public BitmapEntry(Bitmap bitmap, Map<String, Serializable> metadata) {
-            this.bitmap = bitmap;
-            this.metadata = metadata;
-        }
-
-        public Bitmap getBitmap() {
-            return bitmap;
-        }
-
-        public Map<String, Serializable> getMetadata() {
-            return metadata;
-        }
     }
 
     public static class StringEntry {

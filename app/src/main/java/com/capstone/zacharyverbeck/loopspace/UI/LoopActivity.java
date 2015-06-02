@@ -45,8 +45,11 @@ import com.capstone.zacharyverbeck.loopspace.R;
 import com.gc.materialdesign.widgets.Dialog;
 import com.gc.materialdesign.widgets.SnackBar;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -579,6 +582,7 @@ public class LoopActivity extends ActionBarActivity {
         for (int i = 0; i < loops.size(); i++) {
             final int index = i;
             final String endpoint = loops.get(index).endpoint;
+            String endKey = endpoint.split("-")[0];
             addToLayout();
             Loop loop = mLoops.get(index);
             loop.setCurrentState("downloading");
@@ -586,12 +590,14 @@ public class LoopActivity extends ActionBarActivity {
             loop.setId(loops.get(index).id);
             loop.setEndpoint(endpoint);
             SimpleDiskCache.InputStreamEntry inputStreamEntry = null;
+            Log.d(TAG, "ENDPOINT TO BE FOUND.. " + endKey);
             try {
-                inputStreamEntry = mSimpleDiskCache.getInputStream(endpoint);
+                inputStreamEntry = mSimpleDiskCache.getInputStream(endKey);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             if(inputStreamEntry != null) {
+                Log.d(TAG, "PULLING FROM CACHE");
                 StreamingTask task = new StreamingTask();
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{inputStreamEntry.getInputStream(), index});
             } else {
@@ -941,11 +947,24 @@ public class LoopActivity extends ActionBarActivity {
         protected Integer doInBackground(Object... params) {
             final InputStream inputStream = (InputStream) params[0];
             final int index = (int) params[1];
+            final String endpoint = mLoops.get(index).getEndpoint().split("-")[0];
             publishProgress(index);
-            mLoops.get(index).setAudioDataFromInputStream(inputStream);
+            Loop loop = mLoops.get(index);
+            byte[] bytes = new byte[0];
             try {
-                mSimpleDiskCache.put(mLoops.get(index).getEndpoint(), inputStream);
+                bytes = IOUtils.toByteArray(inputStream);
                 inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            loop.setAudioDataFromByteArray(bytes);
+            InputStream is = new ByteArrayInputStream(bytes);
+            try {
+                if(!mSimpleDiskCache.contains(endpoint)) {
+                    mSimpleDiskCache.put(endpoint, is);
+                    Log.d(TAG, "PUTTING IN CACHE: " + endpoint);
+                }
+                is.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
