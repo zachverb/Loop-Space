@@ -22,6 +22,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -348,6 +349,7 @@ public class LoopActivity extends ActionBarActivity {
                 public void onAnimationStart(Animator animation) {
                     super.onAnimationStart(animation);
                     playbar.setVisibility(View.VISIBLE);
+                    playbar.setSubtitle(mLoops.get(selected).getOwner());
                     animation.removeAllListeners();
                 }
             });
@@ -498,10 +500,12 @@ public class LoopActivity extends ActionBarActivity {
         //loopButton.setOnClickListener(startRecOnClickListener);
         loopButton.setId(mLoopsLength);
 
+        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());
+
         // Creating the container.
         RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
-                400);
+                height);
         rlp.addRule(RelativeLayout.CENTER_HORIZONTAL);
         RelativeLayout relativeLayout = new RelativeLayout(this);
         relativeLayout.setLayoutParams(rlp);
@@ -514,11 +518,13 @@ public class LoopActivity extends ActionBarActivity {
         // adding the actual button
         relativeLayout.addView(loopButton, loopParams);
 
+
+        int loopDim = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 110, getResources().getDisplayMetrics());
         // Adding the indeterminate progressbar
         ProgressBar progressBar = new ProgressBar(LoopActivity.this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.INVISIBLE);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300, 300);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(loopDim, loopDim);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(progressBar, params);
 
@@ -528,7 +534,7 @@ public class LoopActivity extends ActionBarActivity {
         loopProgress.setVisibility(View.INVISIBLE);
         loopProgress.setColor(primary_light);
         loopProgress.setDuration(duration);
-        params = new RelativeLayout.LayoutParams(300, 300);
+        params = new RelativeLayout.LayoutParams(loopDim, loopDim);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(loopProgress, params);
 
@@ -568,6 +574,7 @@ public class LoopActivity extends ActionBarActivity {
             mLoops.get(index).setCurrentState("downloading");
             mLoops.get(index).setIndex(index);
             mLoops.get(index).setId(loops.get(index).id);
+            mLoops.get(index).setOwner(loops.get(index).User.name);
             s3Service.getLoop(endpoint,
                     new Callback<Response>() {
                         @Override

@@ -10,4 +10,5 @@ public class LoopFile {
     public String updatedAt;
     public int owner_id;
     public int track_id;
+    public User User;
 }

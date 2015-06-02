@@ -9,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -57,7 +56,6 @@ public class CommentActivity extends ActionBarActivity {
 
     private void setUpToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Current Track");
         setSupportActionBar(toolbar);
 
         materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
@@ -70,6 +68,7 @@ public class CommentActivity extends ActionBarActivity {
             }
         });
         toolbar.setNavigationIcon(materialMenu);
+        getSupportActionBar().setTitle("Comments");
     }
 
     private void init() {
@@ -136,12 +135,7 @@ public class CommentActivity extends ActionBarActivity {
         service = serverRestAdapter.create(ServerAPI.class);
 
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_comment, menu);
-        return true;
-    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -2,17 +2,18 @@ package com.capstone.zacharyverbeck.loopspace.UI;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 
+import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
 import com.capstone.zacharyverbeck.loopspace.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.loopspace.Models.Track;
@@ -55,6 +56,7 @@ public class TrackCreateActivity extends ActionBarActivity {
         setUpVars();
         setUpRestAdapter();
         setUpViews();
+        setUpToolbar();
     }
 
     private void setUpVars() {
@@ -100,7 +102,7 @@ public class TrackCreateActivity extends ActionBarActivity {
         mTrackCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mTrackName.getText().length() != 0) {
+                if (mTrackName.getText().length() != 0) {
                     service.newTrack(new Track(mTrackName.getText().toString(), mBpmPicker.getValue(), longitude, latitude, city), new Callback<Track>() {
                         @Override
                         public void success(Track track, Response response) {
@@ -135,26 +137,22 @@ public class TrackCreateActivity extends ActionBarActivity {
         mGlobal.setupUI(findViewById(R.id.parent));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_track_create, menu);
-        return true;
-    }
+    private void setUpToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        MaterialMenuDrawable materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
+        materialMenu.setIconState(MaterialMenuDrawable.IconState.ARROW);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "home selected");
+                TrackCreateActivity.this.finish();
+            }
+        });
+        toolbar.setNavigationIcon(materialMenu);
+        getSupportActionBar().setTitle("New Track");
     }
 
 

@@ -39,6 +39,7 @@ public class Loop {
     private String currentState;
     private int barSize;
     private int bars;
+    private String mOwner;
 
     public boolean isPlaying() {
         return isPlaying;
@@ -271,4 +272,11 @@ public class Loop {
         this.bars = bars;
     }
 
+    public void setOwner(String owner) {
+        mOwner = owner;
+    }
+
+    public String getOwner() {
+        return mOwner;
+    }
 }
