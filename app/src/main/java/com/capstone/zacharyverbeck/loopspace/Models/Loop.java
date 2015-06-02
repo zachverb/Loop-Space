@@ -13,6 +13,8 @@ import com.capstone.zacharyverbeck.loopspace.Java.LoopButton;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopProgressBar;
 import com.capstone.zacharyverbeck.loopspace.R;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -20,6 +22,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Created by zacharyverbeck on 4/23/15.
@@ -103,17 +107,18 @@ public class Loop {
     public void setLoopProgressBarVisible() {
         getLoopProgressBar().setVisibility(View.VISIBLE);
     }
+
     public String getCurrentState() {
         return currentState;
     }
 
     public void setCurrentState(String state) {
         if ((getCurrentState() == "downloading" || getCurrentState() == "uploading") &&
-            (state != "uploading" && state != "downloading")) {
+                (state != "uploading" && state != "downloading")) {
             setProgressBarInvisible();
         }
         LoopButton button = this.getLoopButton();
-        switch(state) {
+        switch (state) {
             case "ready":
                 button.setImageResource(R.drawable.ic_mic_none_white_48dp);
                 button.setColor(Color.parseColor("#2196F3"));
@@ -171,7 +176,7 @@ public class Loop {
     }
 
     public void setFilePath(String filePath) {
-        if(filePath != null) {
+        if (filePath != null) {
             setAudioData(getAudioDataFromFile(new File(filePath)));
         }
         this.filePath = filePath;
@@ -198,7 +203,7 @@ public class Loop {
     }
 
     public void setAudioData(short[] audioData) {
-        if(audioData != null) {
+        if (audioData != null) {
             Log.d("LoopActivity", "Length = " + audioData.length);
             Log.d("LoopActivity", "Length = " + audioData.length % barSize);
             int bars = (audioData.length - (audioData.length % barSize));
@@ -218,7 +223,7 @@ public class Loop {
     private short[] getAudioDataFromFile(File file) {
         int shortSizeInBytes = Short.SIZE / Byte.SIZE;
         int length = (int) (file.length() / shortSizeInBytes);
-        if(length < barSize) {
+        if (length < barSize) {
             length = barSize;
         }
         short[] audioData = new short[length];
@@ -243,6 +248,22 @@ public class Loop {
         return audioData;
     }
 
+    public void setAudioDataFromInputStream(InputStream inputStream) {
+        byte[] bytes = new byte[0];
+        try {
+            bytes = IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        short[] audioData = new short[bytes.length/2];
+        // to turn bytes to shorts as either big endian or little endian.
+        ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(audioData);
+        for(int i = 0; i < audioData.length; i++) {
+            audioData[i] *= .5;
+        }
+        setAudioData(audioData);
+    }
+
 
     public LoopProgressBar getLoopProgressBar() {
         return mLoopProgressBar;
@@ -253,7 +274,7 @@ public class Loop {
     }
 
     public void setLoopProgress(int beat) {
-        while(beat > (bars * 4)) {
+        while (beat > (bars * 4)) {
             beat = beat - (bars * 4);
         }
         if (beat == 1) {
