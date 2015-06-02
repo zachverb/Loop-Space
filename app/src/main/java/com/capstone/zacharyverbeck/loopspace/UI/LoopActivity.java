@@ -33,8 +33,10 @@ import android.widget.RelativeLayout;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.capstone.zacharyverbeck.loopspace.API.S3API;
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
+import com.capstone.zacharyverbeck.loopspace.Java.LoopApplication;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopButton;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopProgressBar;
+import com.capstone.zacharyverbeck.loopspace.Java.SimpleDiskCache;
 import com.capstone.zacharyverbeck.loopspace.Models.Endpoint;
 import com.capstone.zacharyverbeck.loopspace.Models.Loop;
 import com.capstone.zacharyverbeck.loopspace.Models.LoopFile;
@@ -42,13 +44,12 @@ import com.capstone.zacharyverbeck.loopspace.R;
 import com.gc.materialdesign.widgets.Dialog;
 import com.gc.materialdesign.widgets.SnackBar;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -128,6 +129,8 @@ public class LoopActivity extends ActionBarActivity {
 
     private boolean metronomePlaying = false;
 
+    public SimpleDiskCache mSimpleDiskCache;
+
     /**
      * Called when the activity is first created.
      */
@@ -205,12 +208,18 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void init() {
+        initCache();
         initVariables();
         setupLayouts();
         setupToolbar();
         initAudio();
         setupRestAdapter();
         getTrackInfo();
+    }
+
+    private void initCache() {
+        LoopApplication loopApplication = (LoopApplication)getApplicationContext();
+        mSimpleDiskCache = loopApplication.getSimpleDiskCache();
     }
 
     private void initVariables() {
@@ -565,24 +574,43 @@ public class LoopActivity extends ActionBarActivity {
             final int index = i;
             final String endpoint = loops.get(index).endpoint;
             addToLayout();
-            mLoops.get(index).setCurrentState("downloading");
-            mLoops.get(index).setIndex(index);
-            mLoops.get(index).setId(loops.get(index).id);
-            s3Service.getLoop(endpoint,
-                    new Callback<Response>() {
-                        @Override
-                        public void success(Response result, Response response) {
-                            Log.d(TAG, "SUCCESS INSIDE HERE");
-                            StreamingTask task = new StreamingTask();
-                            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{result, index});
-                        }
+            Loop loop = mLoops.get(index);
+            loop.setCurrentState("downloading");
+            loop.setIndex(index);
+            loop.setId(loops.get(index).id);
+            loop.setEndpoint(endpoint);
+            SimpleDiskCache.InputStreamEntry inputStreamEntry = null;
+            try {
+                inputStreamEntry = mSimpleDiskCache.getInputStream(endpoint);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(inputStreamEntry != null) {
+                StreamingTask task = new StreamingTask();
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{inputStreamEntry.getInputStream(), index});
+            } else {
+                s3Service.getLoop(endpoint,
+                        new Callback<Response>() {
+                            @Override
+                            public void success(Response result, Response response) {
+                                Log.d(TAG, "SUCCESS INSIDE HERE");
+                                InputStream inputStream = null;
+                                try {
+                                    inputStream = result.getBody().in();
+                                    StreamingTask task = new StreamingTask();
+                                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{inputStream, index});
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
-                        @Override
-                        public void failure(RetrofitError retrofitError) {
-                            Log.d(TAG, "Failed to download.");
-                            retrofitError.printStackTrace();
-                        }
-                    });
+                            @Override
+                            public void failure(RetrofitError retrofitError) {
+                                Log.d(TAG, "Failed to download.");
+                                retrofitError.printStackTrace();
+                            }
+                        });
+            }
         }
     }
 
@@ -812,7 +840,7 @@ public class LoopActivity extends ActionBarActivity {
         protected Integer doInBackground(Integer... params) {
             final int id = params[0];
 
-            File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
+            final File file = new File(Environment.getExternalStorageDirectory(), "test" + id + ".pcm");
             try {
                 // actually create the file which is path/to/dir/test.pcm
                 file.createNewFile();
@@ -855,6 +883,23 @@ public class LoopActivity extends ActionBarActivity {
                             Loop loop = mLoops.get(id);
                             loop.setEndpoint(data.endpoint);
                             loop.setId(data.id);
+                            InputStream in = null;
+                            try {
+                                in = new BufferedInputStream(new FileInputStream(file));
+                                mSimpleDiskCache.put(data.endpoint, in);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } finally{
+                                if (in != null) {
+                                    try {
+                                        in.close();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
                         } else {
                             Log.d("Spacers", "Something went wrong.");
                         }
@@ -891,20 +936,17 @@ public class LoopActivity extends ActionBarActivity {
 
         @Override
         protected Integer doInBackground(Object... params) {
-            final Response res = (Response) params[0];
+            final InputStream inputStream = (InputStream) params[0];
             final int index = (int) params[1];
             publishProgress(index);
+            mLoops.get(index).setAudioDataFromInputStream(inputStream);
             try {
-                File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
-                InputStream inputStream = res.getBody().in();
-                OutputStream out = new FileOutputStream(file);
-                IOUtils.copy(inputStream, out);
+                mSimpleDiskCache.put(mLoops.get(index).getEndpoint(), inputStream);
                 inputStream.close();
-                out.close();
-                mLoops.get(index).setFilePath(file.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             return index;
         }
 
@@ -918,6 +960,37 @@ public class LoopActivity extends ActionBarActivity {
             playPostExecute(index);
         }
     }
+
+//    private class StreamingTask extends AsyncTask<Object, Integer, Integer> {
+//
+//        @Override
+//        protected Integer doInBackground(Object... params) {
+//            //final Response res = (Response) params[0];
+//            final InputStream inputStream = (InputStream) params[0];
+//            final int index = (int) params[1];
+//            publishProgress(index);
+//            try {
+//                File file = new File(Environment.getExternalStorageDirectory(), "downloaded" + (index + 1) + ".pcm");
+//                OutputStream out = new FileOutputStream(file);
+//                IOUtils.copy(inputStream, out);
+//                out.close();
+//                mLoops.get(index).setFilePath(file.getAbsolutePath());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return index;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Integer... params) {
+//            mLoops.get(params[0]).setCurrentState("downloading");
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Integer index) {
+//            playPostExecute(index);
+//        }
+//    }
 
     // after recording/streaming, it will add the audioData
     // and start playing it.
