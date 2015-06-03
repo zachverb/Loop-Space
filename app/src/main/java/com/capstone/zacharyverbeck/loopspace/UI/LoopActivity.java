@@ -25,7 +25,9 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -269,6 +271,7 @@ public class LoopActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 if (selected != -1) {
+                    mLoops.get(selected).getLoopButton().setSelected(false);
                     selected = -1;
                     materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
                     animateBottomToolbar();
@@ -765,14 +768,19 @@ public class LoopActivity extends ActionBarActivity {
         public boolean onLongClick(View v) {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(100);
+            if(selected != -1) {
+                mLoops.get(selected).getLoopButton().setSelected(false);
+            }
             if (selected == v.getId()) {
                 selected = -1;
                 materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
             } else {
                 selected = v.getId();
+                v.setSelected(true);
                 materialMenu.animateIconState(MaterialMenuDrawable.IconState.X);
             }
             animateBottomToolbar();
+            setupCancelEvent(findViewById(R.id.loopContainer));
             return true;
         }
     };
@@ -983,6 +991,52 @@ public class LoopActivity extends ActionBarActivity {
     public void setLoopsCountDown(Integer value) {
         for (int i = 0; i < mLoopsLength; i++) {
             mLoops.get(i).setLoopProgress(value);
+        }
+    }
+
+    public void setupCancelEvent(View view) {
+        //Set up touch listener for non-text box views to hide keyboard.
+        if(view.getId() != selected) {
+            view.setOnTouchListener(new View.OnTouchListener() {
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if(selected != -1) {
+                        mLoops.get(selected).getLoopButton().setSelected(false);
+                        selected = -1;
+                        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+                        animateBottomToolbar();
+                        removeCancelEvent(findViewById(R.id.loopContainer));
+                    }
+                    return false;
+                }
+            });
+
+            //If a layout container, iterate over children and seed recursion.
+            if (view instanceof ViewGroup) {
+                for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                    View innerView = ((ViewGroup) view).getChildAt(i);
+                    setupCancelEvent(innerView);
+                }
+            }
+        }
+    }
+
+    private void removeCancelEvent(View view) {
+        view.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return false;
+            }
+        });
+
+        //If a layout container, iterate over children and seed recursion.
+        if (view instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                View innerView = ((ViewGroup) view).getChildAt(i);
+                removeCancelEvent(innerView);
+            }
         }
     }
 }

@@ -270,17 +270,7 @@ public class Loop {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        int length = bytes.length/2;
-        if(length < barSize) {
-            length = barSize;
-        }
-        short[] audioData = new short[length];
-        // to turn bytes to shorts as either big endian or little endian.
-        ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(audioData);
-        for(int i = 0; i < audioData.length; i++) {
-            audioData[i] *= .5;
-        }
-        setAudioData(audioData);
+        setAudioDataFromByteArray(bytes);
     }
 
 

@@ -59,9 +59,7 @@ public class LoopButton extends ImageButton {
         init(context, attrs);
     }
 
-    @Override
-    public void setPressed(boolean pressed) {
-        super.setPressed(pressed);
+    public void setSelected(boolean pressed) {
 
         if (circlePaint != null) {
             circlePaint.setColor(pressed ? pressedColor : defaultColor);
