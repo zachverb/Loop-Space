@@ -802,7 +802,7 @@ public class LoopActivity extends ActionBarActivity {
                     currentBeat = 0;
                     for (int i = 1; i <= 8; i++) {
                         if (i % 2 == 1) {
-                            publishProgress(new Integer[]{-1, i});
+                            publishProgress(new Integer[]{-1, (i * - 1)});
                         }
                         mAudioTrack.write(metronomeData, ((beatSize / 2) * (i - 1)), (beatSize / 2));
                     }
@@ -890,7 +890,7 @@ public class LoopActivity extends ActionBarActivity {
                             Loop loop = mLoops.get(index);
                             loop.setEndpoint(data.endpoint);
                             loop.setId(data.id);
-
+                            loop.setOwner(data.name);
                             try {
                                 InputStream inputStream = new FileInputStream(file);
                                 mSimpleDiskCache.put(data.endpoint, inputStream);

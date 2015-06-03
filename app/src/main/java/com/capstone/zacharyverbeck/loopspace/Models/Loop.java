@@ -118,13 +118,16 @@ public class Loop {
             setProgressBarInvisible();
         }
         LoopButton button = this.getLoopButton();
+        if(state != "ready") {
+            button.setText("", 0f, Color.WHITE);
+        }
         switch (state) {
             case "waiting":
                 button.setImageResource(R.drawable.ic_mic_none_white_48dp);
                 button.setColor(Color.parseColor("#2196F3"));
                 break;
             case "ready":
-                button.setImageResource(R.drawable.ic_mic_white_48dp);
+                button.setImageResource(android.R.color.transparent);
                 button.setColor(Color.parseColor("#2196F3"));
                 break;
             case "recording":
@@ -287,6 +290,16 @@ public class Loop {
     }
 
     public void setLoopProgress(int beat) {
+        if(beat < 0) {
+            if (this.currentState == "ready") {
+                this.getLoopButton().setText(((5 - (-beat / 2 + 1)) + ""), 140f, Color.WHITE);
+            }
+            beat *= -1;
+        } else {
+            if (this.currentState == "ready") {
+                this.getLoopButton().setText("", 0f, Color.WHITE);
+            }
+        }
         while (beat > (bars * 4)) {
             beat = beat - (bars * 4);
         }
@@ -294,7 +307,7 @@ public class Loop {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
         }
         this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
-        if(this.currentState != "waiting") {
+        if(this.currentState != "waiting" && this.currentState != "ready") {
             this.getLoopButton().startAnimation(getAnimation());
         }
     }
