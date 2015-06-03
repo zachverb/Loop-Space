@@ -498,10 +498,12 @@ public class LoopActivity extends ActionBarActivity {
         RelativeLayout relativeLayout = new RelativeLayout(this);
         relativeLayout.setLayoutParams(rlp);
 
+
+        int loopButtonDim = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 130, getResources().getDisplayMetrics());
         // setting up the parameters to add the loop button
         RelativeLayout.LayoutParams loopParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                loopButtonDim,
+                loopButtonDim);
         loopParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         // adding the actual button
         relativeLayout.addView(loopButton, loopParams);
