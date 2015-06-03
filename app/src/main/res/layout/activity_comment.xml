@@ -37,7 +37,8 @@
             android:layout_height="match_parent"
             android:layout_weight="98"
             android:textColor="@android:color/black"
-            android:textColorHint="@android:color/darker_gray"/>
+            android:textColorHint="@android:color/darker_gray"
+            android:textCursorDrawable="@null"/>
 
         <com.gc.materialdesign.views.ButtonRectangle
             android:id="@+id/submitButton"
