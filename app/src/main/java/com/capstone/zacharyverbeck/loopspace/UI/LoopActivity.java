@@ -996,37 +996,15 @@ public class LoopActivity extends ActionBarActivity {
 
     public void setupCancelEvent(View view) {
         //Set up touch listener for non-text box views to hide keyboard.
-        if(view.getId() != selected) {
-            view.setOnTouchListener(new View.OnTouchListener() {
-
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if(selected != -1) {
-                        mLoops.get(selected).getLoopButton().setSelected(false);
-                        selected = -1;
-                        materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
-                        animateBottomToolbar();
-                        removeCancelEvent(findViewById(R.id.loopContainer));
-                    }
-                    return false;
-                }
-            });
-
-            //If a layout container, iterate over children and seed recursion.
-            if (view instanceof ViewGroup) {
-                for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                    View innerView = ((ViewGroup) view).getChildAt(i);
-                    setupCancelEvent(innerView);
-                }
-            }
-        }
-    }
-
-    private void removeCancelEvent(View view) {
         view.setOnTouchListener(new View.OnTouchListener() {
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if(selected != -1 && selected != v.getId()) {
+                    mLoops.get(selected).getLoopButton().setSelected(false);
+                    selected = -1;
+                    materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
+                    animateBottomToolbar();
+                }
                 return false;
             }
         });
@@ -1035,7 +1013,7 @@ public class LoopActivity extends ActionBarActivity {
         if (view instanceof ViewGroup) {
             for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
                 View innerView = ((ViewGroup) view).getChildAt(i);
-                removeCancelEvent(innerView);
+                setupCancelEvent(innerView);
             }
         }
     }
