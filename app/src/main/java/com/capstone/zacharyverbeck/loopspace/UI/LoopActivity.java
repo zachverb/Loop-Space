@@ -749,7 +749,7 @@ public class LoopActivity extends ActionBarActivity {
         @Override
         public void onClick(View v) {
             Loop loop = mLoops.get(v.getId());
-            if (loop.isPlaying()) {
+            if (loop.isPlaying() && selected != v.getId()) {
                 //necessary to set it before checking the total bars in the subtractMethod
                 mLoops.get(v.getId()).setIsPlaying(false);
                 muteAudioData(loop.getAudioData(), loop.getBars());
@@ -851,6 +851,7 @@ public class LoopActivity extends ActionBarActivity {
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
 
                 short[] tempAudioData = new short[minBufferSize];
+                publishProgress(new Integer[]{0, index});
                 while (recordFlag != false) {
                     try {
                         Thread.sleep(10);
@@ -917,6 +918,8 @@ public class LoopActivity extends ActionBarActivity {
         protected void onProgressUpdate(Integer... params) {
             if (params[0] == -1) {
                 mLoops.get(params[1]).setCurrentState("uploading");
+            } else if(params[0] == 0) {
+                mLoops.get(params[1]).setCurrentState("ready");
             } else {
                 mLoops.get(params[1]).setCurrentState("recording");
             }

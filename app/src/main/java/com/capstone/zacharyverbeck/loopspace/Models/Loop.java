@@ -62,7 +62,7 @@ public class Loop {
         this.setFilePath(null);
         this.setAudioData(null);
         this.setIsPlaying(true);
-        this.setCurrentState("ready");
+        this.setCurrentState("waiting");
         this.barSize = barSize;
         this.setBars(1);
     }
@@ -119,8 +119,12 @@ public class Loop {
         }
         LoopButton button = this.getLoopButton();
         switch (state) {
-            case "ready":
+            case "waiting":
                 button.setImageResource(R.drawable.ic_mic_none_white_48dp);
+                button.setColor(Color.parseColor("#2196F3"));
+                break;
+            case "ready":
+                button.setImageResource(R.drawable.ic_mic_white_48dp);
                 button.setColor(Color.parseColor("#2196F3"));
                 break;
             case "recording":
@@ -290,7 +294,9 @@ public class Loop {
             this.getLoopProgressBar().setProgress(Float.valueOf(0));
         }
         this.getLoopProgressBar().setProgressWithAnimation(Float.valueOf(beat));
-        this.getLoopButton().startAnimation(getAnimation());
+        if(this.currentState != "waiting") {
+            this.getLoopButton().startAnimation(getAnimation());
+        }
     }
 
     public int getBars() {
