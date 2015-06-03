@@ -378,10 +378,7 @@ public class LoopActivity extends ActionBarActivity {
                 .getDefaultSharedPreferences(this.getApplicationContext());
         final String token = settings.getString("token", "");
         if (token == "") {
-            Dialog dialog = new Dialog(getApplicationContext(), "Error!", "You must be signed in!");
-            dialog.show();
-            Intent intent = new Intent(LoopActivity.this, LoginActivity.class);
-            startActivity(intent);
+            loginRedirect();
         }
 
         // set up heroku connection header with the token and trackId.
@@ -406,6 +403,13 @@ public class LoopActivity extends ActionBarActivity {
                 .setEndpoint("https://s3-us-west-2.amazonaws.com/loopspace/")
                 .build();
         s3Service = s3RestAdapter.create(S3API.class);
+    }
+
+    private void loginRedirect() {
+        Dialog dialog = new Dialog(getApplicationContext(), "Error!", "You must be signed in!");
+        dialog.show();
+        Intent intent = new Intent(LoopActivity.this, LoginActivity.class);
+        startActivity(intent);
     }
 
     private void setupHowTo() {

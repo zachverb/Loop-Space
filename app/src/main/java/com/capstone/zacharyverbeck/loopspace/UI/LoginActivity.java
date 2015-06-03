@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
 import com.capstone.zacharyverbeck.loopspace.Java.GlobalFunctions;
@@ -31,8 +31,6 @@ public class LoginActivity extends Activity {
     public EditText mEmailField;
     public EditText mPasswordField;
 
-    public ProgressBar mLoadingBar;
-
     public ServerAPI service;
 
     public String TAG = "LoginActivity";
@@ -42,6 +40,11 @@ public class LoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if( PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext()).contains("token")) {
+            Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
+            startActivity(intent);
+        }
         setContentView(R.layout.activity_login);
 
         init();
@@ -55,7 +58,11 @@ public class LoginActivity extends Activity {
         mSignUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String email = mEmailField.getText().toString();
+                String password = mPasswordField.getText().toString();
                 Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                intent.putExtra("email", email);
+                intent.putExtra("password", password);
                 startActivity(intent);
             }
         });

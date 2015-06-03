@@ -64,6 +64,11 @@ public class SignUpActivity extends Activity {
         mPasswordField = (EditText)findViewById(R.id.passwordField);
         mEmailField = (EditText)findViewById(R.id.emailField);
         mNumberField = (EditText)findViewById(R.id.phoneNumberField);
+        String email = getIntent().getStringExtra("email");
+        String password = getIntent().getStringExtra("password");
+
+        mPasswordField.setText(password);
+        mUsernameField.setText(email);
 
         mGlobal = new GlobalFunctions(this);
         mGlobal.setupUI(findViewById(R.id.parent));
