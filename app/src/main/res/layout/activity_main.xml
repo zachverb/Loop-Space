@@ -3,13 +3,13 @@
     android:id="@+id/layoutMain"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:materialdesign="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
     android:background="@android:color/white"
     android:keepScreenOn="true"
     android:orientation="vertical"
-    android:weightSum="1"
-    xmlns:materialdesign="http://schemas.android.com/tools">
+    android:weightSum="1">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"

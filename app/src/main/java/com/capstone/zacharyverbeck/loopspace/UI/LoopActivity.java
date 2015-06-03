@@ -486,7 +486,6 @@ public class LoopActivity extends ActionBarActivity {
     private RelativeLayout addLoopObject() {
         // Creating a new loop button
         LoopButton loopButton = (LoopButton) getLayoutInflater().inflate(R.layout.loop_button, null);
-        //loopButton.setOnClickListener(startRecOnClickListener);
         loopButton.setId(mLoopsLength);
 
         int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 150, getResources().getDisplayMetrics());
