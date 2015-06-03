@@ -87,7 +87,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         holder.title.setText(track.title.substring(0, 1).toUpperCase() + track.title.substring(1));
         holder.owner.setText(username);
         holder.mLoopButton.setText(username.substring(0,1).toUpperCase(), 60f, Color.WHITE);
-        holder.mLoopButton.setColor(Color.parseColor(colors[r.nextInt(colors.length)]));
+        holder.mLoopButton.setColor(Color.parseColor(colors[username.length() % colors.length]));
         String date = mDataset.get(index).createdAt;
         Date formatted = null;
         try {

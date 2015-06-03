@@ -580,14 +580,19 @@ public class LoopActivity extends ActionBarActivity {
                         new Callback<Response>() {
                             @Override
                             public void success(Response result, Response response) {
-                                Log.d(TAG, "SUCCESS INSIDE HERE");
-                                InputStream inputStream = null;
-                                try {
-                                    inputStream = result.getBody().in();
-                                    StreamingTask task = new StreamingTask();
-                                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{inputStream, index});
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+                                if(result.getBody() != null) {
+                                    Log.d(TAG, "SUCCESS INSIDE HERE");
+                                    InputStream inputStream = null;
+                                    try {
+                                        inputStream = result.getBody().in();
+                                        StreamingTask task = new StreamingTask();
+                                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{inputStream, index});
+                                    } catch (IOException e) {
+                                        //e.printStackTrace();
+                                    }
+                                } else {
+                                    Dialog dialog = new Dialog(LoopActivity.this, "Error", "Error loading loops");
+                                    dialog.show();
                                 }
                             }
 
