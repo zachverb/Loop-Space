@@ -563,6 +563,7 @@ public class LoopActivity extends ActionBarActivity {
             loop.setIndex(index);
             loop.setId(loops.get(index).id);
             loop.setEndpoint(endpoint);
+            loop.setOwner(loops.get(index).User.name);
             SimpleDiskCache.InputStreamEntry inputStreamEntry = null;
             Log.d(TAG, "ENDPOINT TO BE FOUND.. " + endKey);
             try {

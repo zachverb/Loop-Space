@@ -44,7 +44,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:src="@mipmap/ic_add_white_24dp"
-        fab:fab_colorNormal="@color/primary_fab"
+        fab:fab_colorNormal="@color/accent"
         fab:fab_colorPressed="@color/primary_dark_fab"
         fab:fab_colorRipple="@color/ripple_fab" />
 

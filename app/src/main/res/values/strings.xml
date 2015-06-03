@@ -16,6 +16,15 @@
         <item>Tracks in City</item>
         <item>Global Tracks</item>
     </string-array>
+    <string-array name="user_colors_array">
+        <item>#2196F3</item>
+        <item>#03A9F4</item>
+        <item>#009688</item>
+        <item>#FF4081</item>
+        <item>#FF5252</item>
+        <item>#B39DDB</item>
+        <item>#FFD740</item>
+    </string-array>
     <string name="title_activity_comment">CommentActivity</string>
 
 </resources>

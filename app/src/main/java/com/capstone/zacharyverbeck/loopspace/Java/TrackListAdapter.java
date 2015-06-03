@@ -2,6 +2,7 @@ package com.capstone.zacharyverbeck.loopspace.Java;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by zacharyverbeck on 5/6/15.
@@ -75,6 +77,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         final int index = position;
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+        Random r = new Random();
+        Resources res = mContext.getResources();
+        String[] colors = res.getStringArray(R.array.user_colors_array);
         final Track track = mDataset.get(index);
         final int trackId = track.id;
         final int bpm = track.bpm;
@@ -82,6 +87,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         holder.title.setText(track.title.substring(0, 1).toUpperCase() + track.title.substring(1));
         holder.owner.setText(username);
         holder.mLoopButton.setText(username.substring(0,1).toUpperCase(), 60f, Color.WHITE);
+        holder.mLoopButton.setColor(Color.parseColor(colors[r.nextInt(colors.length)]));
         String date = mDataset.get(index).createdAt;
         Date formatted = null;
         try {
