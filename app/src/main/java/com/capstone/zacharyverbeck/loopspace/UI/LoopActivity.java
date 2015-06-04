@@ -729,12 +729,12 @@ public class LoopActivity extends ActionBarActivity {
         @Override
         public void onClick(View v) {
             final int buttonId = v.getId();
+            v.setOnClickListener(null);
             Log.d(TAG, "START REC");
             recording = true;
             recordFlag = true;
             RecordingTask task = new RecordingTask();
             task.execute(buttonId);
-            v.setOnClickListener(null);
         }
     };
 
@@ -846,7 +846,6 @@ public class LoopActivity extends ActionBarActivity {
 
             final File file = new File(Environment.getExternalStorageDirectory(), "test" + index + ".pcm");
             try {
-                // actually create the file which is path/to/dir/test.pcm
                 file.createNewFile();
 
                 // sets up an outputstream which is a file
@@ -877,16 +876,18 @@ public class LoopActivity extends ActionBarActivity {
                 dataOutputStream.close();
                 publishProgress(new Integer[]{-1, index});
 
-                //mLoops.get(id).setFilePath(file.getAbsolutePath());
-
                 TypedFile soundFile = new TypedFile("binary", file);
-                InputStream in = null;
+
+                byte[] bytes = new byte[0];
                 try {
-                    in = new FileInputStream(file);
-                    mLoops.get(index).setAudioDataFromInputStream(in);
-                } catch (FileNotFoundException e) {
+                    InputStream inputStream = new FileInputStream(file);
+                    bytes = IOUtils.toByteArray(inputStream);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
+                mLoops.get(index).setAudioDataFromByteArray(bytes);
+                final byte[] byteCache = bytes;
+
                 service.upload(soundFile, new Callback<Endpoint>() {
                     @Override
                     public void success(Endpoint data, Response response) {
@@ -896,13 +897,16 @@ public class LoopActivity extends ActionBarActivity {
                             loop.setId(data.id);
                             Log.d(TAG, "Loopid = " + loop.getId());
                             loop.setOwner(data.name);
+                            InputStream is = new ByteArrayInputStream(byteCache);
                             try {
-                                InputStream inputStream = new FileInputStream(file);
-                                mSimpleDiskCache.put(data.endpoint, inputStream);
-                                inputStream.close();
+                                mSimpleDiskCache.put(data.endpoint, is);
+                                Log.d(TAG, "PUTTING IN CACHE: " + data.endpoint);
+                                is.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
+                            addAudioData(loop.getAudioData(), loop.getBars());
                         } else {
                             Log.d("Spacers", "Something went wrong.");
                         }
@@ -955,6 +959,7 @@ public class LoopActivity extends ActionBarActivity {
                 e.printStackTrace();
             }
             loop.setAudioDataFromByteArray(bytes);
+            addAudioData(loop.getAudioData(), loop.getBars());
             InputStream is = new ByteArrayInputStream(bytes);
             try {
                 if (!mSimpleDiskCache.contains(endpoint)) {
@@ -985,7 +990,6 @@ public class LoopActivity extends ActionBarActivity {
     public void playPostExecute(Integer index) {
         Loop loop = mLoops.get(index);
         LoopButton loopButton = loop.getLoopButton();
-        addAudioData(loop.getAudioData(), loop.getBars());
         loopButton.setOnClickListener(togglePlayOnClickListener);
         loopButton.setOnLongClickListener(setLoopButtonSelected);
         loop.setCurrentState("playing");

@@ -43,7 +43,6 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setupRestAdapter();
 
-
     }
 
     private void setupRestAdapter() {
@@ -77,10 +76,16 @@ public class LoginActivity extends Activity {
                     init();
                 }
             });
+        } else {
+            setContentView(R.layout.activity_login);
+            init();
         }
     }
 
     public void init() {
+        mGlobal = new GlobalFunctions(this);
+        mGlobal.setupUI(findViewById(R.id.parent));
+
         mSignUpButton = (ButtonRectangle) findViewById(R.id.signUpButton);
         mLoginButton = (ButtonRectangle) findViewById(R.id.logInButton);
 
@@ -100,11 +105,6 @@ public class LoginActivity extends Activity {
                 return false;
             }
         });
-
-
-
-        mGlobal = new GlobalFunctions(this);
-        mGlobal.setupUI(findViewById(R.id.parent));
 
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
