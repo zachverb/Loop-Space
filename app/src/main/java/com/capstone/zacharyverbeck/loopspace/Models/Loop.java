@@ -13,8 +13,6 @@ import com.capstone.zacharyverbeck.loopspace.Java.LoopButton;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopProgressBar;
 import com.capstone.zacharyverbeck.loopspace.R;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -217,10 +215,12 @@ public class Loop {
             Log.d("LoopActivity", bars + " Bars b4 division");
             bars = bars / barSize;
             Log.d("LoopActivity", bars + " bars aftr division");
-            if (bars <= 2) {
+            if(bars < 1) {
+                setBars(1);
+            } else if (bars <= 2) {
                 setBars(bars);
             } else {
-                setBars(Integer.highestOneBit(bars - 1));
+                setBars(Integer.highestOneBit(bars));
             }
             Log.d("LoopActivity", this.bars + " many bars");
         }
@@ -269,17 +269,6 @@ public class Loop {
         }
         setAudioData(audioData);
     }
-
-    public void setAudioDataFromInputStream(InputStream inputStream) {
-        byte[] bytes = new byte[0];
-        try {
-            bytes = IOUtils.toByteArray(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        setAudioDataFromByteArray(bytes);
-    }
-
 
     public LoopProgressBar getLoopProgressBar() {
         return mLoopProgressBar;
