@@ -19,6 +19,7 @@ import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.widgets.Dialog;
 
 import retrofit.Callback;
+import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -40,32 +41,43 @@ public class LoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if( PreferenceManager
-                .getDefaultSharedPreferences(this.getApplicationContext()).contains("token")) {
-            Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
-            startActivity(intent);
+        setupRestAdapter();
+
+
+    }
+
+    private void setupRestAdapter() {
+        final String token = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext()).getString("token", "");
+        RequestInterceptor interceptor = new RequestInterceptor() {
+            @Override
+            public void intercept(RequestFacade request) {
+                request.addHeader("Accept", "application/json");
+                request.addHeader("Authorization", token);
+            }
+        };
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                .setRequestInterceptor(interceptor)
+                .build();
+        service = restAdapter.create(ServerAPI.class);
+
+        if(token != "") {
+            service.authorization(new Callback<Response>() {
+                @Override
+                public void success(Response response, Response response2) {
+                    Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
+                    startActivity(intent);
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    Log.d(TAG, "Not already logged in." + token);
+                    setContentView(R.layout.activity_login);
+                    init();
+                }
+            });
         }
-        setContentView(R.layout.activity_login);
-
-        init();
-
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
-        mSignUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = mEmailField.getText().toString();
-                String password = mPasswordField.getText().toString();
-                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-                intent.putExtra("email", email);
-                intent.putExtra("password", password);
-                startActivity(intent);
-            }
-        });
     }
 
     public void init() {
@@ -89,17 +101,28 @@ public class LoginActivity extends Activity {
             }
         });
 
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
-                .build();
 
-        service = restAdapter.create(ServerAPI.class);
 
         mGlobal = new GlobalFunctions(this);
         mGlobal.setupUI(findViewById(R.id.parent));
 
-
-        //toolbar.inflateMenu(R.menu.menu_login);
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                login();
+            }
+        });
+        mSignUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = mEmailField.getText().toString();
+                String password = mPasswordField.getText().toString();
+                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                intent.putExtra("email", email);
+                intent.putExtra("password", password);
+                startActivity(intent);
+            }
+        });
 
     }
 

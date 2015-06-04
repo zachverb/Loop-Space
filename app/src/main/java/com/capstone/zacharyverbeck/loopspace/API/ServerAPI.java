@@ -34,6 +34,9 @@ public interface ServerAPI {
     @POST("/authenticate")
     public void authenticate(@Body User user, Callback<Data> callback);
 
+    @POST("/authorization")
+    public void authorization(Callback<Response> callback);
+
     @Multipart
     @POST("/upload")
     public void upload(@Part("fileContent") TypedFile file, Callback<Endpoint> callback);

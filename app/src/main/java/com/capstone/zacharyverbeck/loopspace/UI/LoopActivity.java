@@ -894,6 +894,7 @@ public class LoopActivity extends ActionBarActivity {
                             Loop loop = mLoops.get(index);
                             loop.setEndpoint(data.endpoint);
                             loop.setId(data.id);
+                            Log.d(TAG, "Loopid = " + loop.getId());
                             loop.setOwner(data.name);
                             try {
                                 InputStream inputStream = new FileInputStream(file);
