@@ -26,5 +26,6 @@
         <item>#FFD740</item>
     </string-array>
     <string name="title_activity_comment">CommentActivity</string>
+    <string name="server_addr">https://secret-spire-6485.herokuapp.com/</string>
 
 </resources>
