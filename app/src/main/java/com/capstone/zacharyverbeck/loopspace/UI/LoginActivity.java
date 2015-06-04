@@ -2,9 +2,14 @@ package com.capstone.zacharyverbeck.loopspace.UI;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,8 +20,12 @@ import com.capstone.zacharyverbeck.loopspace.Java.GlobalFunctions;
 import com.capstone.zacharyverbeck.loopspace.Models.Data;
 import com.capstone.zacharyverbeck.loopspace.Models.User;
 import com.capstone.zacharyverbeck.loopspace.R;
+import com.capstone.zacharyverbeck.loopspace.Services.QuickstartPreferences;
+import com.capstone.zacharyverbeck.loopspace.Services.RegistrationIntentService;
 import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.widgets.Dialog;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -38,14 +47,58 @@ public class LoginActivity extends Activity {
 
     public GlobalFunctions mGlobal;
 
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupRestAdapter();
+        receiveToken();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
+    }
+
+    private void receiveToken() {
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    setupRestAdapter();
+                } else {
+                    Log.d(TAG, "Token didn't send");
+                }
+            }
+        };
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Log.d(TAG, "Yup");
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        } else {
+            setupRestAdapter();
+        }
     }
 
     private void setupRestAdapter() {
+
+
         final String token = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext()).getString("token", "");
         RequestInterceptor interceptor = new RequestInterceptor() {
@@ -165,6 +218,21 @@ public class LoginActivity extends Activity {
                 retrofitError.printStackTrace();
             }
         });
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        9000).show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
 }

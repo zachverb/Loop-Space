@@ -80,6 +80,40 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.capstone.zacharyverbeck.loopspace.UI.LoopActivity" />
         </activity>
+
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.capstone.zacharyverbeck.loopspace" />
+            </intent-filter>
+        </receiver>
+        <!-- [END gcm_receiver] -->
+
+        <!-- [START gcm_listener] -->
+        <service
+            android:name="com.capstone.zacharyverbeck.loopspace.Services.MyGcmListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <!-- [END gcm_listener] -->
+        <!-- [START instanceId_listener] -->
+        <service
+            android:name="com.capstone.zacharyverbeck.loopspace.Services.MyInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+            </intent-filter>
+        </service>
+        <!-- [END instanceId_listener] -->
+        <service
+            android:name="com.capstone.zacharyverbeck.loopspace.Services.RegistrationIntentService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

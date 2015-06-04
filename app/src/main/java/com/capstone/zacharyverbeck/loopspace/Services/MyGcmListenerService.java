@@ -11,7 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.capstone.zacharyverbeck.loopspace.R;
-import com.capstone.zacharyverbeck.loopspace.UI.LoginActivity;
+import com.capstone.zacharyverbeck.loopspace.UI.LoopActivity;
 import com.google.android.gms.gcm.GcmListenerService;
 
 /**
@@ -32,6 +32,8 @@ public class MyGcmListenerService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         String message = data.getString("message");
+        String trackId = data.getString("track_id");
+        String trackBpm = data.getString("trackBpm");
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
@@ -46,7 +48,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(message);
+        sendNotification(message, trackId, trackBpm);
     }
     // [END receive_message]
 
@@ -55,8 +57,10 @@ public class MyGcmListenerService extends GcmListenerService {
      *
      * @param message GCM message received.
      */
-    private void sendNotification(String message) {
-        Intent intent = new Intent(this, LoginActivity.class);
+    private void sendNotification(String message, String trackId, String trackBpm) {
+        Intent intent = new Intent(this, LoopActivity.class);
+        intent.putExtra("trackId", Integer.parseInt(trackId));
+        intent.putExtra("BPM", Integer.parseInt(trackBpm));
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);

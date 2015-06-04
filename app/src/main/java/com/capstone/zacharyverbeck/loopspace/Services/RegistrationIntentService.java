@@ -7,12 +7,19 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
+import com.capstone.zacharyverbeck.loopspace.Models.User;
 import com.capstone.zacharyverbeck.loopspace.R;
-import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
 import java.io.IOException;
+
+import retrofit.Callback;
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by zacharyverbeck on 6/4/15.
@@ -22,6 +29,12 @@ public class RegistrationIntentService extends IntentService {
     private static final String TAG = "RegIntentService";
     private static final String[] TOPICS = {"global"};
 
+
+    public void onCreate() {
+        super.onCreate();
+        Log.d("Server", ">>>onCreate()");
+    }
+
     public RegistrationIntentService() {
         super(TAG);
     }
@@ -29,7 +42,7 @@ public class RegistrationIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
+        Log.d(TAG, "Yup");
         try {
             // In the (unlikely) event that multiple refresh operations occur simultaneously,
             // ensure that they are processed sequentially.
@@ -43,8 +56,9 @@ public class RegistrationIntentService extends IntentService {
                 Log.i(TAG, "GCM Registration Token: " + token);
 
                 // TODO: Implement this method to send any registration to your app's servers.
-                sendRegistrationToServer(token);
-
+                //if(sharedPreferences.getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false)) {
+                    sendRegistrationToServer(token);
+                //}
                 // Subscribe to topic channels
                 //subscribeTopics(token);
 
@@ -74,7 +88,35 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        // Add custom implementation, as needed.
+        SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+
+        final String userToken = settings.getString("token", "");
+
+        // setup heroku connection
+        RequestInterceptor interceptor = new RequestInterceptor() {
+            @Override
+            public void intercept(RequestFacade request) {
+                request.addHeader("Accept", "multipart/form-data");
+                request.addHeader("Authorization", userToken);
+            }
+        };
+        RestAdapter serverRestAdapter = new RestAdapter.Builder()
+                .setEndpoint(this.getResources().getString(R.string.server_addr))
+                .setRequestInterceptor(interceptor)
+                .build();
+        ServerAPI service = serverRestAdapter.create(ServerAPI.class);
+        service.gcmRegistration(new User(token), new Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                Log.d(TAG, "WORKED");
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(TAG, "DID NOT WORK");
+            }
+        });
     }
 
     /**

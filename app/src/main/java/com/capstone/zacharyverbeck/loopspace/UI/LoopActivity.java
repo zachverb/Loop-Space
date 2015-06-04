@@ -597,9 +597,9 @@ public class LoopActivity extends ActionBarActivity {
                                         //e.printStackTrace();
                                     }
                                 } else {
-                                    Dialog dialog = new Dialog(LoopActivity.this, "Error", "Error loading loops");
-                                    dialog.show();
-                                    deleteFromServer(index);
+//                                    Dialog dialog = new Dialog(LoopActivity.this, "Error", "Error loading loops");
+//                                    dialog.show();
+                                    deleteLoop(index);
                                 }
                             }
 

@@ -37,6 +37,9 @@ public interface ServerAPI {
     @POST("/authorization")
     public void authorization(Callback<Response> callback);
 
+    @POST("/gcmregistration")
+    public void gcmRegistration(@Body User userRegistration, Callback<Response> callback);
+
     @Multipart
     @POST("/upload")
     public void upload(@Part("fileContent") TypedFile file, Callback<Endpoint> callback);
