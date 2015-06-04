@@ -734,7 +734,7 @@ public class LoopActivity extends ActionBarActivity {
             recordFlag = true;
             RecordingTask task = new RecordingTask();
             task.execute(buttonId);
-            v.setOnClickListener(stopRecOnClickListener);
+            v.setOnClickListener(null);
         }
     };
 
@@ -926,6 +926,7 @@ public class LoopActivity extends ActionBarActivity {
                 mLoops.get(params[1]).setCurrentState("ready");
             } else {
                 mLoops.get(params[1]).setCurrentState("recording");
+                mLoops.get(params[1]).getLoopButton().setOnClickListener(stopRecOnClickListener);
             }
         }
 
