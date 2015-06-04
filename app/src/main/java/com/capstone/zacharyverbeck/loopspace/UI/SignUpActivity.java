@@ -88,7 +88,7 @@ public class SignUpActivity extends Activity {
             String number = mNumberField.getText().toString();
 
             RestAdapter restAdapter = new RestAdapter.Builder()
-                    .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                    .setEndpoint(SignUpActivity.this.getResources().getString(R.string.server_addr))
                     .build();
 
             service = restAdapter.create(ServerAPI.class);

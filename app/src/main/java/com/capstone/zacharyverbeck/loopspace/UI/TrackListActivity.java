@@ -175,7 +175,7 @@ public class TrackListActivity extends ActionBarActivity implements AdapterView.
             }
         };
         RestAdapter serverRestAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                .setEndpoint(this.getResources().getString(R.string.server_addr))
                 .setRequestInterceptor(interceptor)
                 .build();
         service = serverRestAdapter.create(ServerAPI.class);

@@ -27,5 +27,6 @@
     </string-array>
     <string name="title_activity_comment">CommentActivity</string>
     <string name="server_addr">https://secret-spire-6485.herokuapp.com/</string>
+    <string name="s3_addr">https://s3-us-west-2.amazonaws.com/loopspace/</string>
 
 </resources>

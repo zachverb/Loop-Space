@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -395,15 +396,16 @@ public class LoopActivity extends ActionBarActivity {
         };
 
         // sets up connection to heroku server
+        Resources res = this.getResources();
         RestAdapter serverRestAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                .setEndpoint(res.getString(R.string.server_addr))
                 .setRequestInterceptor(interceptor)
                 .build();
         service = serverRestAdapter.create(ServerAPI.class);
 
         // setup s3 connection
         RestAdapter s3RestAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://s3-us-west-2.amazonaws.com/loopspace/")
+                .setEndpoint(res.getString(R.string.s3_addr))
                 .build();
         s3Service = s3RestAdapter.create(S3API.class);
     }

@@ -56,7 +56,7 @@ public class LoginActivity extends Activity {
             }
         };
         RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://secret-spire-6485.herokuapp.com/")
+                .setEndpoint(this.getResources().getString(R.string.server_addr))
                 .setRequestInterceptor(interceptor)
                 .build();
         service = restAdapter.create(ServerAPI.class);
