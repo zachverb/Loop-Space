@@ -74,15 +74,16 @@ public class LoginActivity extends Activity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
-                SharedPreferences sharedPreferences =
+                sharedPreferences =
                         PreferenceManager.getDefaultSharedPreferences(context);
                 boolean sentToken = sharedPreferences
                         .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
                 if (sentToken) {
-                    setupRestAdapter();
+                    Log.d(TAG, "Token sent!");
                 } else {
                     Log.d(TAG, "Token didn't send");
                 }
+                setupRestAdapter();
             }
         };
 
