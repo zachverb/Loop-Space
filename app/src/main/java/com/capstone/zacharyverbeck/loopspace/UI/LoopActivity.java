@@ -906,7 +906,6 @@ public class LoopActivity extends ActionBarActivity {
                                 e.printStackTrace();
                             }
 
-                            addAudioData(loop.getAudioData(), loop.getBars());
                         } else {
                             Log.d("Spacers", "Something went wrong.");
                         }
@@ -959,7 +958,6 @@ public class LoopActivity extends ActionBarActivity {
                 e.printStackTrace();
             }
             loop.setAudioDataFromByteArray(bytes);
-            addAudioData(loop.getAudioData(), loop.getBars());
             InputStream is = new ByteArrayInputStream(bytes);
             try {
                 if (!mSimpleDiskCache.contains(endpoint)) {
@@ -990,6 +988,7 @@ public class LoopActivity extends ActionBarActivity {
     public void playPostExecute(Integer index) {
         Loop loop = mLoops.get(index);
         LoopButton loopButton = loop.getLoopButton();
+        addAudioData(loop.getAudioData(), loop.getBars());
         loopButton.setOnClickListener(togglePlayOnClickListener);
         loopButton.setOnLongClickListener(setLoopButtonSelected);
         loop.setCurrentState("playing");
