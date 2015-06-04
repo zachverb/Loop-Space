@@ -597,6 +597,7 @@ public class LoopActivity extends ActionBarActivity {
                                 } else {
                                     Dialog dialog = new Dialog(LoopActivity.this, "Error", "Error loading loops");
                                     dialog.show();
+                                    deleteFromServer(index);
                                 }
                             }
 
@@ -685,25 +686,27 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void deleteAudioData(short[] audioData, int localBars) {
-        findTotalBars();
-        short[] globalAudioData = mAudioData;
-        int globalLength = barSize * totalBars;
-        int localLength = barSize * localBars;
-        short[] result = new short[globalLength];
-        int index = 0;
-        int localIndex = 0;
-        while (index < globalLength) {
-            short sum = 0;
-            if (localIndex >= localLength) {
-                localIndex = 0;
+        if(audioData != null) {
+            findTotalBars();
+            short[] globalAudioData = mAudioData;
+            int globalLength = barSize * totalBars;
+            int localLength = barSize * localBars;
+            short[] result = new short[globalLength];
+            int index = 0;
+            int localIndex = 0;
+            while (index < globalLength) {
+                short sum = 0;
+                if (localIndex >= localLength) {
+                    localIndex = 0;
+                }
+                sum += globalAudioData[index];
+                sum -= audioData[localIndex];
+                result[index] = sum;
+                index++;
+                localIndex++;
             }
-            sum += globalAudioData[index];
-            sum -= audioData[localIndex];
-            result[index] = sum;
-            index++;
-            localIndex++;
+            setAudioData(result);
         }
-        setAudioData(result);
     }
 
     public void findTotalBars() {
