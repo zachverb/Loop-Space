@@ -53,7 +53,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        receiveToken();
+        setupRestAdapter();
     }
 
     @Override
@@ -73,7 +73,6 @@ public class LoginActivity extends Activity {
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
                 sharedPreferences =
                         PreferenceManager.getDefaultSharedPreferences(context);
                 boolean sentToken = sharedPreferences
@@ -83,7 +82,6 @@ public class LoginActivity extends Activity {
                 } else {
                     Log.d(TAG, "Token didn't send");
                 }
-                setupRestAdapter();
             }
         };
 
@@ -119,6 +117,7 @@ public class LoginActivity extends Activity {
             service.authorization(new Callback<Response>() {
                 @Override
                 public void success(Response response, Response response2) {
+                    receiveToken();
                     Intent intent = new Intent(LoginActivity.this, TrackListActivity.class);
                     startActivity(intent);
                 }
@@ -189,6 +188,8 @@ public class LoginActivity extends Activity {
         loginDialog.setMessage("Logging in");
         loginDialog.show();
 
+
+        receiveToken();
 
         service.authenticate(new User(email, password), new Callback<Data>() {
             @Override
