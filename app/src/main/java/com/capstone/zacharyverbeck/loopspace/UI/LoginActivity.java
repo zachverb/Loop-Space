@@ -113,7 +113,7 @@ public class LoginActivity extends Activity {
                 .build();
         service = restAdapter.create(ServerAPI.class);
 
-        if(token != "") {
+        if (token != "") {
             service.authorization(new Callback<Response>() {
                 @Override
                 public void success(Response response, Response response2) {

@@ -586,7 +586,7 @@ public class LoopActivity extends ActionBarActivity {
                         new Callback<Response>() {
                             @Override
                             public void success(Response result, Response response) {
-                                if(result.getBody() != null) {
+                                if (result.getBody() != null) {
                                     Log.d(TAG, "SUCCESS INSIDE HERE");
                                     InputStream inputStream = null;
                                     try {
@@ -688,7 +688,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void deleteAudioData(short[] audioData, int localBars) {
-        if(audioData != null) {
+        if (audioData != null) {
             findTotalBars();
             short[] globalAudioData = mAudioData;
             int globalLength = barSize * totalBars;
@@ -774,7 +774,7 @@ public class LoopActivity extends ActionBarActivity {
         public boolean onLongClick(View v) {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(100);
-            if(selected != -1) {
+            if (selected != -1) {
                 mLoops.get(selected).getLoopButton().setSelected(false);
             }
             if (selected == v.getId()) {
@@ -808,7 +808,7 @@ public class LoopActivity extends ActionBarActivity {
                     currentBeat = 0;
                     for (int i = 1; i <= 8; i++) {
                         if (i % 2 == 1) {
-                            publishProgress(new Integer[]{-1, (i * - 1)});
+                            publishProgress(new Integer[]{-1, (i * -1)});
                         }
                         mAudioTrack.write(metronomeData, ((beatSize / 2) * (i - 1)), (beatSize / 2));
                     }
@@ -928,7 +928,7 @@ public class LoopActivity extends ActionBarActivity {
         protected void onProgressUpdate(Integer... params) {
             if (params[0] == -1) {
                 mLoops.get(params[1]).setCurrentState("uploading");
-            } else if(params[0] == 0) {
+            } else if (params[0] == 0) {
                 mLoops.get(params[1]).setCurrentState("ready");
             } else {
                 mLoops.get(params[1]).setCurrentState("recording");
@@ -1013,7 +1013,7 @@ public class LoopActivity extends ActionBarActivity {
         view.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(selected != -1 && selected != v.getId()) {
+                if (selected != -1 && selected != v.getId()) {
                     mLoops.get(selected).getLoopButton().setSelected(false);
                     selected = -1;
                     materialMenu.animateIconState(MaterialMenuDrawable.IconState.ARROW);
