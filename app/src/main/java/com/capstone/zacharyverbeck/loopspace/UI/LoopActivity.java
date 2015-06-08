@@ -453,9 +453,9 @@ public class LoopActivity extends ActionBarActivity {
         refreshLayout();
     }
 
-    private void deleteFromServer(int id) {
-        final int loopId = id;
-        service.deleteLoop(trackId, mLoops.get(id).getId() + "", new Callback<Response>() {
+    private void deleteFromServer(int index) {
+        final int loopId = index;
+        service.deleteLoop(trackId, mLoops.get(index).getId() + "", new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
                 deleteLoop(loopId);
@@ -794,7 +794,6 @@ public class LoopActivity extends ActionBarActivity {
     /*
      * ASYNC TASKS
      */
-
     private class PlayingTask extends AsyncTask<Void, Integer, Boolean> {
         @Override
         protected Boolean doInBackground(Void... params) {

@@ -13,13 +13,6 @@ import com.capstone.zacharyverbeck.loopspace.Java.LoopButton;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopProgressBar;
 import com.capstone.zacharyverbeck.loopspace.R;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -32,7 +25,6 @@ public class Loop {
     private LoopButton mLoopButton;
     private ProgressBar mProgressBar;
     private LoopProgressBar mLoopProgressBar;
-    private String filePath;
     private String endpoint;
     private int index;
     private int id;
@@ -214,34 +206,6 @@ public class Loop {
         }
         this.audioData = audioData;
     }
-
-//    private short[] getAudioDataFromFile(File file) {
-//        int shortSizeInBytes = Short.SIZE / Byte.SIZE;
-//        int length = (int) (file.length() / shortSizeInBytes);
-//        if (length < barSize) {
-//            length = barSize;
-//        }
-//        short[] audioData = new short[length];
-//        try {
-//            InputStream inputStream = new FileInputStream(file);
-//            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-//            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-//
-//            int j = 0;
-//            while (dataInputStream.available() > 0 && j < length) {
-//                audioData[j] += (dataInputStream.readShort() * .5);
-//                j++;
-//            }
-//
-//            dataInputStream.close();
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return audioData;
-//    }
 
     public void setAudioDataFromByteArray(byte[] bytes) {
         int length = bytes.length/2;

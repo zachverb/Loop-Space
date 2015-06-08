@@ -57,7 +57,7 @@ public class RegistrationIntentService extends IntentService {
 
                 // TODO: Implement this method to send any registration to your app's servers.
                 //if(sharedPreferences.getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false)) {
-                    sendRegistrationToServer(token);
+                sendRegistrationToServer(token);
                 //}
                 // Subscribe to topic channels
                 //subscribeTopics(token);
@@ -65,7 +65,6 @@ public class RegistrationIntentService extends IntentService {
                 // You should store a boolean that indicates whether the generated token has been
                 // sent to your server. If the boolean is false, send the token to your server,
                 // otherwise your server should have already received the token.
-                sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, true).apply();
                 // [END get_token]
             }
         } catch (Exception e) {
@@ -93,30 +92,38 @@ public class RegistrationIntentService extends IntentService {
 
         final String userToken = settings.getString("token", "");
 
-        // setup heroku connection
-        RequestInterceptor interceptor = new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                request.addHeader("Accept", "multipart/form-data");
-                request.addHeader("Authorization", userToken);
-            }
-        };
-        RestAdapter serverRestAdapter = new RestAdapter.Builder()
-                .setEndpoint(this.getResources().getString(R.string.server_addr))
-                .setRequestInterceptor(interceptor)
-                .build();
-        ServerAPI service = serverRestAdapter.create(ServerAPI.class);
-        service.gcmRegistration(new User(token), new Callback<Response>() {
-            @Override
-            public void success(Response response, Response response2) {
-                Log.d(TAG, "WORKED");
-            }
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("gcmToken", token);
+        if(token != "") {
+            // setup heroku connection
+            RequestInterceptor interceptor = new RequestInterceptor() {
+                @Override
+                public void intercept(RequestFacade request) {
+                    request.addHeader("Accept", "multipart/form-data");
+                    request.addHeader("Authorization", userToken);
+                }
+            };
+            RestAdapter serverRestAdapter = new RestAdapter.Builder()
+                    .setEndpoint(this.getResources().getString(R.string.server_addr))
+                    .setRequestInterceptor(interceptor)
+                    .build();
+            ServerAPI service = serverRestAdapter.create(ServerAPI.class);
+            service.gcmRegistration(new User(token), new Callback<Response>() {
+                @Override
+                public void success(Response response, Response response2) {
+                    Log.d(TAG, "WORKED");
+                }
 
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d(TAG, "DID NOT WORK");
-            }
-        });
+                @Override
+                public void failure(RetrofitError error) {
+                    Log.d(TAG, "DID NOT WORK");
+                }
+            });
+
+            editor.putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, true).apply();
+        } else {
+            editor.putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false).apply();
+        }
     }
 
     /**

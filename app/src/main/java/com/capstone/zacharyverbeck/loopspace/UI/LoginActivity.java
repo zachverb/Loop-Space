@@ -59,45 +59,21 @@ public class LoginActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+        if(mRegistrationBroadcastReceiver != null) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+        }
     }
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        if(mRegistrationBroadcastReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        }
         super.onPause();
     }
 
-    private void receiveToken() {
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context);
-                boolean sentToken = sharedPreferences
-                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
-                if (sentToken) {
-                    Log.d(TAG, "Token sent!");
-                } else {
-                    Log.d(TAG, "Token didn't send");
-                }
-            }
-        };
-
-        if (checkPlayServices()) {
-            // Start IntentService to register this application with GCM.
-            Log.d(TAG, "Yup");
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        } else {
-            setupRestAdapter();
-        }
-    }
-
     private void setupRestAdapter() {
-
-
         final String token = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext()).getString("token", "");
         RequestInterceptor interceptor = new RequestInterceptor() {
@@ -132,6 +108,30 @@ public class LoginActivity extends Activity {
         } else {
             setContentView(R.layout.activity_login);
             init();
+        }
+    }
+
+    private void receiveToken() {
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    Log.d(TAG, "Token sent!");
+                } else {
+                    Log.d(TAG, "Token didn't send");
+                }
+            }
+        };
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Log.d(TAG, "Yup");
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
         }
     }
 
@@ -187,7 +187,6 @@ public class LoginActivity extends Activity {
         loginDialog.setTitle("Please Wait");
         loginDialog.setMessage("Logging in");
         loginDialog.show();
-
 
         receiveToken();
 
