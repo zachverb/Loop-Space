@@ -57,7 +57,6 @@ public class Loop {
         this.setProgressBar((ProgressBar) layout.getChildAt(1));
         this.setLoopProgressBar((LoopProgressBar) layout.getChildAt(2));
         this.setIndex(this.getLoopButton().getId());
-        this.setFilePath(null);
         this.setAudioData(null);
         this.setIsPlaying(true);
         this.setCurrentState("waiting");
@@ -176,17 +175,6 @@ public class Loop {
         this.index = index;
     }
 
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        if (filePath != null) {
-            setAudioData(getAudioDataFromFile(new File(filePath)));
-        }
-        this.filePath = filePath;
-    }
-
     public RelativeLayout getContainer() {
         return mContainer;
     }
@@ -227,33 +215,33 @@ public class Loop {
         this.audioData = audioData;
     }
 
-    private short[] getAudioDataFromFile(File file) {
-        int shortSizeInBytes = Short.SIZE / Byte.SIZE;
-        int length = (int) (file.length() / shortSizeInBytes);
-        if (length < barSize) {
-            length = barSize;
-        }
-        short[] audioData = new short[length];
-        try {
-            InputStream inputStream = new FileInputStream(file);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-
-            int j = 0;
-            while (dataInputStream.available() > 0 && j < length) {
-                audioData[j] += (dataInputStream.readShort() * .5);
-                j++;
-            }
-
-            dataInputStream.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return audioData;
-    }
+//    private short[] getAudioDataFromFile(File file) {
+//        int shortSizeInBytes = Short.SIZE / Byte.SIZE;
+//        int length = (int) (file.length() / shortSizeInBytes);
+//        if (length < barSize) {
+//            length = barSize;
+//        }
+//        short[] audioData = new short[length];
+//        try {
+//            InputStream inputStream = new FileInputStream(file);
+//            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+//            DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+//
+//            int j = 0;
+//            while (dataInputStream.available() > 0 && j < length) {
+//                audioData[j] += (dataInputStream.readShort() * .5);
+//                j++;
+//            }
+//
+//            dataInputStream.close();
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return audioData;
+//    }
 
     public void setAudioDataFromByteArray(byte[] bytes) {
         int length = bytes.length/2;

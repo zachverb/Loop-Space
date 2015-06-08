@@ -64,4 +64,5 @@ public interface ServerAPI {
 
     @DELETE("/tracks/{track_id}/loops/{loop_id}")
     public void deleteLoop(@Path("track_id") String trackId, @Path("loop_id") String loopId, Callback<Response> callback);
+
 }
