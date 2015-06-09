@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit.Callback;
@@ -472,9 +473,10 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     public void refreshLayout() {
+        Collections.sort(mLoops);
         int index = 0;
         for (Loop loop : mLoops) {
-            loop.setIndex(index);
+            loop.getLoopButton().setId(index);
             ((LinearLayout) loop.getContainer().getParent()).removeView(loop.getContainer());
             if (index % 2 == 0) {
                 mLeftLayout.addView(loop.getContainer());
@@ -532,7 +534,6 @@ public class LoopActivity extends ActionBarActivity {
 
         // Adding the loop to the global container
         mLoops.add(mLoopsLength, new Loop(relativeLayout, barSize));
-        mLoops.get(mLoopsLength).setIndex(mLoopsLength);
         return relativeLayout;
     }
 
@@ -566,7 +567,6 @@ public class LoopActivity extends ActionBarActivity {
             addToLayout();
             Loop loop = mLoops.get(index);
             loop.setCurrentState("downloading");
-            loop.setIndex(index);
             loop.setId(loops.get(index).id);
             loop.setEndpoint(endpoint);
             loop.setOwner(loops.get(index).User.name);

@@ -19,14 +19,13 @@ import java.nio.ByteOrder;
 /**
  * Created by zacharyverbeck on 4/23/15.
  */
-public class Loop {
+public class Loop implements Comparable<Loop> {
 
     private RelativeLayout mContainer;
     private LoopButton mLoopButton;
     private ProgressBar mProgressBar;
     private LoopProgressBar mLoopProgressBar;
     private String endpoint;
-    private int index;
     private int id;
     private short[] audioData;
     private boolean isPlaying;
@@ -48,7 +47,6 @@ public class Loop {
         this.setLoopButton((LoopButton) layout.getChildAt(0));
         this.setProgressBar((ProgressBar) layout.getChildAt(1));
         this.setLoopProgressBar((LoopProgressBar) layout.getChildAt(2));
-        this.setIndex(this.getLoopButton().getId());
         this.setAudioData(null);
         this.setIsPlaying(true);
         this.setCurrentState("waiting");
@@ -158,15 +156,6 @@ public class Loop {
         this.id = id;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.getLoopButton().setId(index);
-        this.index = index;
-    }
-
     public RelativeLayout getContainer() {
         return mContainer;
     }
@@ -269,4 +258,15 @@ public class Loop {
     public String getOwner() {
         return mOwner;
     }
+
+    @Override
+    public int compareTo(Loop another) {
+        if(this.id > another.id) {
+            return 1;
+        } else if (this.id < another.id) {
+            return -1;
+        }
+        return 0;
+    }
+
 }
