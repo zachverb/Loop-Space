@@ -110,7 +110,6 @@ public class TrackCreateActivity extends ActionBarActivity {
                             if (track.type == true) {
                                 Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
                                 loopIntent.putExtra("trackId", track.id);
-                                loopIntent.putExtra("BPM", mBpmPicker.getValue());
                                 Log.d(TAG, String.valueOf(track.latitude));
                                 Log.d(TAG, track.city + "");
 

@@ -44,6 +44,7 @@ import com.capstone.zacharyverbeck.loopspace.Java.SimpleDiskCache;
 import com.capstone.zacharyverbeck.loopspace.Models.Endpoint;
 import com.capstone.zacharyverbeck.loopspace.Models.Loop;
 import com.capstone.zacharyverbeck.loopspace.Models.LoopFile;
+import com.capstone.zacharyverbeck.loopspace.Models.Track;
 import com.capstone.zacharyverbeck.loopspace.R;
 import com.gc.materialdesign.widgets.Dialog;
 import com.gc.materialdesign.widgets.SnackBar;
@@ -108,6 +109,7 @@ public class LoopActivity extends ActionBarActivity {
     private int totalBars = 1;
     private boolean metronomePlaying = false;
     public SimpleDiskCache mSimpleDiskCache;
+    private String title;
 
     /**
      * Called when the activity is first created.
@@ -117,21 +119,25 @@ public class LoopActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "Creating");
-        init();
+        setupRestAdapter();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        startAudio();
+        if(mAudioTrack != null) {
+            startAudio();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG, "Pausing");
-        playing = false;
-        mAudioTrack.pause();
+        if(mAudioTrack != null) {
+            playing = false;
+            mAudioTrack.pause();
+        }
     }
 
     @Override
@@ -191,7 +197,8 @@ public class LoopActivity extends ActionBarActivity {
         setupLayouts();
         setupToolbar();
         initAudio();
-        getTrackInfo();
+        getTrackLoops();
+        startAudio();
     }
 
     private void initCache() {
@@ -200,9 +207,6 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void initVariables() {
-        trackId = getIntent().getIntExtra("trackId", -1) + "";
-        setupRestAdapter();
-        bpm = (double) getIntent().getIntExtra("BPM", 60);
         // basic samplerate, general for all devices.
         sampleRate = 44100;
         // the length of a beatSize in samples
@@ -264,7 +268,7 @@ public class LoopActivity extends ActionBarActivity {
     private void setupToolbar() {
         // top toolbar, holds navigation controls, refresh, and add track
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Current Track");
+        toolbar.setTitle(title);
         setSupportActionBar(toolbar);
 
         materialMenu = new MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN);
@@ -377,7 +381,7 @@ public class LoopActivity extends ActionBarActivity {
 
     // sets up the REST Client for the AWS s3 server and the node.js server.
     private void setupRestAdapter() {
-
+        trackId = getIntent().getIntExtra("trackId", -1) + "";
         // Find token.
         settings = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext());
@@ -409,6 +413,23 @@ public class LoopActivity extends ActionBarActivity {
                 .setEndpoint(res.getString(R.string.s3_addr))
                 .build();
         s3Service = s3RestAdapter.create(S3API.class);
+
+        service.getCurrentTrack(trackId, new Callback<Track>() {
+            @Override
+            public void success(Track track, Response response) {
+                bpm = track.bpm;
+                title = track.title;
+                init();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Dialog dialog = new Dialog(LoopActivity.this, "Error!", "Error loading track details!");
+                dialog.show();
+                Log.d(TAG, "failed to download details for loop");
+                error.printStackTrace();
+            }
+        });
     }
 
     private void loginRedirect() {
@@ -542,7 +563,7 @@ public class LoopActivity extends ActionBarActivity {
      */
 
     // gets the endpoints for each track
-    private void getTrackInfo() {
+    private void getTrackLoops() {
         service.getLoops(trackId,
                 new Callback<List<LoopFile>>() {
                     @Override

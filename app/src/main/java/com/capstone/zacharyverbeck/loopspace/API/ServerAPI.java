@@ -50,6 +50,9 @@ public interface ServerAPI {
     @GET("/tracks")
     public void getTracks(Callback<List<Track>> callback);
 
+    @GET("/tracks/{track_id}")
+    public void getCurrentTrack(@Path("track_id") String trackId, Callback<Track> callback);
+
     @GET("/tracks/{city}")
     public void getTracksByCity(@Path("city") String city, Callback<List<Track>> callback);
 

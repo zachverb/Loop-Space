@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,7 +83,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         String[] colors = res.getStringArray(R.array.user_colors_array);
         final Track track = mDataset.get(index);
         final int trackId = track.id;
-        final int bpm = track.bpm;
         String username = track.User.name;
         holder.title.setText(track.title.substring(0, 1).toUpperCase() + track.title.substring(1));
         holder.owner.setText(username);
@@ -104,13 +102,13 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         holder.mContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToTrack(trackId, bpm);
+                goToTrack(trackId);
             }
         });
         holder.mLoopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToTrack(trackId, bpm);
+                goToTrack(trackId);
             }
         });
 
@@ -122,10 +120,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         return mDataset.size();
     }
 
-    private void goToTrack(int trackId, int bpm) {
+    private void goToTrack(int trackId) {
         Intent loopIntent = new Intent(mContext, LoopActivity.class);
         loopIntent.putExtra("trackId", trackId);
-        loopIntent.putExtra("BPM", bpm);
         loopIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(loopIntent);
     }
