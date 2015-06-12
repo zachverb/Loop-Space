@@ -48,7 +48,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(message, trackId, trackBpm);
+        sendLoopNotification(message, trackId, trackBpm);
     }
     // [END receive_message]
 
@@ -57,7 +57,7 @@ public class MyGcmListenerService extends GcmListenerService {
      *
      * @param message GCM message received.
      */
-    private void sendNotification(String message, String trackId, String trackBpm) {
+    private void sendLoopNotification(String message, String trackId, String trackBpm) {
         Intent intent = new Intent(this, LoopActivity.class);
         intent.putExtra("trackId", Integer.parseInt(trackId));
         intent.putExtra("BPM", Integer.parseInt(trackBpm));

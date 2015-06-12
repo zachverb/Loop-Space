@@ -191,7 +191,6 @@ public class LoopActivity extends ActionBarActivity {
         setupLayouts();
         setupToolbar();
         initAudio();
-        setupRestAdapter();
         getTrackInfo();
     }
 
@@ -202,6 +201,7 @@ public class LoopActivity extends ActionBarActivity {
 
     private void initVariables() {
         trackId = getIntent().getIntExtra("trackId", -1) + "";
+        setupRestAdapter();
         bpm = (double) getIntent().getIntExtra("BPM", 60);
         // basic samplerate, general for all devices.
         sampleRate = 44100;
