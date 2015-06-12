@@ -34,7 +34,7 @@ public class MyGcmListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         String message = data.getString("message");
         String trackId = data.getString("track_id");
-        int type = data.getInt("type");
+        int type = Integer.parseInt(data.getString("type"));
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
@@ -49,6 +49,8 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
+
+        Log.d(TAG, type + " BITTTCH");
         switch (type) {
             case 0:
                 sendLoopNotification(message, trackId);
