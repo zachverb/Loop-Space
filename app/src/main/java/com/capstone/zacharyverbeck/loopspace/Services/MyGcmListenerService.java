@@ -49,8 +49,6 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-
-        Log.d(TAG, type + " BITTTCH");
         switch (type) {
             case 0:
                 sendLoopNotification(message, trackId);

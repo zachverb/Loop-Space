@@ -1,5 +1,6 @@
 package com.capstone.zacharyverbeck.loopspace.UI;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -64,7 +65,9 @@ public class CommentActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "home selected");
-                CommentActivity.this.finish();
+                Intent loopIntent = new Intent(CommentActivity.this, LoopActivity.class);
+                loopIntent.putExtra("trackId", Integer.parseInt(trackId));
+                startActivity(loopIntent);
             }
         });
         toolbar.setNavigationIcon(materialMenu);
@@ -103,7 +106,7 @@ public class CommentActivity extends ActionBarActivity {
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mCommentBox.getText().length() != 0) {
+                if (mCommentBox.getText().length() != 0) {
                     newComment(mCommentBox.getText().toString());
                     mGlobal.hideSoftKeyboard(CommentActivity.this);
                     mCommentBox.setText("");
