@@ -37,9 +37,9 @@ import android.widget.RelativeLayout;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.capstone.zacharyverbeck.loopspace.API.S3API;
 import com.capstone.zacharyverbeck.loopspace.API.ServerAPI;
-import com.capstone.zacharyverbeck.loopspace.Java.LoopApplication;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopButton;
 import com.capstone.zacharyverbeck.loopspace.Java.LoopProgressBar;
+import com.capstone.zacharyverbeck.loopspace.Java.LoopSingleton;
 import com.capstone.zacharyverbeck.loopspace.Java.SimpleDiskCache;
 import com.capstone.zacharyverbeck.loopspace.Models.Endpoint;
 import com.capstone.zacharyverbeck.loopspace.Models.Loop;
@@ -202,8 +202,7 @@ public class LoopActivity extends ActionBarActivity {
     }
 
     private void initCache() {
-        LoopApplication loopApplication = (LoopApplication) getApplicationContext();
-        mSimpleDiskCache = loopApplication.getSimpleDiskCache();
+        mSimpleDiskCache = LoopSingleton.get(getApplication()).getSimpleDiskCache();
     }
 
     private void initVariables() {
