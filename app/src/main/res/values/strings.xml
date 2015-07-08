@@ -26,7 +26,8 @@
         <item>#FFD740</item>
     </string-array>
     <string name="title_activity_comment">CommentActivity</string>
-    <string name="server_addr">https://secret-spire-6485.herokuapp.com/</string>
+    <string name="server_addr"><!-- http://ec2-54-201-82-71.us-west-2.compute.amazonaws.com/</string>
+    <!--<string name="server_addr">http://192.168.1./</string> LOCALHOST HERE <-->
     <string name="s3_addr">https://s3-us-west-2.amazonaws.com/loopspace/</string>
 
 </resources>

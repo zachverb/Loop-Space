@@ -107,16 +107,11 @@ public class TrackCreateActivity extends ActionBarActivity {
                         @Override
                         public void success(Track track, Response response) {
                             Log.d(TAG, "SUCCESS!");
-                            if (track.type == true) {
-                                Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
-                                loopIntent.putExtra("trackId", track.id);
-                                Log.d(TAG, String.valueOf(track.latitude));
-                                Log.d(TAG, track.city + "");
-
-                                startActivity(loopIntent);
-                            } else {
-                                Log.d(TAG, "JK, failure");
-                            }
+                            Intent loopIntent = new Intent(getApplicationContext(), LoopActivity.class);
+                            loopIntent.putExtra("trackId", track.id);
+                            Log.d(TAG, String.valueOf(track.latitude));
+                            Log.d(TAG, track.city + "");
+                            startActivity(loopIntent);
                         }
 
                         @Override

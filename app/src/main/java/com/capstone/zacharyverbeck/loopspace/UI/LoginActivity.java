@@ -196,7 +196,6 @@ public class LoginActivity extends Activity {
                 if (loginDialog.isShowing()) {
                     loginDialog.dismiss();
                 }
-                Log.d(TAG, data.type + data.token);
                 if (data.error == null && data.type) {
                     mGlobal.saveToken(data.token);
                     mGlobal.saveUserId(data.id);
